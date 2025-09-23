@@ -10,7 +10,7 @@ WORD adc_arrval[ADC_sample_num];
 WORD adc_lastStatus_btn= 0;
 WORD adc_iBtn_press_long= FALSE;
 WORD adc_last_Btn_time_press=0;
-WORD powerStatus=Turn_OFF;
+
 #define ADC_PIN (2<<11)//10b: select VIN2 pin 33
 WORD getSampleAverage(WORD arr[], WORD len)
 {
@@ -54,53 +54,29 @@ void ADC_check(void)
 		if(adc_curr_val!=adc_old_val)
 		{
 			
-			TRACE("ADC_check adc read=%d", adc_arrval[adc_cntSample]);
-			TRACE("adc_curr_val=%d", adc_curr_val);
-			adc_old_val=adc_curr_val;
-			// if((adc_curr_val>=(ADC_Btn1_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn1_press_value+ADC_Threshold)))
-			// {
-			// 	TRACE("adc_lastStatus_btn=%d", adc_lastStatus_btn);
-			// 	if(adc_lastStatus_btn!=Key1_press_value)
-			// 	{
-			// 		TRACE("Key1_press %d", adc_curr_val);
-			// 		adc_lastStatus_btn=Key1_press_value;
-			// 		adc_last_Btn_time_press=0;
-			// 		adc_iBtn_press_long=FALSE;
-			// 	}else
-			// 	{
-			// 		adc_last_Btn_time_press++;
-			// 		TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
-			// 		if(adc_last_Btn_time_press>=TIME_POWER_PRESS && !adc_iBtn_press_long)
-			// 		{						
-			// 			adc_iBtn_press_long=TRUE;	
-			// 			powerStatus=(powerStatus==POWER_ON)?POWER_OFF:POWER_ON;	
-			// 			TRACE("Key1_press long powerStatus=%d", powerStatus);				
-			// 		}
-			// 	}
-			// }
+			//TRACE("ADC_check adc read=%d", adc_arrval[adc_cntSample]);
+			//TRACE("adc_curr_val=%d", adc_curr_val);
+			adc_old_val=adc_curr_val;			
 			if((adc_curr_val>=(ADC_Btn1_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn1_press_value+ADC_Threshold)))
 			{
 				if(adc_lastStatus_btn!=Key1_press_value)
 				{
-					TRACE("Key1_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key1_press_value;
-					
+					//TRACE("Key1_press %d", adc_curr_val);
+					adc_lastStatus_btn=Key1_press_value;					
 				}
 			}else if((adc_curr_val>=(ADC_Btn2_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn2_press_value+ADC_Threshold)))
 			{
 				if(adc_lastStatus_btn!=Key2_press_value)
 				{
-					TRACE("Key2_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key2_press_value;
-					
+					//TRACE("Key2_press %d", adc_curr_val);
+					adc_lastStatus_btn=Key2_press_value;					
 				}
 			}else if((adc_curr_val>=(ADC_Btn3_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn3_press_value+ADC_Threshold)))
 			{
 				if(adc_lastStatus_btn!=Key3_press_value)
 				{
-					TRACE("Key3_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key3_press_value;
-					
+					//TRACE("Key3_press %d", adc_curr_val);
+					adc_lastStatus_btn=Key3_press_value;					
 				}
 			}else
 			{
@@ -115,9 +91,7 @@ void ADC_check(void)
 						Button_3_Press();	
 					adc_lastStatus_btn=0;
 					adc_old_val=0;
-				}           
-              		
-            
+				}  
 			}
 		}
 	}
@@ -128,11 +102,3 @@ void ADC_check(void)
 	_wrxtmem( SCIFPG, BRVAL_ADC, 0 );	//trigger first ADC conversion
 }
 
-WORD adc_get_powerStatus(void)
-{
-	return powerStatus;
-}
-WORD adc_get_value(void)
-{
-	return adc_curr_val;
-}

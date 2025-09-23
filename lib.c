@@ -14,7 +14,7 @@ MyData_t  myData;
 WORD devices_connect=0;
 WORD devices_connect_tmp=0;
 WORD iNeedSaveFlash=FALSE;
-WORD iPowerStatus=0;
+
 //https://resource.heltec.cn/utils/hf
 #define FLOAT_2         0x40000000
 #define FLOAT_10        0x41200000
@@ -285,14 +285,5 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     
     TRACE("valueToSAM %x",valueToSAM);
     return valueToSAM;
-}
-
-void setPowerStatus(WORD value)
-{
-    iPowerStatus=value;
-}
-WORD getPowerStatus()
-{
-    return iPowerStatus;
 }
 

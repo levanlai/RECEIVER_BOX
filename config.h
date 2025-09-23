@@ -111,14 +111,15 @@ enum {
     DSP4_LIVEMIC,
 };
 enum {
-    Turn_OFF,
-    Turn_ON,
+    POWER_OFF,   
+    POWER_ON,
+};
+enum {
+    CHARGE_PLUS,    
+    CHARGE_UN_PLUS,
+    CHARGE_DONE,   
 };
 
-enum {
-    Detect_unPlug,
-    Detect_Plug,
-};
 enum {
     MOVE_UP,    
     MOVE_DOWN,    

@@ -22,6 +22,5 @@ enum {
 
 void adc_init(void);
 void ADC_check(void);
-WORD adc_get_powerStatus(void);
 WORD adc_get_value(void);
 #endif 

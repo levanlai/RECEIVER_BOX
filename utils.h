@@ -2,6 +2,8 @@
 #include <trace.h>
 #include <sys5000.h>
 
+#define SYS_POWER_BUTTON_ACTIVED 0
+
 #define SYS_POWER_LATCH_PORT_DIR P0DIRPORT
 #define SYS_POWER_LATCH_PORT_VAL P0VALPORT
 #define SYS_POWER_LATCH_PIN  13
@@ -13,7 +15,8 @@
 
 void sys_power_latch(WORD onoff);
 BOOL sys_power_button(void);
-
+BOOL check_charge_det(void);
+BOOL check_plugin_det(void);
 void Button_1_Press();
 void Button_2_Press();
 void Button_3_Press();
