@@ -16,3 +16,5 @@ BOOL sys_power_button(void);
 
 void Button_1_Press();
 void Button_2_Press();
+void Button_3_Press();
+void Button_Power_Press();

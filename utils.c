@@ -60,4 +60,9 @@ void Button_3_Press()
     uart_send_cmd(CMD_SET_CHANGE, testChange);
     // uart_send_cmd(CMD_RESET_FACTORY, 0);
 }
+void Button_Power_Press()
+{
+    //TRACE("Button_Power_Press=%d",onoff);
+    uart_send_cmd(CMD_SELECT_CHANGE, 0);
+}
 

@@ -237,30 +237,57 @@ void main_power_on_check(void)
 
 void main_power_off_check(void)
 {
-	static WORD power_button_last_state = ~SYS_POWER_BUTTON_ACTIVED;
+	static WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 	static DWORD delay = 0;
-	// check power on //
-		//power_button_last_state = sys_power_button();
-
-	if(power_button_last_state != sys_power_button())
+	if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
 	{
-		delay = 0;
-	}
-
-	power_button_last_state = sys_power_button();
-	//TRACE("main_power_off_check ",power_button_last_state);
-
-	if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=Turn_OFF)
-	{
-		delay++;
-		//TRACE("main_power_off_check %d",delay);
-		if(delay > 200)
+		power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+		if(powerState!=Turn_OFF)
 		{
-			powerState=Turn_OFF;
-			delay=0;
-			sys_power_latch(0);
+			delay++;
+			//TRACE("main_power_off_check %d",delay);
+			if(delay > 150)
+			{
+				powerState=Turn_OFF;
+				delay=0;
+				sys_power_latch(0);
+			}
 		}
+				
+	}else
+	{
+		if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+		{
+			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+			delay=0;
+			if(powerState!=Turn_OFF)
+			{				
+				TRACE("Button_Power_Press %d",delay);
+				Button_Power_Press();
+			}
+		}	
 	}
+
+	// if(power_button_last_state != sys_power_button())
+	// {
+	// 	delay = 0;
+	// }
+
+	// power_button_last_state = sys_power_button();
+	// //TRACE("main_power_off_check ",power_button_last_state);
+
+	// if
+	// if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=Turn_OFF)
+	// {
+	// 	delay++;
+	// 	//TRACE("main_power_off_check %d",delay);
+	// 	if(delay > 200)
+	// 	{
+	// 		powerState=Turn_OFF;
+	// 		delay=0;
+	// 		sys_power_latch(0);
+	// 	}
+	// }
 	
 }
 
