@@ -8,9 +8,9 @@ WORD dsp[NBDSPINITIALIZED];
 
 const WORD dspRouting_In[4][8] = 
 {
-	{DAAD0L,DAAD0R,0,0,0,0,0,0},
+	{DAAD0L,DAAD0R,DAAD2L,DAAD2R,DAAD1L,DAAD1R,0,0},
 	{32768,0,0,0,0,0,0,0},
-	{32816,0,0,0,0,0,0,0},
+	{32816,32769,32770,0,0,0,0,0},
 	{32784,0,0,0,0,0,0,0}
 };
 
@@ -18,7 +18,7 @@ const WORD dspRouting_Out[4][8] =
 {
 	{-1,-1,-1,-1,-1,-1,-1,-1},
 	{-1,-1,-1,-1,-1,-1,-1,-1},
-	{DABD0L,DABD0R,-1,-1,-1,-1,-1,-1},
+	{DABD1L,DABD1R,DABD0L,DABD0R,-1,-1,-1,-1},
 	{-1,-1,-1,-1,-1,-1,-1,-1}
 };
 

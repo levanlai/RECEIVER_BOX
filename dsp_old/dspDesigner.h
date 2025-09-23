@@ -36,9 +36,9 @@ WORD dspNrpnHandlerCallback ( PTR32 FunctionPointer32, WORD nrpn, WORD dspId, WO
 extern WORD dsp[NBDSPINITIALIZED];
 
 WORD dsp1InitAndRoute(void);
-extern WORD dsp1pcs[14];
-#define	NUMBEROFPROCESS1	0x0005
-#define	NUMBEROFCOMMAND1	0x0012
+extern WORD dsp1pcs[18];
+#define	NUMBEROFPROCESS1	0x0011
+#define	NUMBEROFCOMMAND1	0x0034
 extern const WORD nrpn1List[NUMBEROFCOMMAND1][2];
 extern WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 
@@ -50,16 +50,16 @@ extern const WORD nrpn2List[NUMBEROFCOMMAND2][2];
 extern WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 
 WORD dsp3InitAndRoute(void);
-extern WORD dsp3pcs[7];
-#define	NUMBEROFPROCESS3	0x0005
-#define	NUMBEROFCOMMAND3	0x000F
+extern WORD dsp3pcs[28];
+#define	NUMBEROFPROCESS3	0x001A
+#define	NUMBEROFCOMMAND3	0x0042
 extern const WORD nrpn3List[NUMBEROFCOMMAND3][2];
 extern WORD dsp3NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 
 WORD dsp4InitAndRoute(void);
 extern WORD dsp4pcs[8];
-#define	NUMBEROFPROCESS4	0x0005
-#define	NUMBEROFCOMMAND4	0x001A
+#define	NUMBEROFPROCESS4	0x0006
+#define	NUMBEROFCOMMAND4	0x001D
 extern const WORD nrpn4List[NUMBEROFCOMMAND4][2];
 extern WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 

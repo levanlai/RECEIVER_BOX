@@ -5,15 +5,62 @@
 #include <trace.h>
 #include <math.h>
 #include "config.h"
+#include "lib.h"
 #include "dsp/midictrl.h"
+#include "nvs/pms.h"
+#include "lcd/uart.h"
 
-WORD Sys_func_value_cur   = 0x0000;
-WORD Sys_func_value_tmp   = 0x0000;
-
+MyData_t  myData;
+WORD devices_connect=0;
+WORD devices_connect_tmp=0;
+WORD iNeedSaveFlash=FALSE;
+WORD iPowerStatus=0;
 //https://resource.heltec.cn/utils/hf
-#define FLOAT_20        0x41a00000
+#define FLOAT_2         0x40000000
+#define FLOAT_10        0x41200000
 #define FLOAT_12        0x41400000
+#define FLOAT_20        0x41a00000
+#define FLOAT_100       0x42c80000
+#define FLOAT_650       0x44228000
 #define FLOAT_0x7FFF    0x46fffe00
+
+#define MYDATA_FLASH_ID  0xF005
+
+void SysVarInit(void)
+{
+    int rc ;
+    rc=pms_get_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(myData)/sizeof(WORD));
+    TRACE("SysVarInit rc=%d",rc);
+    if(rc==-1)
+    {        
+        myData.Mic_Vol=UI_VALUE_MID;        
+        myData.Mic_Bass=UI_VALUE_MID;
+        myData.Mic_Mid=UI_VALUE_MID;
+        myData.Mic_Treb=UI_VALUE_MID;
+        myData.Echo_Vol=UI_VALUE_MID;
+        myData.Delay=UI_VALUE_MID;
+        myData.Reverb=UI_VALUE_MID;
+        myData.Mic_FBC=FALSE;
+        pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
+    }      
+   uart_cmd_parse(CMD_MIC_VOL,myData.Mic_Vol,TRUE);
+   uart_cmd_parse(CMD_MIC_BASS,myData.Mic_Bass,TRUE);
+   uart_cmd_parse(CMD_MIC_MID,myData.Mic_Mid,TRUE);
+   uart_cmd_parse(CMD_MIC_TREB,myData.Mic_Treb,TRUE);
+   uart_cmd_parse(CMD_ECHO,myData.Echo_Vol,TRUE);
+   uart_cmd_parse(CMD_DELAY,myData.Delay,TRUE);
+   uart_cmd_parse(CMD_REVERB,myData.Reverb,TRUE);
+   uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
+}
+
+void checkSaveFlash(void)
+{
+    if(iNeedSaveFlash)
+    {
+        iNeedSaveFlash=FALSE;
+        pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
+    }
+}
 
 void setBit(WORD Reg, WORD bitPosition)
 {
@@ -27,73 +74,113 @@ void clearBit(WORD Reg, WORD bitPosition)
 	_andio(Reg, value);
 }
 
-DWORD func_calRangeLinearGainValue(DWORD value)
+FLOAT func_calRangeLinearGainValue(FLOAT value)
 {
-    //Converts linearValue parameter[0..0x7FFF] to 20*log10(linearValue/0x8000)+12. 
+    //Converts linearValue parameter[0..0x7FFF] to 20*log10(linearValue/0x7FFF)+12. 
     //linearValue is the gain value, 0x7FFF=+12dB .. 0x5A9D=+9dB .. 0x4026=+6dB, .. 0x2000=0dB, .. 0x1000=-6dB, .. 0=-Inf 
-    // vd: 20*log10(linearValue/0x8000)+12=-3
-    // ->log10(linearValue/0x8000)=(-3-12)/20
-    // ->linearValue/0x8000=10^((-3-12)/20)
-    // ->linearValue=0x8000*10^((-3-12)/20)
+    // vd: 20*log10(linearValue/0x7FFF)+12=-3
+    // ->log10(linearValue/0x7FFF)=(-3-12)/20
+    // ->linearValue/0x7FFF=10^((-3-12)/20)
+    // ->linearValue=0x7FFF*10^((-3-12)/20)
     //log⁡(a)=b có nghĩa là 10^b=a
-    DWORD range;
-    	
-    if(value==-6)   range = 0x1000;
-	else if(value==-3)   range = 0x16C3;
-    else if(value==0)   range = 0x2000;
-	else if(value==3)   range = 0x2D6A;
-    else if(value==6)   range = 0x4026;
-    else if(value==9)   range = 0x5A9D;
-    else if(value==12)   range = 0x7FFF;
-    else
+    FLOAT result;
+    //TRACE("value=%f",value); 	
+    //TRACE("value=%x",value); 
+    // if(value==-6)   range = 0x1000;
+	// else if(value==-3)   range = 0x16C3;
+    // else if(value==0)   range = 0x2000;
+	// else if(value==3)   range = 0x2D6A;
+    // else if(value==6)   range = 0x4026;
+    // else if(value==9)   range = 0x5A9D;
+    // else if(value==12)   range = 0x7FFF;
+    // else
     {
-        //tmp=_fmul(_float(0x7FFF),_fpow(_float(10),_fdiv(_fsub(_float(value),_float(12)),_float(20))));
-        //tmp=_fmul(_float(0x7FFF),_fpow10(_fdiv(_fsub(_float(value),_float(12)),_float(20))));
-        FLOAT tmp=_fmul(FLOAT_0x7FFF,_fpow10(_fdiv(_fsub(_float(value),FLOAT_12),FLOAT_20)));
-        //TRACE("tmp=%x",tmp); 
-        range=_ftol(tmp);  
-        //TRACE("range=%x",range); 
+       FLOAT tmp=_fmul(FLOAT_0x7FFF,_fpow10(_fdiv(_fsub(_fdiv(value,FLOAT_10),FLOAT_12),FLOAT_20)));
+        //FLOAT tmp=0x7FFF*_fpow10((value-12)/20);
+         //TRACE("tmp=%x",tmp); 
+        result=_ftol(tmp);  
+        //TRACE("result=%x",result); 
         //-6->range=0x101D
-        //12->range=0x7FFF
-    }
-    
-    return range;
+    }    
+    return result;
+}
+FLOAT func_convertEQToSam(FLOAT value)
+{
+    FLOAT result,resultEnd;    
+    //valueToSAM=((EQ_GAIN_MID_SAM+2*valueConvert)<<8)&0x0FFFF;
+    FLOAT tmp=_fdiv(_fmul(value,FLOAT_2),FLOAT_10);
+    result=_ftol(tmp); 
+    resultEnd= ((EQ_GAIN_MID_SAM+result)<<8)&0x0FFFF;
+    //TRACE("func_convertEQToSam resultEnd=%x",resultEnd); 
+    //TRACE("func_convertEQToSam result=%x",result);  
+    return resultEnd;
+}
+FLOAT func_convertEchoToSam(FLOAT value)
+{
+    FLOAT result;
+    //in range 0..0x7FFE = 0...100%
+    //->linearValue=value/100*0x7FFF
+    FLOAT tmp=_fmul(_fdiv(_fdiv(value,FLOAT_10),FLOAT_100),FLOAT_0x7FFF);
+    result=_ftol(tmp);  
+    //TRACE("func_convertEchoToSam value=%x",value);  
+    return result;
+}
+FLOAT func_convertDelayToSam(FLOAT value)
+{
+    FLOAT result;
+    //in range 0..0x7FFE = 20ms...650ms
+    //WORD minDelay=20;
+    //WORD maxDelay=650;
+    //FLOAT result=(value-minDelay)*0x7FFE/(maxDelay-minDelay);
+    FLOAT tmp=_fdiv(_fmul(_fsub(_fdiv(value,FLOAT_10),FLOAT_20),FLOAT_0x7FFF),_fsub(FLOAT_650,FLOAT_20));
+    result=_ftol(tmp);  
+    //TRACE("func_convertDelayToSam value=%d",value);  
+    return result;
 }
 
 FLOAT log10(FLOAT x) {
     return _fdiv(_flog(x), FLOAT_LOG10);
 }
+// Hàm nội suy tuyến tính giữa 2 điểm
+FLOAT linearInterpolate(DWORD x, DWORD x0, DWORD x1, DWORD y0, DWORD y1) {
+    DWORD result;    
+    FLOAT tmp;    
+    if (x1 == x0) return _float(y0); // tránh chia cho 0
+    tmp=_fadd(_float(y0) ,_fmul(_fdiv(_fsub(_float(x),_float(x0)) , _fsub(_float(x1),_float(x0))), _fsub(_float(y1),_float(y0))));
+    result=_ftol(tmp);    
+    //TRACE("linearInterpolate tmp=%x",tmp);    
+    TRACE("result=%d",result);   
+     return tmp;
+    //return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0);
+}
+// Hàm chuyển đổi value thành dB dựa trên 3 đoạn min-mid-max
+FLOAT convertInRange(DWORD value, DWORD min, DWORD mid, DWORD max, DWORD minDb, DWORD midDb, DWORD maxDb) {
+    // Nếu có 2 điểm:
+    // x0,y0
+    // x1,y1
+    // Và nếu biết giá trị x nằm trong khoảng [x0,x1], ta muốn tìm giá trị y tương ứng, thì công thức là:
+    // y=y0+((x-x0)/(x1-x0))*(y1-y0)
+    //khi người dùng nhập một giá trị value trong khoảng [min, max], chương trình sẽ:
+    //Nếu value nằm trong [min, mid], nội suy từ (min → mid) tới (minDb → midDb)
+    //Nếu value nằm trong [mid, max], nội suy từ (mid → max) tới (midDb → maxDb)
+    TRACE("convertInRange value=%d",value);          
+    // Giới hạn value trong [min, max]
+    if (value <= min)
+    {
+        if(minDb==(DWORD)GAIN_MIN_START)
+            return _float(GAIN_MIN);
+        else 
+            return _float(minDb);        
+    } 
+    if (value >= max) return _float(maxDb);
 
-DWORD func_convertvalueToSam(DWORD value,DWORD midcircle,DWORD maxcircle,DWORD middB,DWORD maxdB)
-{
-    //nếu midcicle=0 thì bỏ qua mid, sẽ tuyến tính từ 0->max
-    //Converts linearValue parameter[0..0x7FFF] to 20*log10(linearValue/0x8000)+12. 
-    //linearValue is the gain value, 0x7FFF=+12dB .. 0x5A9D=+9dB .. 0x4026=+6dB, .. 0x2000=0dB, .. 0x1000=-6dB, .. 0=-Inf 
-    //float value = (float)(20 * Math.log10(((i * range) / maxPercent) / 0x8000) + 12.0);
-    
-    DWORD samvalue;       
-    //FLOAT tmp=_fadd(_fmul(FLOAT_20,log10(_fdiv(FLOAT_0x1000,FLOAT_0x7FFF))),FLOAT_12);
-    // TRACE("tmp=%x",tmp); 
-    // samvalue=_ftol(tmp);    
-    //TRACE("samvalue=%x",samvalue);  
-    
-    TRACE("func_convertvalueToSam value=%d",value);   
-    TRACE("midcircle=%d",midcircle);   
-    TRACE("maxcircle=%d",maxcircle);  
-     TRACE("middB=%d",middB);   
-    TRACE("maxdB=%d",maxdB);  
-    if(midcircle!=CIRCLE_NO_MID_POS && value<=midcircle)
-    {
-        DWORD midRange=func_calRangeLinearGainValue(middB);
-        samvalue=(value * midRange) / midcircle;
-        TRACE("<=midcircle samvalue=%x",samvalue); 
-    }else
-    {
-        DWORD maxRange=func_calRangeLinearGainValue(maxdB);
-        samvalue=(value * maxRange) / maxcircle;
-        TRACE(">midcircle samvalue=%x",samvalue);
+    if (value <= mid) {
+        // Nội suy từ min -> mid
+        return linearInterpolate(value, min, mid, minDb, midDb);
+    } else {
+        // Nội suy từ mid -> max
+        return linearInterpolate(value, mid, max, midDb, maxDb);
     }
-    return samvalue;
 }
 
 WORD setValueAtOffset(WORD num, WORD offset, WORD value) {
@@ -125,92 +212,32 @@ WORD getBitValueAtOffset(WORD num, WORD offset) {
     return (num >> offset) & 1;
 }
 
-// WORD get_Sys_func_avails()
+// void check_devices_connect(void)
 // {
-//     return SYSTEM_FUNC_AVAILS;    
-// }
-
-void get_Sys_func_value()
-{
-    WORD check_bit=0;
-    check_bit=bk9532_mic_is_connected(0)|bk9532_mic_is_connected(1);
-    Sys_func_value_tmp=setValueAtOffset(Sys_func_value_tmp,SYSTEM_FUNC_MIC_STATE_OFFS,check_bit);  
-    //TRACE("get_Sys_func_value =%x",Sys_func_value_tmp);
-    //TRACE("get_Sys_func_value check_bit=%x",check_bit); 
-}
-
-void parse_func_value_from_panel(WORD value)
-{
-    if(Sys_func_value_cur!=value)
-    {        
-        WORD valueCur=getBitValueAtOffset(Sys_func_value_cur,SYSTEM_FUNC_FBX_STATE_OFFS);
-        WORD valueReceive=getBitValueAtOffset(value,SYSTEM_FUNC_FBX_STATE_OFFS);
-        TRACE("parse_func_value_from_panel value=%x",Sys_func_value_cur);
-        if(valueCur!=valueReceive)
-        {
-            TRACE("FBX change %d",valueReceive);
-        }
-        valueCur=getBitValueAtOffset(Sys_func_value_cur,SYSTEM_FUNC_BASSB_STATE_OFFS);
-        valueReceive=getBitValueAtOffset(value,SYSTEM_FUNC_BASSB_STATE_OFFS);
-        if(valueCur!=valueReceive)
-        {
-            TRACE("BASSB change %d",valueReceive);
-            TurnBASS_BOOST(valueReceive);
-        }        
-        valueCur=getBitValueAtOffset(Sys_func_value_cur,SYSTEM_FUNC_ENHANCER_STATE_OFFS);
-        valueReceive=getBitValueAtOffset(value,SYSTEM_FUNC_ENHANCER_STATE_OFFS);
-        if(valueCur!=valueReceive)
-        {
-            TRACE("ENHANCER change %d",valueReceive);
-        }
-        valueCur=getBitValueAtOffset(Sys_func_value_cur,SYSTEM_FUNC_Power48v_OFFS);
-        valueReceive=getBitValueAtOffset(value,SYSTEM_FUNC_Power48v_OFFS);
-        if(valueCur!=valueReceive)
-        {
-            TRACE("Power48v change %d",valueReceive);
-            set_Power48v_value(valueReceive);
-        }
-        valueCur=getBitValueAtOffset(Sys_func_value_cur,SYSTEM_FUNC_OUTPUT_AUDIO_MODE);
-        valueReceive=getBitValueAtOffset(value,SYSTEM_FUNC_OUTPUT_AUDIO_MODE);
-        //TRACE("output valueCur=%d",valueCur);
-         //TRACE("output valueReceive=%d",valueReceive);
-        if(valueCur!=valueReceive)
-        {
-            TRACE("OutputAudio change %d",valueReceive);
-            changeOutputAudio(valueReceive);
-        }
-        Sys_func_value_cur=Sys_func_value_tmp=value;
-    }
-}
-
-void update_func_value_to_panel(void)
-{
-    WORD tmp=getStatusSyncPanel();
-    //TRACE("update_func_value_to_panel %d",tmp); 
-    if(getStatusSyncPanel())
-    {
-        get_Sys_func_value();
-        //TRACE("update_func_value_to_panel tmp=%x",Sys_func_value_tmp); 
-        //TRACE("Sys_func_value=%x",Sys_func_value_cur); 
-        if(Sys_func_value_cur!=Sys_func_value_tmp)    
-        {
-            Sys_func_value_cur=Sys_func_value_tmp;
-            uart_send_cmd(CMD_FUNC_VALUE, Sys_func_value_cur);
-        }         
-    }
-	
-}
-
-// void func_sync_sendto_panel(void)
-// {
-//     if(getStatusSyncPanel())
+//     WORD check_bit=bk9532_mic_is_connected(0)|bk9532_mic_is_connected(1);
+//     devices_connect_tmp=setValueAtOffset(devices_connect_tmp,mic_status_offset,check_bit);  
+//     //TRACE("check_devices_connect tmp=%x",devices_connect_tmp);
+//     //TRACE("devices_connect=%x",devices_connect); 
+//     if(devices_connect_tmp!=devices_connect)
 //     {
-//         WORD data=get_Sys_func_avails();
-//         TRACE("Sys_func_avails %x",data);        
-//         uart_send_cmd(CMD_FUNC_ENABLE, data);
-//         update_func_value_to_panel();
-//     }
+//         TRACE("check_devices_connect# =%x",devices_connect_tmp);
+//         devices_connect=devices_connect_tmp;
+//         uart_send_cmd(UART1,CMD_DEVICES_CONNECT, devices_connect);
+//     }    
 // }
+
+void check_mics_connect(WORD iSend)
+{
+    devices_connect_tmp=(bk9532_mic_is_connected(1)<<1)|bk9532_mic_is_connected(0);
+    //TRACE("check_devices_connect tmp=%x",devices_connect_tmp);
+    //TRACE("devices_connect=%x",devices_connect); 
+    if(devices_connect_tmp!=devices_connect || iSend)
+    {
+        TRACE("check_mics_connect# =%x",devices_connect_tmp);
+        devices_connect=devices_connect_tmp;
+        uart_send_cmd(CMD_DEVICES_CONNECT, devices_connect);
+    }    
+}
 
 WORD func_SendValueToSAM(WORD ch, WORD nrpn, DWORD v, WORD format)
 {	
@@ -219,242 +246,53 @@ WORD func_SendValueToSAM(WORD ch, WORD nrpn, DWORD v, WORD format)
 	return tmp;
 }
 
-// DWORD ConvertValueToSAM(DWORD value,WORD type) 
-// {    
-//   	DWORD valueConvert;
-//     DWORD valueToSAM;
-
-//     TRACE("ConvertValueToSAM value=%d",value);
-//     TRACE("type=%d",type);
-//     if(type==Type_EQ)
-//    	{
-//         if(value<50)//giá trị từ -12db->0db
-//         {
-//             valueConvert=EQ_GAIN_MIN+(value*(EQ_GAIN_MID-EQ_GAIN_MIN)/ 50);
-//             valueToSAM=((EQ_GAIN_MID_SAM+2*valueConvert)<<8)&0x0FFFF;
-//         }else//giá trị từ 0db->12db
-//         {
-//             valueConvert=EQ_GAIN_MID+((value-50)*(EQ_GAIN_MAX-EQ_GAIN_MID)/ 50);
-//             valueToSAM=((EQ_GAIN_MID_SAM+2*valueConvert)<<8)&0x0FFFF;
-//         } 
-//     }else if(type==Type_MASTER_VOL)
-//     {
-//         //func_convertvalueToSam(value,(DWORD)50,(DWORD)100,(DWORD)0,(DWORD)6);
-        
-//         if(value==0)
-//             valueToSAM=GAIN_MIN_SAM;
-//         else if(value<5)    
-//              valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-//         else if(value<50)//giá trị từ -20db->(-3)db
-//         {
-//             valueConvert=GAIN_MIN_start+(value*(GAIN_MID-GAIN_MIN_start)/ 50);
-//             if(GAIN_MID<0)
-//                 valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//             else    
-//                 valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }else//giá trị từ -3db->5db
-//         {
-//             valueConvert=GAIN_MID+((value-50)*(GAIN_MASTER_MAX-GAIN_MID)/ 50);
-//              if(GAIN_MID<0)
-//                 valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//             else  
-//                 valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }        
-//     }else if(type==Type_MUSIC_VOL)
-//     {
-//         if(value==0)
-//             valueToSAM=GAIN_MIN_SAM;
-//         else if(value<5)    
-//              valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-//         else if(value<50)//giá trị từ -20db->(-3)db
-//         {
-//             valueConvert=GAIN_MIN_start+(value*(GAIN_MID-GAIN_MIN_start)/ 50);
-//             if(GAIN_MID<0)
-//                 valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//             else    
-//                 valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }else//giá trị từ -3db->3db
-//         {
-//             valueConvert=GAIN_MID+((value-50)*(GAIN_MAX-GAIN_MID)/ 50);
-//              if(GAIN_MID<0)
-//                 valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//             else  
-//                 valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }        
-//     }else if(type==Type_MIC_VOL)
-//     {
-//          if(value==0)
-//             valueToSAM=GAIN_MIN_SAM;
-//         else if(value<5)    
-//             valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-//         else if(value<50)//giá trị từ -20db->0db
-//         {
-//             valueConvert=GAIN_MIN_start+(value*(GAIN_MIC_MID-GAIN_MIN_start)/ 50);
-//             valueToSAM=(((GAIN_MIC_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }else//giá trị từ 0db->6db
-//         {
-//                 valueConvert=GAIN_MIC_MID+((value-50)*(GAIN_MIC_MAX-GAIN_MIC_MID)/ 50);
-//                 valueToSAM=(((GAIN_MIC_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-//         }        
-//     }else if(type==Type_Echo)
-//     {
-//         if(value<50)//giá trị từ 0->50
-//         {
-//             valueConvert = (value * (GAIN_ECHO_MID_SAM - GAIN_ECHO_MIN_SAM)) / 50 + GAIN_ECHO_MIN_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;            
-//         }else   //giá trị từ 50->70 
-//         {
-//              valueConvert = ((value-50) * (GAIN_ECHO_MAX_SAM - GAIN_ECHO_MID_SAM)) / 50 + GAIN_ECHO_MID_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;            
-//         }
-//     }else if(type==Type_Delay)
-//     {
-//         if(value<50)//giá trị từ 45->75
-//         {
-//              valueConvert = (value * (GAIN_DELAY_MID_SAM - GAIN_DELAY_MIN_SAM)) / 50 + GAIN_DELAY_MIN_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB; 
-//         }else   //giá trị từ 75->100
-//         {
-//              valueConvert = ((value-50) * (GAIN_DELAY_MAX_SAM - GAIN_DELAY_MID_SAM)) / 50 + GAIN_DELAY_MID_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB; 
-//         }
-//     }else if(type==Type_Reverb)
-//     {
-//         if(value<50)//giá trị từ 0->30
-//         {
-//              valueConvert = (value * (GAIN_REV_MID_SAM - GAIN_REV_MIN_SAM)) / 50 + GAIN_REV_MIN_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;    
-//         }else   //giá trị từ 30->60
-//         {
-//               valueConvert = ((value-50) * (GAIN_REV_MAX_SAM - GAIN_REV_MID_SAM)) / 50 + GAIN_REV_MID_SAM;
-//             valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;    
-//         }
-//     }
-//     TRACE("valueConvert %d",valueConvert);
-//     TRACE("valueToSAM %x",valueToSAM);
-//   return valueToSAM;
-// }
-DWORD ConvertValueToSAM(DWORD value,WORD type) 
+DWORD ConvertValueToSAM(DWORD value,WORD cmd) 
 {    
-  	DWORD valueConvert;
+  	FLOAT valueConvert;
     DWORD valueToSAM;
 
-    TRACE("ConvertValueToSAM value=%d",value);
-    TRACE("type=%d",type);
-    if(value<CIRCLE_NO_MID_POS)
-        value=CIRCLE_NO_MID_POS;
-    if(value>CIRCLE_MAX_POS)
-        value=CIRCLE_MAX_POS;    
-    if(type==Type_EQ)
+    //TRACE("ConvertValueToSAM value=%d",value);
+    TRACE("cmd=%d",cmd);
+    if(value<UI_VALUE_MIN)
+        value=UI_VALUE_MIN;
+    if(value>UI_VALUE_MAX)
+        value=UI_VALUE_MAX;    
+    if(cmd==CMD_MIC_BASS|| cmd==CMD_MIC_TREB|| cmd==CMD_MIC_MID)
    	{
-        if(value<50)//giá trị từ -12db->0db
-        {
-            valueConvert=EQ_GAIN_MIN+(value*(EQ_GAIN_MID-EQ_GAIN_MIN)/ 50);
-            valueToSAM=((EQ_GAIN_MID_SAM+2*valueConvert)<<8)&0x0FFFF;
-        }else//giá trị từ 0db->12db
-        {
-            valueConvert=EQ_GAIN_MID+((value-50)*(EQ_GAIN_MAX-EQ_GAIN_MID)/ 50);
-            valueToSAM=((EQ_GAIN_MID_SAM+2*valueConvert)<<8)&0x0FFFF;
-        } 
-    }else if(type==Type_MASTER_VOL)
+        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)EQ_GAIN_MIN,(DWORD)EQ_GAIN_MID,(DWORD)EQ_GAIN_MAX);
+        valueToSAM=func_convertEQToSam(valueConvert);        
+    }else if(cmd==CMD_ECHO)
     {
-        valueToSAM=func_convertvalueToSam(value,(DWORD)CIRCLE_MID_POS,(DWORD)CIRCLE_MAX_POS,(DWORD)GAIN_MID,(DWORD)GAIN_MASTER_MAX);
-        
-        // if(value==0)
-        //     valueToSAM=GAIN_MIN_SAM;
-        // else if(value<5)    
-        //      valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-        // else if(value<50)//giá trị từ -20db->(-3)db
-        // {
-        //     valueConvert=GAIN_MIN_start+(value*(GAIN_MID-GAIN_MIN_start)/ 50);
-        //     if(GAIN_MID<0)
-        //         valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        //     else    
-        //         valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-
-        // }else//giá trị từ -3db->5db
-        // {
-        //     valueConvert=GAIN_MID+((value-50)*(GAIN_MASTER_MAX-GAIN_MID)/ 50);
-        //      if(GAIN_MID<0)
-        //         valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        //     else  
-        //         valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        // }        
-    }else if(type==Type_MUSIC_VOL)
+        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_ECHO_MIN,(DWORD)UI_MIC_ECHO_MID,(DWORD)UI_MIC_ECHO_MAX);
+        valueToSAM=func_convertEchoToSam(valueConvert);
+    }else if(cmd==CMD_REVERB)
     {
-        valueToSAM=func_convertvalueToSam(value,(DWORD)CIRCLE_MID_POS,(DWORD)CIRCLE_MAX_POS,(DWORD)GAIN_MID,(DWORD)GAIN_MAX);
-        // if(value==0)
-        //     valueToSAM=GAIN_MIN_SAM;
-        // else if(value<5)    
-        //      valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-        // else if(value<50)//giá trị từ -20db->(-3)db
-        // {
-        //     valueConvert=GAIN_MIN_start+(value*(GAIN_MID-GAIN_MIN_start)/ 50);
-        //     if(GAIN_MID<0)
-        //         valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        //     else    
-        //         valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        // }else//giá trị từ -3db->3db
-        // {
-        //     valueConvert=GAIN_MID+((value-50)*(GAIN_MAX-GAIN_MID)/ 50);
-        //      if(GAIN_MID<0)
-        //         valueToSAM=(((GAIN_MID_SAM-GAIN_MID+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        //     else  
-        //         valueToSAM=(((GAIN_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        // }        
-    }else if(type==Type_MIC_VOL)
-    {
-		valueToSAM=func_convertvalueToSam(value,(DWORD)CIRCLE_MID_POS,(DWORD)CIRCLE_MAX_POS,(DWORD)GAIN_MIC_MID,(DWORD)GAIN_MIC_MAX);
-        //  if(value==0)
-        //     valueToSAM=GAIN_MIN_SAM;
-        // else if(value<5)    
-        //     valueToSAM=((GAIN_MIN_start_SAM<<8)&0x0FFFF)|GAIN_LSB;
-        // else if(value<50)//giá trị từ -20db->0db
-        // {
-        //     valueConvert=GAIN_MIN_start+(value*(GAIN_MIC_MID-GAIN_MIN_start)/ 50);
-        //     valueToSAM=(((GAIN_MIC_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        // }else//giá trị từ 0db->6db
-        // {
-        //         valueConvert=GAIN_MIC_MID+((value-50)*(GAIN_MIC_MAX-GAIN_MIC_MID)/ 50);
-        //         valueToSAM=(((GAIN_MIC_MID_SAM+valueConvert)<<8)&0x0FFFF)|GAIN_LSB;
-        // }        
-    }else if(type==Type_Echo)
-    {
-		valueToSAM=func_convertvalueToSam(value,(DWORD)CIRCLE_MID_POS,(DWORD)CIRCLE_MAX_POS,(DWORD)GAIN_ECHO_MID,(DWORD)GAIN_ECHO_MAX);
-        // if(value<50)//giá trị từ 0->50
-        // {
-        //     valueConvert = (value * (GAIN_ECHO_MID_SAM - GAIN_ECHO_MIN_SAM)) / 50 + GAIN_ECHO_MIN_SAM;
-        //     valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;            
-        // }else   //giá trị từ 50->70 
-        // {
-        //      valueConvert = ((value-50) * (GAIN_ECHO_MAX_SAM - GAIN_ECHO_MID_SAM)) / 50 + GAIN_ECHO_MID_SAM;
-        //     valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;            
-        // }
-    }else if(type==Type_Delay)
-    {
-        if(value<50)//giá trị từ 45->75
-        {
-             valueConvert = (value * (GAIN_DELAY_MID_SAM - GAIN_DELAY_MIN_SAM)) / 50 + GAIN_DELAY_MIN_SAM;
-            valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB; 
-        }else   //giá trị từ 75->100
-        {
-             valueConvert = ((value-50) * (GAIN_DELAY_MAX_SAM - GAIN_DELAY_MID_SAM)) / 50 + GAIN_DELAY_MID_SAM;
-            valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB; 
-        }
-    }else if(type==Type_Reverb)
-    {
-		valueToSAM=func_convertvalueToSam(value,(DWORD)CIRCLE_MID_POS,(DWORD)CIRCLE_MAX_POS,(DWORD)GAIN_REV_MID,(DWORD)GAIN_REV_MAX);
-        // if(value<50)//giá trị từ 0->30
-        // {
-        //      valueConvert = (value * (GAIN_REV_MID_SAM - GAIN_REV_MIN_SAM)) / 50 + GAIN_REV_MIN_SAM;
-        //     valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;    
-        // }else   //giá trị từ 30->60
-        // {
-        //       valueConvert = ((value-50) * (GAIN_REV_MAX_SAM - GAIN_REV_MID_SAM)) / 50 + GAIN_REV_MID_SAM;
-        //     valueToSAM=((valueConvert<<8)&0x0FFFF)|GAIN_LSB;    
-        // }
+        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REVERB_MIN,(DWORD)UI_MIC_REVERB_MID,(DWORD)UI_MIC_REVERB_MAX);
+        valueToSAM=func_convertEchoToSam(valueConvert);
     }
+    else if(cmd==CMD_DELAY)
+    {
+        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_DELAY_MIN,(DWORD)UI_MIC_DELAY_MID,(DWORD)UI_MIC_DELAY_MAX);
+        valueToSAM=func_convertDelayToSam(valueConvert);
+    }else
+    {       
+        if(cmd==CMD_MIC_VOL)
+        {
+            valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
+        }
+         valueToSAM=func_calRangeLinearGainValue(valueConvert);
+    } 
+    
     TRACE("valueToSAM %x",valueToSAM);
     return valueToSAM;
+}
+
+void setPowerStatus(WORD value)
+{
+    iPowerStatus=value;
+}
+WORD getPowerStatus()
+{
+    return iPowerStatus;
 }
 

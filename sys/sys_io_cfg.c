@@ -6,22 +6,6 @@
 #include "sys_io.h"
 
 extern void delayMsec(WORD ms);
-extern WORD detect_Mic_Wire;
-extern WORD volume_Mic_Wire;
-// MIDI_IN1 	(UART Rx)	P0.14	=SAM RX
-// MIDI_OUT1 	(UART Tx)	P0.9	=SAM TX
-
-// MIDI_IN2	(UART Rx)	P0.15	=SAM RX2
-// MIDI_OUT2	(UART Tx)	P0.13	=SAM TX2
-//PRM0PORT=0x08
-//SEC2PORT=0x0F
-#define DETECT_MIC_WIRE_PORT      0
-#define DETECT_MIC_WIRE_PIN       10
-#define DETECT_GUITAR_PORT        0
-#define DETECT_GUITAR_PIN         8
-#define Power48v_PORT             0
-#define Power48v_PIN              2//0//V1.5=P00,V1.4=P02
-
 
 #define SET_DIR_INPUT(port,pin)      _andio(IO_PORT_DIR(port), ~(1 << pin))
 #define SET_DIR_OUTPUT(port,pin)     _orio (IO_PORT_DIR(port),  (1 << pin))
@@ -143,29 +127,10 @@ void sys_io_gpio_init(void)
 
 void sys_io_audio_init(void)
 {
-    _orio(PRM2PORT, (((1<<9)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
-    // spdif out //
-
-    _andio(SEC2PORT, ~(1 << 11));
-    _orio(SEC2PORT, (1 << 10));
-    _andio(PRM2PORT, ~(1 << 15));
-
-        // spdif in //
-    // _andio(PRM2PORT, ~(1 << 0));
-    // _andio(SEC2PORT, ~(1 << 13));
-    // _orio(SEC2PORT, (1 << 12));
-
-
-
-
-    // _orio(DIGITAL_AUDIO_CONFIG_PORT, 1 << 6);
-    // _andio(DIGITAL_AUDIO_CONFIG_PORT, ~(1 << 11));
-    // _andio(DIGITAL_AUDIO_CONFIG_PORT, ~(1 << 8));
-    // _orio(DIGITAL_AUDIO_CONFIG_PORT, 1 << 5);
-
-    //_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xC988);
-    //_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xE126);
-
+    //Register 0x0A – PRM2: Primary Function Select for P2
+    //(enable DAAD0/DABD0)    
+    _orio(PRM2PORT, (((1<<15)|(1<<0))));
+    
     // i2s //
     // master mode //
     // _andio(DIGITAL_AUDIO_IN_CONFIG_PORT, ~(0x3F));
@@ -198,7 +163,7 @@ void sys_io_init(void)
     sys_io_gpio_init();
     sys_io_i2c_init();
     sys_io_audio_init();
-    _orio(PRM2PORT, (((1<<15)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
+    //_orio(PRM2PORT, (((1<<15)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
 }
 void sys_timer0_init(void)
 {
@@ -219,29 +184,4 @@ void sys_timer0_init(void)
     _wrio(TIMER0PORT, TIMER0V);  //init timer 0  //Timer 0 reload value for ~10ms (base level timer)
 	_orio(CONTROLPORT, ENA_TIMER0);    
     
-}
-
-WORD check_Mic_Wire_detect()
-{
-     return IO_INPUT_READ(DETECT_MIC_WIRE_PORT,DETECT_MIC_WIRE_PIN);
-}
-
-WORD check_guitar_detect()
-{
-     return IO_INPUT_READ(DETECT_GUITAR_PORT,DETECT_GUITAR_PIN);
-}
-
-WORD set_Power48v_value(WORD value)
-{
-     if(value)
-        IO_HIGH_BIT(Power48v_PORT,Power48v_PIN);
-     else   
-        IO_LOW_BIT(Power48v_PORT,Power48v_PIN);
-    if(detect_Mic_Wire==Detect_Plug)
-    {    
-     //khi tắt/mở phải mute để ngăn tiếng bụp   
-     set_Vol_Mic_Wire(0) ;
-     delayMsec(2000); 
-     set_Vol_Mic_Wire(volume_Mic_Wire); 
-    }
 }

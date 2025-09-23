@@ -1209,9 +1209,10 @@ void bk9532_test(void)
 
     //bk9532_test_chip_id();
     //bk9532_test_write_and_read();
-
+    
     bk9532_test_pairing(I2C_PORT_MIC1);
     bk9532_test_pairing(I2C_PORT_MIC2);
+    bk9532_TurnLED(TRUE);
 }
 void bk9532_callHander(void)
 {

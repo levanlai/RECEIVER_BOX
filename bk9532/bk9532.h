@@ -5,7 +5,6 @@
 #include "../sys/sys_i2c.h"
 #include "../sys/sys_i2c_bk9532.h"
 
-
 #define BK9532_MAX_CHANNELS 2
 #define BK9532_PAIRING_TIMEOUT 3000 // ms
 #define BK9532_AFC_TIMEOUT 50       // ms
@@ -14,13 +13,26 @@
 
 #define BK9532_SCAN_FREQUENCY_MIN_MHZ 676
 #define BK9532_SCAN_FREQUENCY_MAX_MHZ 684
-#define BK9532_SCAN_FREQUENCY_TIMEOUT 300 // ms
+#define BK9532_SCAN_FREQUENCY_TIMEOUT 150//300 // ms
+
+
+#define BK9532_FLASH_ID_IDCODE_CHA      0xF001
+#define BK9532_FLASH_ID_IDCODE_CHB      0xF002
+
+#define BK9532_FLASH_ID_FREQUENCY_CHA   0xF003
+#define BK9532_FLASH_ID_FREQUENCY_CHB   0xF004
+
+#define BK9532_FLASH_FREQUENCY_DEFUALT_CHA 676
+#define BK9532_FLASH_FREQUENCY_DEFUALT_CHB 685
+
+#define BK9532_FLASH_IDCODE_DEFUALT_CHA 0x00000000
+#define BK9532_FLASH_IDCODE_DEFUALT_CHB 0x00000000
 
 #define BK9532_PASS I2C_OK
 
 #define BK9532_STEP_MS 10 // 10 ms  //  min 10ms // 
 
-#define bk9532_timeout(a, b) ((a) * BK9532_STEP_MS > b)
+#define bk9532_timeout(a, b) ((((DWORD)a) * BK9532_STEP_MS) > (DWORD)b)
 
 typedef enum BK9532_RF_STATE
 {
@@ -134,8 +146,6 @@ void bk9532_register_task(WORD bus);
 void bk9532_task_handler(WORD bus);
 WORD bk9532_mic_is_connected(WORD bus);
 WORD bk9532_rf_indicate_onoff(WORD bus, WORD onoff);
-void  bk9532_set_ID_pair_fromPanel(WORD cmd,WORD id);
-void  bk9532_mic_skip_pair(void);
 void  bk9532_mic_reset_pair(void);
 
 #endif //__BK9532_H__

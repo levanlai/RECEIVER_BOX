@@ -1,10 +1,10 @@
 #include <system.h>
 #include <sys5000.h>
 #include <trace.h>
-
 #include "bk9532.h"
 #include "../config.h"
 #include "../lcd/uart.h"
+#include "../nvs/pms.h"
 #define BK9532_AFC_MAX_INDEX 5
 
 /**********************************************************************
@@ -122,6 +122,7 @@ static WORD bk9532_rf_indicate_init(WORD bus)
  */
 WORD bk9532_rf_indicate_onoff(WORD bus, WORD onoff)
 {
+   // TRACE("bk9532_rf_indicate_onoff  onoff=%x", onoff);
     return bk9532_set_gpio_output(bus, BK9532_GPIO_PIN_4, onoff);
 }
 
@@ -131,7 +132,8 @@ static WORD bk9532_rf_indicate_period(WORD bus, WORD time, WORD period)
     if (((DWORD)time * BK9532_STEP_MS) % (period) == 0)
     {
         bk9532_rf_indicate_onoff(bus, indicate[bus]);
-        indicate[bus] = ~indicate[bus];
+        //indicate[bus] = ~indicate[bus];
+        indicate[bus] = (indicate[bus]==1)?0:1;
     }
     return 0;
 }
@@ -320,10 +322,13 @@ static WORD bk9532_rf_monitor(WORD bus)
  */
 static WORD bk9532_rf_query_idcode(WORD bus, DWORD *idcode, WORD *flag)
 {
-
+    WORD tmp;
     WORD state = 1;
     DWORD reg_usrdata;
-    if (bk9532_get_user_data(bus, &reg_usrdata) == BK9532_PASS)
+    tmp=bk9532_get_user_data(bus, &reg_usrdata);
+    TRACE("bk9532 query tmp= %x", tmp);
+    if (tmp == BK9532_PASS)
+    //if (bk9532_get_user_data(bus, &reg_usrdata) == BK9532_PASS)
     {
         DWORD udata = reg_usrdata & 0xFF;
         WORD ud_idx = (udata >> 5);
@@ -443,7 +448,8 @@ WORD bk9532_rf_sync_idcode_handle(WORD bus, DWORD *idcode)
     }
 
     bk9532_rf_indicate_period(bus, g_bk9532_rf_ctx[bus].last_time_freq_change, 200);
-//TRACE("bk9532_rf_sync_idcode_handle %d ", g_bk9532_rf_ctx[bus].state);
+    TRACE("bk9532_rf_sync_idcode_handle %d ", bus);
+    TRACE("state %d ", g_bk9532_rf_ctx[bus].state);
     switch (g_bk9532_rf_ctx[bus].state)
     {
     case BK9532_RF_STATE_CHANGE_FREQ:
@@ -460,7 +466,7 @@ WORD bk9532_rf_sync_idcode_handle(WORD bus, DWORD *idcode)
         break;
     case BK9532_RF_STATE_TIMEOUT:
         ret = -1;
-       //TRACE("bk9532 pairing timeout ", g_bk9532_rf_ctx[bus].last_time_freq_change);
+       TRACE("bk9532 pairing timeout bus=%d", bus);
         bk9532_rf_change_idcode_and_frequency_process(bus, BK9532_PAIR_IDCODE, g_bk9532_rf_ctx[bus].pair_freq, TRUE);
         g_bk9532_rf_ctx[bus].state = BK9532_RF_STATE_CHANGE_FREQ;
         g_bk9532_rf_ctx[bus].last_time_freq_change = 0;
@@ -471,7 +477,7 @@ WORD bk9532_rf_sync_idcode_handle(WORD bus, DWORD *idcode)
         TRACE("bk9532 pairing ok, with bus %d", bus);
         TRACE("bk9532 pairing ok, with idcode %x", tmp);
         g_bk9532_rf_ctx[bus].state = BK9532_RF_STATE_CHANGE_FREQ;
-        g_bk9532_rf_ctx[bus].last_time_freq_change = 0;
+        //g_bk9532_rf_ctx[bus].last_time_freq_change = 0;
         bk9532_rf_indicate_onoff(bus, TRUE);
         break;
     default:
@@ -496,13 +502,14 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
 
     if (bus >= BK9532_MAX_CHANNELS)
     {
-        TRACE("channel over range", bus);
+        //TRACE("channel over range", bus);
         return ret;
     }
 
     g_bk9532_rf_ctx[bus].last_time_freq_change += 1;
     //bk9532_rf_indicate_period(bus, g_bk9532_rf_ctx[bus].last_time_freq_change, 750);
-    // TRACE("scan %d", g_bk9532_rf_ctx[bus].state);
+    // TRACE("rf_scan %d", bus);
+     //TRACE("state %d", g_bk9532_rf_ctx[bus].state);
     // id=g_bk9532_rf_ctx[bus].rf_idc;
     // TRACE("rf_idc %x",id);
     switch (g_bk9532_rf_ctx[bus].state)
@@ -510,11 +517,12 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
     case BK9532_RF_STATE_CHANGE_FREQ:
         if(bk9532_rf_change_idcode_and_frequency_process(bus, g_bk9532_rf_ctx[bus].rf_idc, g_bk9532_rf_ctx[bus].rf_freq, FALSE) == 0)
         {
-            TRACE("bk9532 rf connected at  ", g_bk9532_rf_ctx[bus].rf_freq);
+            TRACE("bk9532 rf connected at  %d", g_bk9532_rf_ctx[bus].rf_freq);
             g_bk9532_rf_ctx[bus].state = BK9532_RF_STATE_CONNECTED;
             bk9532_rf_indicate_onoff(bus, TRUE);
             g_bk9532_rf_ctx[bus].is_connected = TRUE;
-            //update_func_value_to_panel();
+            check_mics_connect(FALSE);
+            // bk9532_flash_save_freq(bus, g_bk9532_rf_ctx[bus].rf_freq);
             // callback connected to tx device//
         }
         else 
@@ -534,7 +542,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
             bk9532_rf_change_idcode_and_frequency_process(bus, g_bk9532_rf_ctx[bus].rf_idc, g_bk9532_rf_ctx[bus].rf_freq, TRUE);
             g_bk9532_rf_ctx[bus].last_time_freq_change = 0;
             g_bk9532_rf_ctx[bus].state = BK9532_RF_STATE_CHANGE_FREQ;
-            bk9532_rf_indicate_onoff(bus, FALSE);
+            bk9532_rf_indicate_onoff(bus, FALSE);           
             // callback lost connected to tx device //
         }
         else 
@@ -579,8 +587,9 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
         //TRACE("bk9532 rf idc ", aud_rssi);
         if(g_bk9532_rf_ctx[bus].is_connected)
         {
+            TRACE("BK9532_RF_STATE_TIMEOUT  %d", bus);
             g_bk9532_rf_ctx[bus].is_connected = FALSE;
-            //update_func_value_to_panel();
+            check_mics_connect(FALSE);
         }
         break;
     default:
@@ -596,40 +605,62 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
  void bk9532_task_handler(WORD bus)
 {
     //static state_machine[BK9532_MAX_CHANNELS] = {0, 0};
-    //TRACE("bk9532_task_handler =%d ",state_pair[bus]);
+int state;
     switch (state_pair[bus])
     {
     case 0: // get idcode //
-        if(bk9532_rf_sync_idcode_handle(bus, &g_bk9532_rf_ctx[bus].pair_idc) == 0)
+        /*if(bk9532_rf_sync_idcode_handle(bus, &g_bk9532_rf_ctx[bus].pair_idc) == 0)
         {
             state_pair[bus] = 1;
             g_bk9532_rf_ctx[bus].rf_idc =  g_bk9532_rf_ctx[bus].pair_idc;
             uart_send_ID_mic_pair(bus,g_bk9532_rf_ctx[bus].rf_idc);
             //save idcode to rom //
-        }
-        // if != 1 ; state_machine[bus] = 1; if == 0 update idcode ;
-        // state = bk9532_rf_sync_idcode_handle(bus, &g_bk9532_rf_ctx[bus].pair_idc);
-        // if(state != 1)
-        // {
-        //     if(state == 0)
-        //     {
-        //         //save idcode to rom //
-        //         g_bk9532_rf_ctx[bus].rf_idc =  g_bk9532_rf_ctx[bus].pair_idc;
-        //     }
-        //     else
-        //     {
-        //         //load idcode from rom //
-        //         g_bk9532_rf_ctx[bus].rf_idc =  bk9532_flash_get_idcode(bus);
-        //     }
-        //         //load idcode from rom //
-        //     g_bk9532_rf_ctx[bus].rf_freq =  bk9532_flash_get_freq(bus);
-        //     state_machine[bus] = 1;
-        // }
+        }*/
+        state = bk9532_rf_sync_idcode_handle(bus, &g_bk9532_rf_ctx[bus].pair_idc);
+        if(state != 1)
+        {
+			DWORD tmp;
+            TRACE("bk9532_task_handler 0 state: %d",state);
+            if(state == 0)
+            {            
+                //save idcode to rom //
+                g_bk9532_rf_ctx[bus].rf_idc =  g_bk9532_rf_ctx[bus].pair_idc;
+                bk9532_flash_save_idcode(bus, g_bk9532_rf_ctx[bus].rf_idc);                
+                tmp=g_bk9532_rf_ctx[bus].rf_idc;
+                TRACE("bk9532 flash save bus: %x", bus);
+                TRACE("idcode: %x", tmp);
+                bk9532_rf_indicate_onoff(bus, TRUE);
+                g_bk9532_rf_ctx[bus].is_connected = TRUE;
+                check_mics_connect(FALSE);
 
+            }
+            else
+            {
+                //load idcode from rom //
+
+                bk9532_flash_load_idcode(bus, &g_bk9532_rf_ctx[bus].rf_idc);
+                tmp=g_bk9532_rf_ctx[bus].rf_idc;
+                TRACE("bk9532 flash load bus: %x", bus);
+                TRACE("idcode: %x", tmp);
+                state_pair[bus] = 1;
+            }
+                //load freq from rom //
+           // bk9532_flash_load_freq(bus, &g_bk9532_rf_ctx[bus].rf_freq);
+           // TRACE("bk9532 flash load freq: %d", g_bk9532_rf_ctx[bus].rf_freq);
+            //state_pair[bus] = 1;
+        }
         break;
     case 1: // scan frequency //
         bk9532_rf_scan_frequency_handle(bus);
         break;
+    case 2:
+        g_bk9532_rf_ctx[bus].last_time_freq_change += 1;    
+        if (bk9532_timeout(g_bk9532_rf_ctx[bus].last_time_freq_change, BK9532_PAIRING_TIMEOUT))
+        {
+             g_bk9532_rf_ctx[bus].last_time_freq_change =0; 
+             state_pair[bus] = 1;   
+        }
+        break;    
     default:
         break;
     }
@@ -644,43 +675,7 @@ void  bk9532_mic_reset_pair(void)
     bk9532_rf_param_init(0);
     bk9532_rf_param_init(1);    
 }
-void  bk9532_mic_skip_pair(void)
-{
-    DWORD tmp0,tmp1;
-	state_pair[0] = 1;
-    state_pair[1] = 1;
-    tmp0= g_bk9532_rf_ctx[0].rf_idc;
-    TRACE("mic1 rf_idc=%x ",tmp0);
-    tmp0=get_ID_pair_fromPanel(0);
-    TRACE("mic1 id save=%x ", tmp0);
-    //TRACE("mic1 is_connected=%d ", g_bk9532_rf_ctx[0].is_connected);
-    
 
-    tmp1=g_bk9532_rf_ctx[1].rf_idc;
-    TRACE("mic2 rf_idc=%x ",tmp1 );
-    tmp1=get_ID_pair_fromPanel(1);
-    TRACE("mic2 id save=%x ", tmp1);
-    //TRACE("mic2 is_connected=%d ", g_bk9532_rf_ctx[1].is_connected);
-   
-    if(g_bk9532_rf_ctx[0].rf_idc==0)
-    {
-        bk9532_set_ID_pair(0,tmp0);
-    }
-    if(g_bk9532_rf_ctx[1].rf_idc==0)
-    {
-        bk9532_set_ID_pair(1,tmp1);
-    }
-} 
-
-void  bk9532_set_ID_pair(WORD bus,DWORD id)
-{
-    if(!g_bk9532_rf_ctx[bus].is_connected && id!=0)
-    {
-	    g_bk9532_rf_ctx[bus].rf_idc =  g_bk9532_rf_ctx[bus].pair_idc=id;
-        TRACE("bk9532_set_ID_pair id=%x ", id);
-    }
-        
-} 
 DWORD bk9532_get_ID_pair(WORD bus)
 {
     DWORD id=0;
@@ -720,9 +715,11 @@ static WORD bk9532_rf_chip_init(WORD bus)
     // default rom //
     WORD i;
     DWORD reg_val;
+     WORD ret;
     for (i = 0; i < sizeof(g_bk9532_rom) / sizeof(struct bk9532_reg_val); i++)
     {
-        bk9532_reg_write(bus, g_bk9532_rom[i].reg_addr, g_bk9532_rom[i].reg_val);
+        ret=bk9532_reg_write(bus, g_bk9532_rom[i].reg_addr, g_bk9532_rom[i].reg_val);
+        //TRACE("ret=%x", ret);
     }
 
     bk9532_set_rf_chip_reset(bus);
@@ -771,4 +768,110 @@ void bk9532_register_task(WORD bus)
     bk9532_rf_param_init(bus);
     bk9532_rf_chip_init(bus);
     //_Sys_SchedRegister(&bk9532_task[bus], bk9532_task_handler_channel[bus], BK9532_STEP_MS);
+}
+
+int bk9532_flash_save_freq(WORD bus, WORD frequency)
+{
+    int rc ;
+    WORD ffrequency = 0;
+
+    if(bus == 0)
+    {
+        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, &ffrequency);
+    }
+    else
+    {
+        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, &ffrequency);
+    }
+
+    if (rc == sizeof(WORD) && frequency == ffrequency)
+        return rc;
+
+    if(bus == 0)
+    {
+        return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
+    }
+    else
+    {
+        return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
+    }
+}
+
+int bk9532_flash_load_freq(WORD bus, PWORD frequency)
+{
+    int rc ;
+
+    if(bus == 0)
+    {
+        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
+    }
+    else {
+        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
+    }
+
+    if(rc != sizeof(WORD))
+    {
+        if(bus == 0)
+        {
+            *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHA;
+        }else {
+            *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHB;
+        }
+    }
+
+    return rc;
+}
+
+int bk9532_flash_save_idcode(WORD bus, DWORD idcode)
+{
+    int rc ;
+    DWORD fidcode = 0;
+
+    if(bus == 0)
+    {
+        rc = pms_get_dword(BK9532_FLASH_ID_IDCODE_CHA, &fidcode);
+    }
+    else
+    {
+        rc = pms_get_dword(BK9532_FLASH_ID_IDCODE_CHB, &fidcode);
+    }
+
+    if (rc == sizeof(DWORD) && idcode == fidcode)
+        return rc;
+
+    if(bus == 0)
+    {
+        return pms_set_dword(BK9532_FLASH_ID_IDCODE_CHA, idcode);
+    }
+    else
+    {
+        return pms_set_dword(BK9532_FLASH_ID_IDCODE_CHB, idcode);
+    }
+}
+
+int bk9532_flash_load_idcode(WORD bus, PDWORD idcode)
+{
+    int rc ;
+
+    if(bus == 0)
+    {
+        rc = pms_get_dword(BK9532_FLASH_ID_IDCODE_CHA, idcode);
+    }
+    else {
+        rc = pms_get_dword(BK9532_FLASH_ID_IDCODE_CHB, idcode);
+    }
+
+    if(rc != sizeof(DWORD))
+    {
+        if(bus == 0)
+        {
+            *idcode = BK9532_FLASH_IDCODE_DEFUALT_CHA;
+        }else {
+            *idcode = BK9532_FLASH_IDCODE_DEFUALT_CHB;
+        }
+    }
+
+    return rc;
+
+
 }

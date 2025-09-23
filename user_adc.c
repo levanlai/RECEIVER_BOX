@@ -11,6 +11,7 @@ WORD adc_lastStatus_btn= 0;
 WORD adc_iBtn_press_long= FALSE;
 WORD adc_last_Btn_time_press=0;
 WORD powerStatus=Turn_OFF;
+#define ADC_PIN (2<<11)//10b: select VIN2 pin 33
 WORD getSampleAverage(WORD arr[], WORD len)
 {
   WORD i = 0;
@@ -23,7 +24,12 @@ WORD getSampleAverage(WORD arr[], WORD len)
 void adc_init(void)
 {
 	WORD av;
-	_andio( CLOCK_AND_RESET_CONTROL1_PORT, ~(3<<11));	//clear ADC channel address bits
+	//clear ADC channel address bits
+	//Bit[12:11] – ADC_MUX_SEL //10b: select VIN2 pin 33
+	_andio(CLOCK_AND_RESET_CONTROL1_PORT, ~(1 << 11)); 
+    _orio(CLOCK_AND_RESET_CONTROL1_PORT, 1 << 12);
+	//ADC VIN2 pin enable
+	_orio(CLOCK_AND_RESET_CONTROL1_PORT, 1 << 10);
 	_wrxtmem( SCIFPG, BRVAL_ADC, 0 );	//trigger first ADC conversion
 	
 	do av = _rdxtmem( SCIFPG, BRVAL_ADC );	//read ADC
@@ -88,16 +94,27 @@ void ADC_check(void)
 					adc_lastStatus_btn=Key2_press_value;
 					
 				}
+			}else if((adc_curr_val>=(ADC_Btn3_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn3_press_value+ADC_Threshold)))
+			{
+				if(adc_lastStatus_btn!=Key3_press_value)
+				{
+					TRACE("Key3_press %d", adc_curr_val);
+					adc_lastStatus_btn=Key3_press_value;
+					
+				}
 			}else
 			{
 				if(adc_lastStatus_btn!=0) 
 				{
-					TRACE("Key1_press out %d", adc_lastStatus_btn);
+					TRACE("Key_press out %d", adc_lastStatus_btn);
 					if(adc_lastStatus_btn==Key1_press_value)
-						changeOutputAudio(0);
+						Button_1_Press();
 					else if(adc_lastStatus_btn==Key2_press_value)	
-						ToogleBASS_BOOST();
+						Button_2_Press();
+					else if(adc_lastStatus_btn==Key3_press_value)	
+						Button_3_Press();	
 					adc_lastStatus_btn=0;
+					adc_old_val=0;
 				}           
               		
             
@@ -105,7 +122,9 @@ void ADC_check(void)
 		}
 	}
 	
-	_andio( CLOCK_AND_RESET_CONTROL1_PORT, ~(3<<11));	//clear ADC channel address bits
+	//_andio( CLOCK_AND_RESET_CONTROL1_PORT, ADC_PIN);	//clear ADC channel address bits
+	_andio(CLOCK_AND_RESET_CONTROL1_PORT, ~(1 << 11)); 
+    _orio(CLOCK_AND_RESET_CONTROL1_PORT, 1 << 12);
 	_wrxtmem( SCIFPG, BRVAL_ADC, 0 );	//trigger first ADC conversion
 }
 

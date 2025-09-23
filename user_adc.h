@@ -6,15 +6,11 @@
 #define ADC_CHANNELS	1 	//number of used ADC channe
 #define ADC_sample_num    3 // lấy mẫu 3 lần thì tính trung bình adc
 
-#define ADC_Threshold    50
-// #define ADC_Btn1_press_value    180
-// #define ADC_Btn2_press_value    560
-// #define ADC_Btn3_press_value    740
-#define ADC_Btn1_press_value    50
-#define ADC_Btn2_press_value    270
-#define ADC_Btn3_press_value    430
-#define ADC_Btn4_press_value    570
-#define ADC_Btn5_press_value    770
+#define ADC_Threshold    30
+
+#define ADC_Btn1_press_value    230
+#define ADC_Btn2_press_value    395
+#define ADC_Btn3_press_value    625
 
 #define TIME_POWER_PRESS    30//khoan 1.9s, thêm nhấp nháy nữa là 2.2s
 
