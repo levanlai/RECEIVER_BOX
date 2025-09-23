@@ -35,7 +35,7 @@ void sys_power_latch(WORD onoff)
 BOOL sys_power_button(void)
 {
     BOOL val;
-    _andio(SYS_POWER_BUTTON_PORT_DIR, ~(1 << SYS_POWER_BUTTON_PORT_DIR));
+    _andio(SYS_POWER_BUTTON_PORT_DIR, ~(1 << SYS_POWER_BUTTON_PIN));
 
     return (_rdio(SYS_POWER_BUTTON_PORT_VAL) >> SYS_POWER_BUTTON_PIN ) & 0x01;
 }

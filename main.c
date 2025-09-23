@@ -246,7 +246,7 @@ void main_power_off_check(void)
 		{
 			delay++;
 			//TRACE("main_power_off_check %d",delay);
-			if(delay > 150)
+			if(delay > 100)
 			{
 				powerState=Turn_OFF;
 				delay=0;
