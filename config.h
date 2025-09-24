@@ -152,11 +152,13 @@ typedef struct MyData{
   //WORD init;
   WORD Mic_Vol;
   WORD Mic_Bass;
-  WORD Mic_Mid;
+  //WORD Mic_Mid;
   WORD Mic_Treb;
-  WORD Echo_Vol;
+  WORD Echo;
   WORD Delay;
   WORD Reverb;
+  WORD Filter_L;
+  WORD Filter_H;
   WORD Mic_FBC;  
 }MyData_t;
 typedef struct format_data

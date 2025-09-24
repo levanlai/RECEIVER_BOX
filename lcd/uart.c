@@ -225,15 +225,15 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				func_SendValueToSAM(DSP3_MIXPAXT,0x0460,valueConvert,FORMAT_14BIT_PRECISION);
 				break;	
-			case CMD_MIC_MID:
-				if(!iInit)
-				{
-					iNeedSaveFlash=TRUE;
-					myData.Mic_Mid=value;
-				}
-				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				func_SendValueToSAM(DSP3_MIXPAXT,0x0461,valueConvert,FORMAT_14BIT_PRECISION);
-				break;			
+			// case CMD_MIC_MID:
+			// 	if(!iInit)
+			// 	{
+			// 		iNeedSaveFlash=TRUE;
+			// 		myData.Mic_Mid=value;
+			// 	}
+			// 	valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+			// 	func_SendValueToSAM(DSP3_MIXPAXT,0x0461,valueConvert,FORMAT_14BIT_PRECISION);
+			// 	break;			
 			case CMD_MIC_TREB:
 				if(!iInit)
 				{
@@ -247,7 +247,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Echo_Vol=value;
+					myData.Echo=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				_LiveMic_Effect_EchoInputLevel(dsp[DSP4_LIVEMIC], valueConvert);
@@ -294,8 +294,8 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MIC_VOL, myData.Mic_Vol);
 	uart_send_cmd(CMD_MIC_BASS, myData.Mic_Bass);
 	uart_send_cmd(CMD_MIC_TREB, myData.Mic_Treb);
-	uart_send_cmd(CMD_MIC_MID, myData.Mic_Mid);
-	uart_send_cmd(CMD_ECHO, myData.Echo_Vol);
+	//uart_send_cmd(CMD_MIC_MID, myData.Mic_Mid);
+	uart_send_cmd(CMD_ECHO, myData.Echo);
 	uart_send_cmd(CMD_DELAY, myData.Delay);
 	uart_send_cmd(CMD_REVERB, myData.Reverb);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);

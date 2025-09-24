@@ -333,7 +333,7 @@ void main(void)
 #if ENABLE_USB
     InitUSB();	
 #endif   	
-	//SysVarInit();	
+	SysVarInit();	
 	chargeState=check_charge_det();
 	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
 	bk9532_test();

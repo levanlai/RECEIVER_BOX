@@ -35,19 +35,21 @@ void SysVarInit(void)
     {        
         myData.Mic_Vol=UI_VALUE_MID;        
         myData.Mic_Bass=UI_VALUE_MID;
-        myData.Mic_Mid=UI_VALUE_MID;
+        //myData.Mic_Mid=UI_VALUE_MID;
         myData.Mic_Treb=UI_VALUE_MID;
-        myData.Echo_Vol=UI_VALUE_MID;
+        myData.Echo=UI_VALUE_MID;
         myData.Delay=UI_VALUE_MID;
         myData.Reverb=UI_VALUE_MID;
         myData.Mic_FBC=FALSE;
+        myData.Filter_L=UI_VALUE_MID;
+        myData.Filter_H=UI_VALUE_MID;
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
    uart_cmd_parse(CMD_MIC_VOL,myData.Mic_Vol,TRUE);
    uart_cmd_parse(CMD_MIC_BASS,myData.Mic_Bass,TRUE);
-   uart_cmd_parse(CMD_MIC_MID,myData.Mic_Mid,TRUE);
+   //uart_cmd_parse(CMD_MIC_MID,myData.Mic_Mid,TRUE);
    uart_cmd_parse(CMD_MIC_TREB,myData.Mic_Treb,TRUE);
-   uart_cmd_parse(CMD_ECHO,myData.Echo_Vol,TRUE);
+   uart_cmd_parse(CMD_ECHO,myData.Echo,TRUE);
    uart_cmd_parse(CMD_DELAY,myData.Delay,TRUE);
    uart_cmd_parse(CMD_REVERB,myData.Reverb,TRUE);
    uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
