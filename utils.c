@@ -35,7 +35,7 @@ void sys_power_latch(WORD onoff)
     {
         _andio(SYS_POWER_LATCH_PORT_VAL, ~(1 << SYS_POWER_LATCH_PIN));
         bk9532_TurnLED(FALSE);
-        _Sys_Reset();//reset trong debug không có tác dụng
+        //_Sys_Reset();//reset trong debug không có tác dụng
         
     }
 }

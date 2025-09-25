@@ -259,7 +259,7 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
         value=UI_VALUE_MIN;
     if(value>UI_VALUE_MAX)
         value=UI_VALUE_MAX;    
-    if(cmd==CMD_MIC_BASS|| cmd==CMD_MIC_TREB|| cmd==CMD_MIC_MID)
+    if(cmd==CMD_MIC_BASS|| cmd==CMD_MIC_TREB/*|| cmd==CMD_MIC_MID*/)
    	{
         valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)EQ_GAIN_MIN,(DWORD)EQ_GAIN_MID,(DWORD)EQ_GAIN_MAX);
         valueToSAM=func_convertEQToSam(valueConvert);        

@@ -76,8 +76,8 @@ log⁡(a)=b có nghĩa là 10^b=a
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
 */
-#define UI_MIC_DELAY_MIN        3000 // ms    
-#define UI_MIC_DELAY_MID        5000    
+#define UI_MIC_DELAY_MIN        200//3000 // ms    
+#define UI_MIC_DELAY_MID        3500////5000    
 #define UI_MIC_DELAY_MAX        6500
 
 // #define UI_MIC_BASS_MIN       -120 
@@ -125,13 +125,13 @@ enum {
     MOVE_DOWN,    
 };
 enum {    
-    CMD_MIC_VOL,    
-    CMD_MIC_BASS,    
-    CMD_MIC_TREB, 
-    CMD_MIC_MID,   
+    CMD_MIC_VOL,
     CMD_ECHO,
     CMD_DELAY,    
     CMD_REVERB, 
+    CMD_MIC_BASS,    
+    CMD_MIC_TREB, 
+    //CMD_MIC_MID,   
     CMD_FILTER_L, 
     CMD_FILTER_H, 
     CMD_MIC_FBC, 

@@ -75,7 +75,7 @@ WORD HandleUart1Data(_SYS_CCB_USER_P dummy, WORD data)
 {
 	//A5 5A FC 03 14 00 00 16: power off
 	//TRACE("data received on UART1", data);
-	//TRACE("iDataCnt=%d", iDataCnt);
+	TRACE("iDataCnt=%d", iDataCnt);
 	data &= 0xFF;	// mask away ID bits
 	switch(iDataCnt) 
 	{
@@ -168,8 +168,8 @@ void uartMC_check_fifo(void)
 void uart_send_cmd(WORD cmd, WORD value)
 {
 	//TRACE("uart_send_cmd uartnum=%d",uartnum);
-	TRACE("uart_send_cmd cmd=%d",cmd);
-	TRACE("uart_send_cmd value=%d",value);
+	//TRACE("uart_send_cmd cmd=%d",cmd);
+	//TRACE("uart_send_cmd value=%d",value);
 	uart1_send_cmd(cmd,value);	
 }
 
@@ -250,6 +250,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Echo=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				TRACE("CMD_ECHO %x",valueConvert);
 				_LiveMic_Effect_EchoInputLevel(dsp[DSP4_LIVEMIC], valueConvert);
 				break;					
 			case CMD_DELAY:
@@ -259,6 +260,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Delay=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				TRACE("CMD_DELAY %x",valueConvert);
 				_LiveMic_Effect_EchoTime(dsp[DSP4_LIVEMIC], valueConvert);
 				break;				 
 			case CMD_REVERB: 
@@ -268,6 +270,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Reverb=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				TRACE("CMD_REVERB %x",valueConvert);
 				_LiveMic_Effect_RevLevel(dsp[DSP4_LIVEMIC], valueConvert);
 				break;			
 			case CMD_MIC_FBC:
