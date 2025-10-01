@@ -14,7 +14,7 @@ MyData_t  myData;
 WORD devices_connect=0;
 WORD devices_connect_tmp=0;
 WORD iNeedSaveFlash=FALSE;
-
+extern void delayMsec(WORD ms);
 //https://resource.heltec.cn/utils/hf
 #define FLOAT_2         0x40000000
 #define FLOAT_10        0x41200000
@@ -52,6 +52,8 @@ void SysVarInit(void)
    uart_cmd_parse(CMD_ECHO,myData.Echo,TRUE);
    uart_cmd_parse(CMD_DELAY,myData.Delay,TRUE);
    uart_cmd_parse(CMD_REVERB,myData.Reverb,TRUE);
+   uart_cmd_parse(CMD_FILTER_L,myData.Filter_L,TRUE);
+   uart_cmd_parse(CMD_FILTER_H,myData.Filter_H,TRUE);
    uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
 }
 
@@ -62,6 +64,20 @@ void checkSaveFlash(void)
         iNeedSaveFlash=FALSE;
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }
+}
+
+void SaveFlash(void)
+{
+    pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));    
+}
+
+void resetFactory(void)
+{
+    int rc ;
+    rc=pms_delete_bufs(MYDATA_FLASH_ID);
+    TRACE("resetFactory rc=%d",rc);
+    delayMsec(100);
+    SysVarInit();
 }
 
 void setBit(WORD Reg, WORD bitPosition)

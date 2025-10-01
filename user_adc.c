@@ -10,6 +10,7 @@ WORD adc_arrval[ADC_sample_num];
 WORD adc_lastStatus_btn= 0;
 WORD adc_iBtn_press_long= FALSE;
 WORD adc_last_Btn_time_press=0;
+WORD adc_timePressKeep=0;
 
 #define ADC_PIN (2<<11)//10b: select VIN2 pin 33
 WORD getSampleAverage(WORD arr[], WORD len)
@@ -62,21 +63,63 @@ void ADC_check(void)
 				if(adc_lastStatus_btn!=Key1_press_value)
 				{
 					//TRACE("Key1_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key1_press_value;					
+					adc_lastStatus_btn=Key1_press_value;
+					adc_last_Btn_time_press=0;	
+					adc_timePressKeep=TIME_PRESS_KEEP;			
+				}else
+				{
+					adc_last_Btn_time_press++;
+					//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+					if(adc_last_Btn_time_press>=TIME_PRESS_KEEP)
+					{			
+						TRACE("Key1_press long %d", adc_curr_val);				
+						adc_last_Btn_time_press=0;	
+						adc_timePressKeep=TIME_PRESS_CONTINUE;
+						adc_lastStatus_btn=0;
+						Button_1_Press();
+					}
 				}
 			}else if((adc_curr_val>=(ADC_Btn2_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn2_press_value+ADC_Threshold)))
 			{
 				if(adc_lastStatus_btn!=Key2_press_value)
 				{
 					//TRACE("Key2_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key2_press_value;					
+					adc_lastStatus_btn=Key2_press_value;
+					adc_last_Btn_time_press=0;	
+					adc_timePressKeep=TIME_PRESS_KEEP;						
+				}else
+				{
+					adc_last_Btn_time_press++;
+					//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+					if(adc_last_Btn_time_press>=TIME_PRESS_KEEP)
+					{			
+						TRACE("Key2_press long %d", adc_curr_val);				
+						adc_last_Btn_time_press=0;	
+						adc_timePressKeep=TIME_PRESS_CONTINUE;
+						adc_lastStatus_btn=0;
+						Button_2_Press();
+					}
 				}
 			}else if((adc_curr_val>=(ADC_Btn3_press_value-ADC_Threshold))&&(adc_curr_val<=(ADC_Btn3_press_value+ADC_Threshold)))
 			{
 				if(adc_lastStatus_btn!=Key3_press_value)
 				{
 					//TRACE("Key3_press %d", adc_curr_val);
-					adc_lastStatus_btn=Key3_press_value;					
+					adc_lastStatus_btn=Key3_press_value;
+					adc_last_Btn_time_press=0;	
+					adc_timePressKeep=TIME_PRESS_KEEP;						
+				}else
+				{
+					adc_last_Btn_time_press++;
+					//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+					if(adc_last_Btn_time_press>=TIME_PRESS_KEEP)
+					{			
+						TRACE("Key3_press long %d", adc_curr_val);				
+						adc_last_Btn_time_press=0;	
+						adc_timePressKeep=TIME_PRESS_CONTINUE;
+						adc_lastStatus_btn=0;
+						Button_3_Press();
+					}
 				}
 			}else
 			{

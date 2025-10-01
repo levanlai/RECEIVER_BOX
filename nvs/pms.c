@@ -54,3 +54,8 @@ int pms_set_bufs(WORD key, WORD *val, WORD nwords)
 {
     return nvs_write(&g_nvs_fs, key, (void *)val, nwords);
 }
+
+int pms_delete_bufs(WORD key)
+{
+    return nvs_delete(&g_nvs_fs, key);
+}

@@ -271,7 +271,7 @@ static WORD bk9532_rf_detect_signal(WORD bus)
 static WORD bk9532_rf_monitor(WORD bus)
 {
     WORD state = 1;
-    if (bk9532_get_rf_signal(bus) != 0)
+    if (bk9532_get_rf_signal(bus) != 0)// no signal
     {
         //TRACE(" bk9532_rf_monitor lost signal detect %d", g_rf_afc[bus].last_time_tune);
         if(g_rf_afc[bus].opened)
@@ -535,7 +535,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
             }    
         }
         break;
-    case BK9532_RF_STATE_CONNECTED:
+    case BK9532_RF_STATE_CONNECTED:        
         if(bk9532_rf_monitor(bus) == -1)
         {
             //TRACE("bk9532 rf lost connected at  ", g_bk9532_rf_ctx[bus].rf_freq);
@@ -560,6 +560,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
 			{
 				bk9532_rf_indicate_onoff(bus, FALSE);
 			}
+            
         }
 
         break;

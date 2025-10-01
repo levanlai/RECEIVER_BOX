@@ -12,7 +12,8 @@
 #define ADC_Btn2_press_value    395
 #define ADC_Btn3_press_value    625
 
-#define TIME_POWER_PRESS    30//khoan 1.9s, thêm nhấp nháy nữa là 2.2s
+#define TIME_PRESS_KEEP         50
+#define TIME_PRESS_CONTINUE    30
 
 enum {
     Key1_press_value=1,   

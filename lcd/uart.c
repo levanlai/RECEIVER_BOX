@@ -75,7 +75,7 @@ WORD HandleUart1Data(_SYS_CCB_USER_P dummy, WORD data)
 {
 	//A5 5A FC 03 14 00 00 16: power off
 	//TRACE("data received on UART1", data);
-	TRACE("iDataCnt=%d", iDataCnt);
+	//TRACE("iDataCnt=%d", iDataCnt);
 	data &= 0xFF;	// mask away ID bits
 	switch(iDataCnt) 
 	{
@@ -272,15 +272,39 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				TRACE("CMD_REVERB %x",valueConvert);
 				_LiveMic_Effect_RevLevel(dsp[DSP4_LIVEMIC], valueConvert);
-				break;			
+				break;
+			case CMD_FILTER_L: 
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Filter_L=value;
+				}
+				
+				break;	
+			case CMD_FILTER_H: 
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Filter_H=value;
+				}
+				
+				break;				
 			case CMD_MIC_FBC:
 				if(!iInit)
+				{
 					iNeedSaveFlash=TRUE;
+					myData.Mic_FBC=value;
+				}
 				_FBCancel_Bypass( dsp[DSP2_FBC], value );	
 				//_FBCancel_SetMode( dsp[DSP2_FBC], value==0?FBC_OFF:FBC_ON);		
 				 	
 				break;
-			
+			case CMD_SAVE:
+				SaveFlash();
+				break;	
+			case CMD_RESET_FACTORY:
+				resetFactory();
+				break;
 			default:
 				break;
 		}	
@@ -301,10 +325,13 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_ECHO, myData.Echo);
 	uart_send_cmd(CMD_DELAY, myData.Delay);
 	uart_send_cmd(CMD_REVERB, myData.Reverb);
+	uart_send_cmd(CMD_FILTER_L, myData.Filter_L);
+	uart_send_cmd(CMD_FILTER_H, myData.Filter_H);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
 	//TRACE("syncDataToPanel %d",value);
 
 }
+
 
