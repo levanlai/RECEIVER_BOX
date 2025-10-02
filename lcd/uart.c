@@ -1,4 +1,4 @@
-
+ 
 #include <system.h>
 #include <sys5000.h>
 #include <libFX5000.h>
@@ -15,6 +15,7 @@
 extern MyData_t  myData;
 extern WORD devices_connect;
 extern WORD	iNeedSaveFlash;
+extern void main_sendCmdPower();
 void delayMsec(WORD ms);
 void uart_init(void)
 {
@@ -182,7 +183,10 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 	TRACE("uart_cmd_parse cmd=%d",cmd);	
 	TRACE("uart_cmd_parse value=%d",value);		
 		switch (cmd)
-		{			
+		{		
+			case CMD_POWER:				
+				main_sendCmdPower();	
+				break;		
 			case CMD_PANEL_SYNC:				
 				TRACE("CMD_PANEL_SYNC %x",value);
 				syncDataToPanel();		

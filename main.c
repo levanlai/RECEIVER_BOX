@@ -133,198 +133,277 @@ void main_loop(void)
 		#endif  
 
 		uartMC_check_fifo();//check uart RX
-		FBC_BaseLevels( );
-		bk9532_callHander();
 		if (timer_reload_10ms())
 		{
 			ADC_check();	
-			main_power_off_check();	
-			timer_count++;
-			if( timer_count>=100)//2s
-			{					
-				timer_count=0;
-				tmp=check_charge_det();
-				//TRACE("charge_det=%d",tmp);
-				if(chargeState!=tmp)
-				{
-					chargeState=tmp;
-					uart_send_cmd(CMD_CHARGE_DET, chargeState);
+			main_power_btn_check();
+			//main_power_off_check();
+			if(powerState==POWER_ON)
+			{
+				timer_count++;
+				if( timer_count>=100)//2s
+				{					
+					timer_count=0;
+					tmp=check_charge_det();
+					//TRACE("charge_det=%d",tmp);
+					if(chargeState!=tmp)
+					{
+						chargeState=tmp;
+						uart_send_cmd(CMD_CHARGE_DET, chargeState);
+					}
+					//tmp=check_plugin_det();
+					//TRACE("plugin_det=%d",tmp);
 				}
-				//tmp=check_plugin_det();
-				//TRACE("plugin_det=%d",tmp);
-			}
+			}	
+			
+		}
+
+		if(powerState==POWER_ON)
+		{
+			FBC_BaseLevels( );
+			bk9532_callHander();
 		}			
     }
 }
 
-void main_power_on_check(void)
+void main_sendCmdPower()
 {
-	// check power on //
-	while(1){
-		//power_button_last_state = sys_power_button();
-
+	chargeState=check_charge_det();
+	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
+}
+void main_power_btn_check(void)
+{
+	if(powerState==POWER_OFF)
+	{
 		if(power_button_last_state != sys_power_button())
 		{
 			delay = 0;
 		}
 
 		power_button_last_state = sys_power_button();
-
-
-		if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=POWER_ON)
+		if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED)
 		{
 			delay++;
-			if(delay > 200000)
+			TRACE("main_power_on_check %d",delay);
+			if(delay > 80)
 			{
 				delay=0;
 				powerState=POWER_ON;
 				iFirstPowerON=TRUE;
 				sys_power_latch(1);
-				break;
+				SysVarInit();	
+				main_sendCmdPower();
+				bk9532_test();
 			}
 		}
-	}
-}
-
-void main_power_off_check(void)
-{	
-	if(iFirstPowerON)
-	{
-		if(sys_power_button()==!SYS_POWER_BUTTON_ACTIVED)
-		{
-			iFirstPowerON=FALSE;
-			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
-		}
-		return;	
-	}
-	if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
-	{
-		power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
-		if(powerState!=POWER_OFF)
-		{
-			delay++;
-			//TRACE("main_power_off_check %d",delay);
-			if(delay > 100)
-			{
-				powerState=POWER_OFF;
-				delay=0;
-				uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
-				sys_power_latch(0);
-			}
-		}
-				
 	}else
 	{
-		if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+		if(iFirstPowerON)
 		{
-			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
-			delay=0;
-			if(powerState!=POWER_OFF)
-			{				
-				TRACE("Button_Power_Press %d",delay);
-				Button_Power_Press();
+			if(sys_power_button()==!SYS_POWER_BUTTON_ACTIVED)
+			{
+				iFirstPowerON=FALSE;
+				power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
 			}
-		}	
+			return;	
+		}
+		if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
+		{
+			power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+			if(powerState!=POWER_OFF)
+			{
+				delay++;
+				//TRACE("main_power_off_check %d",delay);
+				if(delay > 80)
+				{
+					powerState=POWER_OFF;
+					delay=0;
+					main_sendCmdPower();
+					sys_power_latch(0);
+				}
+			}
+					
+		}else
+		{
+			if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+			{
+				power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+				delay=0;
+				if(powerState!=POWER_OFF)
+				{				
+					TRACE("Button_Power_Press %d",delay);
+					Button_Power_Press();
+				}
+			}	
+		}
 	}
+}
 
-	// if(power_button_last_state != sys_power_button())
-	// {
-	// 	delay = 0;
-	// }
+// void main_power_on_check(void)
+// {
+// 	// check power on //
+// 	while(1){
+// 		//power_button_last_state = sys_power_button();
 
-	// power_button_last_state = sys_power_button();
-	// //TRACE("main_power_off_check ",power_button_last_state);
+// 		if(power_button_last_state != sys_power_button())
+// 		{
+// 			delay = 0;
+// 		}
 
-	// if
-	// if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=Turn_OFF)
-	// {
-	// 	delay++;
-	// 	//TRACE("main_power_off_check %d",delay);
-	// 	if(delay > 200)
-	// 	{
-	// 		powerState=Turn_OFF;
-	// 		delay=0;
-	// 		sys_power_latch(0);
-	// 	}
-	// }
+// 		power_button_last_state = sys_power_button();
+
+
+// 		if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=POWER_ON)
+// 		{
+// 			delay++;
+// 			if(delay > 200000)
+// 			{
+// 				delay=0;
+// 				powerState=POWER_ON;
+// 				iFirstPowerON=TRUE;
+// 				sys_power_latch(1);
+// 				break;
+// 			}
+// 		}
+// 	}
+// }
+
+// void main_power_off_check(void)
+// {	
+// 	if(iFirstPowerON)
+// 	{
+// 		if(sys_power_button()==!SYS_POWER_BUTTON_ACTIVED)
+// 		{
+// 			iFirstPowerON=FALSE;
+// 			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+// 		}
+// 		return;	
+// 	}
+// 	if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
+// 	{
+// 		power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+// 		if(powerState!=POWER_OFF)
+// 		{
+// 			delay++;
+// 			//TRACE("main_power_off_check %d",delay);
+// 			if(delay > 100)
+// 			{
+// 				powerState=POWER_OFF;
+// 				delay=0;
+// 				uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
+// 				sys_power_latch(0);
+// 			}
+// 		}
+				
+// 	}else
+// 	{
+// 		if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+// 		{
+// 			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+// 			delay=0;
+// 			if(powerState!=POWER_OFF)
+// 			{				
+// 				TRACE("Button_Power_Press %d",delay);
+// 				Button_Power_Press();
+// 			}
+// 		}	
+// 	}
+
+// 	// if(power_button_last_state != sys_power_button())
+// 	// {
+// 	// 	delay = 0;
+// 	// }
+
+// 	// power_button_last_state = sys_power_button();
+// 	// //TRACE("main_power_off_check ",power_button_last_state);
+
+// 	// if
+// 	// if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED && powerState!=Turn_OFF)
+// 	// {
+// 	// 	delay++;
+// 	// 	//TRACE("main_power_off_check %d",delay);
+// 	// 	if(delay > 200)
+// 	// 	{
+// 	// 		powerState=Turn_OFF;
+// 	// 		delay=0;
+// 	// 		sys_power_latch(0);
+// 	// 	}
+// 	// }
 	
-}
+// }
 
-WORD dspMain, dspASRC;	// DSPs id 
-
-
-void test_function(void)
-{
-
-	WORD dsp1pcs[3];
-	_DSPresetAll();					// resets all DSP
-#if 0
-	// AUDIO PORT //
-	//External audio clock 1 (XACLP1) Reg. 0x0F SEC2[9:8]=10b Reg. 0x08 PRM0[0]=0b
-	// _andio(PRM0PORT, ~(1 << 0));
-    // _orio(SEC2PORT, (1 << 9));
-    // _andio(SEC2PORT, ~(1 << 8));
-
-    // _andio(DIGITAL_AUDIO_IN_CONFIG_PORT, 0);
-	// _orio(DIGITAL_AUDIO_IN_CONFIG_PORT, (3 << 0));
-    // _andio(DIGITAL_AUDIO_CONFIG_PORT, ~(7 << 0));
-
-	// _orio(PRM2PORT, (((1<<9)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
-
-	//_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xC988);
-    //_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xD12E);
-
-	// /*------------------------------*/
-	// /*        ASRC8I2S Module       */
-	// /*------------------------------*/
-	// // up to 8 channels ASRC on I2S audio inputs
-	// WORD _ASRC8I2S_Init( void );
-	// void _ASRC8I2S_EnableASRC( WORD DSPid, WORD enable );
-	// void _ASRC8I2S_SetInputRate( WORD DSPid, WORD value );
-	dspASRC = _ASRC8I2S_Init();
-	_ASRC8I2S_EnableASRC(dspASRC, TRUE);
-	_DSProutIN( dspASRC, DAAD0L,DAAD0R, -2, -2 );
-	_DSProut( dspASRC, IBUS0OUT, IBUS1OUT, -1, -1);
-	_StartDSP( dspASRC );
-	TRACE("dspASRC", dspASRC);
-#endif
- 	//_orio(PRM2PORT, (((1<<15)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
-	// mix bt and opt 
-	dspMain = _MixPA_Init();
-
-	/* route */
-	// Process #1: MixN
-	dsp1pcs[1] = _MixPA_MixN_Allocate( dspMain, 4 );
-	_MixPA_SetProcIN( dspMain, MIXN_SAMPLE_IN|dsp1pcs[1], PCS_DSP_IN | 0 );
-	_MixPA_SetProcOUT( dspMain, MIXN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 0 );
-
-	// Process #2: BusSendN
-	dsp1pcs[2] = _MixPA_BusSendN_Allocate( dspMain, 4 );
-	_MixPA_SetProcIN( dspMain, BUSSENDN_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 0 );
-	_MixPA_SetProcOUT( dspMain, BUSSENDN_SAMPLE_OUT|dsp1pcs[2], PCS_DSP_OUT | 0 );
+// WORD dspMain, dspASRC;	// DSPs id 
 
 
-	_DSProutIN( dspMain, DAAD0L, DAAD0R,DAAD1L,DAAD1R );
-	//_DSProutIN( dspMain, 0,0,IBUS0IN,IBUS1IN );
-	//_DSProutIN( dspMain, IBUS0IN,IBUS1IN, -2, -2 );
-	_DSProut( dspMain, DABD0L,DABD0R,DABD1L,DABD1R );
-	_StartDSP( dspMain );
+// void test_function(void)
+// {
 
-	TRACE("dspMain", dspMain);
-}
+// 	WORD dsp1pcs[3];
+// 	_DSPresetAll();					// resets all DSP
+// #if 0
+// 	// AUDIO PORT //
+// 	//External audio clock 1 (XACLP1) Reg. 0x0F SEC2[9:8]=10b Reg. 0x08 PRM0[0]=0b
+// 	// _andio(PRM0PORT, ~(1 << 0));
+//     // _orio(SEC2PORT, (1 << 9));
+//     // _andio(SEC2PORT, ~(1 << 8));
+
+//     // _andio(DIGITAL_AUDIO_IN_CONFIG_PORT, 0);
+// 	// _orio(DIGITAL_AUDIO_IN_CONFIG_PORT, (3 << 0));
+//     // _andio(DIGITAL_AUDIO_CONFIG_PORT, ~(7 << 0));
+
+// 	// _orio(PRM2PORT, (((1<<9)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
+
+// 	//_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xC988);
+//     //_wrio(CLOCK_AND_RESET_CONTROL0_PORT, 0xD12E);
+
+// 	// /*------------------------------*/
+// 	// /*        ASRC8I2S Module       */
+// 	// /*------------------------------*/
+// 	// // up to 8 channels ASRC on I2S audio inputs
+// 	// WORD _ASRC8I2S_Init( void );
+// 	// void _ASRC8I2S_EnableASRC( WORD DSPid, WORD enable );
+// 	// void _ASRC8I2S_SetInputRate( WORD DSPid, WORD value );
+// 	dspASRC = _ASRC8I2S_Init();
+// 	_ASRC8I2S_EnableASRC(dspASRC, TRUE);
+// 	_DSProutIN( dspASRC, DAAD0L,DAAD0R, -2, -2 );
+// 	_DSProut( dspASRC, IBUS0OUT, IBUS1OUT, -1, -1);
+// 	_StartDSP( dspASRC );
+// 	TRACE("dspASRC", dspASRC);
+// #endif
+//  	//_orio(PRM2PORT, (((1<<15)|(1<<8))|((1<<2)|(1<<1)|(1<<0))));
+// 	// mix bt and opt 
+// 	dspMain = _MixPA_Init();
+
+// 	/* route */
+// 	// Process #1: MixN
+// 	dsp1pcs[1] = _MixPA_MixN_Allocate( dspMain, 4 );
+// 	_MixPA_SetProcIN( dspMain, MIXN_SAMPLE_IN|dsp1pcs[1], PCS_DSP_IN | 0 );
+// 	_MixPA_SetProcOUT( dspMain, MIXN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 0 );
+
+// 	// Process #2: BusSendN
+// 	dsp1pcs[2] = _MixPA_BusSendN_Allocate( dspMain, 4 );
+// 	_MixPA_SetProcIN( dspMain, BUSSENDN_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 0 );
+// 	_MixPA_SetProcOUT( dspMain, BUSSENDN_SAMPLE_OUT|dsp1pcs[2], PCS_DSP_OUT | 0 );
+
+
+// 	_DSProutIN( dspMain, DAAD0L, DAAD0R,DAAD1L,DAAD1R );
+// 	//_DSProutIN( dspMain, 0,0,IBUS0IN,IBUS1IN );
+// 	//_DSProutIN( dspMain, IBUS0IN,IBUS1IN, -2, -2 );
+// 	_DSProut( dspMain, DABD0L,DABD0R,DABD1L,DABD1R );
+// 	_StartDSP( dspMain );
+
+// 	TRACE("dspMain", dspMain);
+// }
 
 void main(void)
 {		
-	WORD tmp=0;
-	// #ifdef AUTO_POWER_ON
-	// sys_timer0_init();
-	// delayMsec(3000);//lai
-	// #endif
-	uart_init();
+	WORD tmp=0;	
 	sys_timer0_init();
+	uart_init();	
 	TRACE("main start %d",tmp);
 	sys_io_init();
-	main_power_on_check();
+	uartMC_init();	
+	//main_power_on_check();
 	
 	pms_init();
 
@@ -337,15 +416,15 @@ void main(void)
 #endif
 
 	FBCStatus_Init();	
-	uartMC_init();
+	
 	adc_init();	
 #if ENABLE_USB
     InitUSB();	
 #endif   	
-	SysVarInit();	
-	chargeState=check_charge_det();
-	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
-	bk9532_test();
+	// SysVarInit();	
+	// chargeState=check_charge_det();
+	// uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
+	// bk9532_test();
 	TRACE("main end %d",tmp);
 	main_loop();
 			
