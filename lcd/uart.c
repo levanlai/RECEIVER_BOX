@@ -16,6 +16,7 @@ extern MyData_t  myData;
 extern WORD devices_connect;
 extern WORD	iNeedSaveFlash;
 extern void main_sendCmdPower();
+extern WORD getValueBatery();
 void delayMsec(WORD ms);
 void uart_init(void)
 {
@@ -180,13 +181,16 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 	//WORD tmp;
 	DWORD valueConvert;
 	
-	TRACE("uart_cmd_parse cmd=%d",cmd);	
-	TRACE("uart_cmd_parse value=%d",value);		
+	//TRACE("uart_cmd_parse cmd=%d",cmd);	
+	//TRACE("uart_cmd_parse value=%d",value);		
 		switch (cmd)
 		{		
 			case CMD_POWER:				
 				main_sendCmdPower();	
-				break;		
+				break;
+			case CMD_BATTERY_VALUE:
+				uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
+				break;			
 			case CMD_PANEL_SYNC:				
 				TRACE("CMD_PANEL_SYNC %x",value);
 				syncDataToPanel();		
@@ -254,7 +258,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Echo=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				TRACE("CMD_ECHO %x",valueConvert);
+				//TRACE("CMD_ECHO %x",valueConvert);
 				_LiveMic_Effect_EchoInputLevel(dsp[DSP4_LIVEMIC], valueConvert);
 				break;					
 			case CMD_DELAY:
@@ -264,7 +268,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Delay=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				TRACE("CMD_DELAY %x",valueConvert);
+				//TRACE("CMD_DELAY %x",valueConvert);
 				_LiveMic_Effect_EchoTime(dsp[DSP4_LIVEMIC], valueConvert);
 				break;				 
 			case CMD_REVERB: 
@@ -274,7 +278,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Reverb=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				TRACE("CMD_REVERB %x",valueConvert);
+				//TRACE("CMD_REVERB %x",valueConvert);
 				_LiveMic_Effect_RevLevel(dsp[DSP4_LIVEMIC], valueConvert);
 				break;
 			case CMD_FILTER_L: 

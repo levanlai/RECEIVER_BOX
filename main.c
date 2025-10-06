@@ -16,7 +16,8 @@
 
 WORD powerState=POWER_OFF;
 WORD chargeState=CHARGE_UN_PLUS;
-WORD iFirstPowerON=FALSE;
+WORD iFirstPowerPress=FALSE;
+WORD initPowerOn=0;
 WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 DWORD delay = 0;
 #if ENABLE_USB
@@ -135,7 +136,7 @@ void main_loop(void)
 		uartMC_check_fifo();//check uart RX
 		if (timer_reload_10ms())
 		{
-			ADC_check();	
+			ADC_check();			
 			main_power_btn_check();
 			//main_power_off_check();
 			if(powerState==POWER_ON)
@@ -173,70 +174,129 @@ void main_sendCmdPower()
 }
 void main_power_btn_check(void)
 {
-	if(powerState==POWER_OFF)
+	if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
 	{
-		if(power_button_last_state != sys_power_button())
+		if(powerState==POWER_OFF)
 		{
-			delay = 0;
-		}
-
-		power_button_last_state = sys_power_button();
-		if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED)
-		{
-			delay++;
-			TRACE("main_power_on_check %d",delay);
-			if(delay > 80)
+			if(power_button_last_state!=SYS_POWER_BUTTON_ACTIVED)
 			{
-				delay=0;
-				powerState=POWER_ON;
-				iFirstPowerON=TRUE;
-				sys_power_latch(1);
-				SysVarInit();	
-				main_sendCmdPower();
-				bk9532_test();
+				power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+				TRACE("main_power_on_check %d",initPowerOn);
+				//if(initPowerOn==0)
+				{
+					powerState=POWER_ON;
+					initPowerOn=1;
+					sys_power_latch(1);
+					delayMsec(100);
+					SysVarInit();	
+					main_sendCmdPower();
+					bk9532_test();
+				}				
+			}
+		}else
+		{
+			if(power_button_last_state!=SYS_POWER_BUTTON_ACTIVED)
+			{				
+				power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+				iFirstPowerPress=TRUE;
+				delay = 0;
+			}else
+			{
+				if(iFirstPowerPress)
+				{
+					delay++;
+					TRACE("main_power_off_check %d",delay);
+				 	if(delay >= 60)
+					{
+						powerState=POWER_OFF;
+						delay=0;
+						main_sendCmdPower();
+						sys_power_latch(0);
+					}
+				}
 			}
 		}
 	}else
-	{
-		if(iFirstPowerON)
-		{
-			if(sys_power_button()==!SYS_POWER_BUTTON_ACTIVED)
-			{
-				iFirstPowerON=FALSE;
-				power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
-			}
-			return;	
-		}
-		if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
-		{
-			power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
-			if(powerState!=POWER_OFF)
-			{
-				delay++;
-				//TRACE("main_power_off_check %d",delay);
-				if(delay > 80)
-				{
-					powerState=POWER_OFF;
-					delay=0;
-					main_sendCmdPower();
-					sys_power_latch(0);
-				}
-			}
-					
-		}else
-		{
-			if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
-			{
-				power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
-				delay=0;
-				if(powerState!=POWER_OFF)
-				{				
-					TRACE("Button_Power_Press %d",delay);
+	{	
+		if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+		{			
+			TRACE("check here %d",powerState);
+			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+			if(powerState==POWER_ON)
+			{			
+				if(initPowerOn==1)
+					initPowerOn=2;
+				else if(initPowerOn==2)		
 					Button_Power_Press();
-				}
-			}	
+			}
 		}
+		if(iFirstPowerPress)
+			iFirstPowerPress=FALSE;		
 	}
+
+	// if(powerState==POWER_OFF)
+	// {
+	// 	if(power_button_last_state != sys_power_button())
+	// 	{
+	// 		delay = 0;
+	// 	}
+
+	// 	power_button_last_state = sys_power_button();
+	// 	if(power_button_last_state == SYS_POWER_BUTTON_ACTIVED)
+	// 	{
+	// 		delay++;
+	// 		TRACE("main_power_on_check %d",delay);
+	// 		if(delay > 10)
+	// 		{
+	// 			delay=0;
+	// 			powerState=POWER_ON;
+	// 			iFirstPowerON=TRUE;
+	// 			sys_power_latch(1);
+	// 			SysVarInit();	
+	// 			main_sendCmdPower();
+	// 			bk9532_test();
+	// 		}
+	// 	}		
+	// }else
+	// {
+	// 	if(iFirstPowerON)
+	// 	{
+	// 		if(sys_power_button()==!SYS_POWER_BUTTON_ACTIVED)
+	// 		{
+	// 			iFirstPowerON=FALSE;
+	// 			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+	// 		}
+	// 		return;	
+	// 	}
+	// 	if(sys_power_button()==SYS_POWER_BUTTON_ACTIVED)
+	// 	{
+	// 		power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
+	// 		if(powerState!=POWER_OFF)
+	// 		{
+	// 			delay++;
+	// 			//TRACE("main_power_off_check %d",delay);
+	// 			if(delay > 80)
+	// 			{
+	// 				powerState=POWER_OFF;
+	// 				delay=0;
+	// 				main_sendCmdPower();
+	// 				sys_power_latch(0);
+	// 			}
+	// 		}
+					
+	// 	}else
+	// 	{
+	// 		if(power_button_last_state==SYS_POWER_BUTTON_ACTIVED)
+	// 		{
+	// 			power_button_last_state= !SYS_POWER_BUTTON_ACTIVED;
+	// 			delay=0;
+	// 			if(powerState!=POWER_OFF)
+	// 			{				
+	// 				Button_Power_Press();
+	// 			}
+	// 		}	
+	// 	}
+	// }
 }
 
 // void main_power_on_check(void)
@@ -430,7 +490,11 @@ void main(void)
 			
 }
 
-
+void resetPowerOff()
+{
+	bk9532_mic_reset_pair();
+	//bk9532_TurnLED(FALSE);	
+}
 void Send( UCHAR data )
 {
     _USBMC_Send( data );

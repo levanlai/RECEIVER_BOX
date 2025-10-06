@@ -22,6 +22,7 @@
 
 extern void bk9532_TurnLED(WORD value);
 extern MyData_t  myData;
+extern WORD powerState;
 void sys_power_latch(WORD onoff)
 {
     TRACE("sys_power_latch onoff=%d",onoff);
@@ -72,27 +73,22 @@ BOOL check_plugin_det(void)
 
 void Button_1_Press()//Move UP
 {
-    //TRACE("Button_1_Press=%d",onoff);    
+    TRACE("Button_1_Press powerState=%d",powerState);    
     uart_send_cmd(CMD_MOVE, MOVE_UP);
 }
 void Button_2_Press()//Move UP
 {
-    //TRACE("Button_2_Press=%d",onoff);
+    TRACE("Button_2_Press powerState=%d",powerState); 
     uart_send_cmd(CMD_MOVE, MOVE_DOWN);
 }
-WORD testChange=0;
 void Button_3_Press()
 {
-    //TRACE("Button_3_Press=%d",onoff);
-    testChange++;
-    if(testChange>16)
-    testChange=0;
-    uart_send_cmd(CMD_SET_CHANGE, testChange);
-    // uart_send_cmd(CMD_RESET_FACTORY, 0);
+    TRACE("Button_3_Press powerState=%d",powerState); 
+   //uart_send_cmd(CMD_RESET_FACTORY, 0);
 }
 void Button_Power_Press()
 {
-    //TRACE("Button_Power_Press=%d",onoff);
+    TRACE("Button_Power_Press powerState=%d",powerState); 
     uart_send_cmd(CMD_SELECT_CHANGE, 0);
 }
 

@@ -167,7 +167,7 @@ FLOAT linearInterpolate(DWORD x, DWORD x0, DWORD x1, DWORD y0, DWORD y1) {
     tmp=_fadd(_float(y0) ,_fmul(_fdiv(_fsub(_float(x),_float(x0)) , _fsub(_float(x1),_float(x0))), _fsub(_float(y1),_float(y0))));
     result=_ftol(tmp);    
     //TRACE("linearInterpolate tmp=%x",tmp);    
-    TRACE("result=%d",result);   
+   // TRACE("result=%d",result);   
      return tmp;
     //return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0);
 }
@@ -181,7 +181,7 @@ FLOAT convertInRange(DWORD value, DWORD min, DWORD mid, DWORD max, DWORD minDb, 
     //khi người dùng nhập một giá trị value trong khoảng [min, max], chương trình sẽ:
     //Nếu value nằm trong [min, mid], nội suy từ (min → mid) tới (minDb → midDb)
     //Nếu value nằm trong [mid, max], nội suy từ (mid → max) tới (midDb → maxDb)
-    TRACE("convertInRange value=%d",value);          
+    //TRACE("convertInRange value=%d",value);          
     // Giới hạn value trong [min, max]
     if (value <= min)
     {
@@ -270,7 +270,7 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     DWORD valueToSAM;
 
     //TRACE("ConvertValueToSAM value=%d",value);
-    TRACE("cmd=%d",cmd);
+    //TRACE("cmd=%d",cmd);
     if(value<UI_VALUE_MIN)
         value=UI_VALUE_MIN;
     if(value>UI_VALUE_MAX)
@@ -301,7 +301,7 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
          valueToSAM=func_calRangeLinearGainValue(valueConvert);
     } 
     
-    TRACE("valueToSAM %x",valueToSAM);
+    //TRACE("valueToSAM %x",valueToSAM);
     return valueToSAM;
 }
 

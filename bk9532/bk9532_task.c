@@ -448,8 +448,8 @@ WORD bk9532_rf_sync_idcode_handle(WORD bus, DWORD *idcode)
     }
 
     bk9532_rf_indicate_period(bus, g_bk9532_rf_ctx[bus].last_time_freq_change, 200);
-    TRACE("bk9532_rf_sync_idcode_handle %d ", bus);
-    TRACE("state %d ", g_bk9532_rf_ctx[bus].state);
+    //TRACE("bk9532_rf_sync_idcode_handle %d ", bus);
+    //TRACE("state %d ", g_bk9532_rf_ctx[bus].state);
     switch (g_bk9532_rf_ctx[bus].state)
     {
     case BK9532_RF_STATE_CHANGE_FREQ:
@@ -621,7 +621,7 @@ int state;
         if(state != 1)
         {
 			DWORD tmp;
-            TRACE("bk9532_task_handler 0 state: %d",state);
+            //TRACE("bk9532_task_handler 0 state: %d",state);
             if(state == 0)
             {            
                 //save idcode to rom //

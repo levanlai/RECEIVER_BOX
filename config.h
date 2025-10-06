@@ -166,3 +166,8 @@ typedef struct format_data
     WORD cmd;
     WORD value;   
 }format_data_t;
+
+enum {
+    ADC_BATERY,
+    ADC_BTN,    
+};
