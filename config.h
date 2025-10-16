@@ -49,6 +49,11 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_VALUE_MAX		16//254//100
 #define UI_VALUE_MID		(UI_VALUE_MAX - UI_VALUE_MIN)/2
 
+#define UI_VALUE_DB_MIN    -8//-12
+#define UI_VALUE_DB_MID    0
+#define UI_VALUE_DB_MAX    8//12
+
+
 //các giá trị *10 để lấy giá trị x.x, vì kiểu float không dùng được
 #define GAIN_MIN        -1160 // dB
 #define GAIN_MIN_START    -200 // dB
@@ -124,6 +129,8 @@ enum {
     MOVE_UP,    
     MOVE_DOWN,    
 };
+
+
 enum {    
     CMD_MIC_VOL,
     CMD_ECHO,
@@ -171,3 +178,4 @@ enum {
     ADC_BATERY,
     ADC_BTN,    
 };
+

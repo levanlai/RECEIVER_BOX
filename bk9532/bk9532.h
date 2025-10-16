@@ -6,6 +6,7 @@
 #include "../sys/sys_i2c_bk9532.h"
 
 #define BK9532_MAX_CHANNELS 2
+#define BK9532_IDCODE_RX_LENGTH 7
 #define BK9532_PAIRING_TIMEOUT 3000 // ms
 #define BK9532_AFC_TIMEOUT 50       // ms
 #define BK9532_PAIR_FREQUENCY_MHZ 670

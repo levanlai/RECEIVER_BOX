@@ -271,11 +271,11 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
 
     //TRACE("ConvertValueToSAM value=%d",value);
     //TRACE("cmd=%d",cmd);
-    if(value<UI_VALUE_MIN)
-        value=UI_VALUE_MIN;
-    if(value>UI_VALUE_MAX)
-        value=UI_VALUE_MAX;    
-    if(cmd==CMD_MIC_BASS|| cmd==CMD_MIC_TREB/*|| cmd==CMD_MIC_MID*/)
+    // if(value<UI_VALUE_MIN)
+    //     value=UI_VALUE_MIN;
+    // if(value>UI_VALUE_MAX)
+    //     value=UI_VALUE_MAX;    
+    if(cmd>=CMD_MIC_BASS && cmd<=CMD_FILTER_H)
    	{
         valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)EQ_GAIN_MIN,(DWORD)EQ_GAIN_MID,(DWORD)EQ_GAIN_MAX);
         valueToSAM=func_convertEQToSam(valueConvert);        
@@ -305,3 +305,110 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     return valueToSAM;
 }
 
+/** Convert little endian */
+DWORD cpu_swap_edian(DWORD i)
+{
+	DWORD ui, ret;
+	ui = i;
+	ret = ui >> 24;
+	ret |= (ui >> 8) & 0x0000ff00;
+	ret |= (ui << 8) & 0x00ff0000;
+	ret |= (ui << 24);
+	return ret;
+}
+
+WORD CRC8_Array(DWORD data,WORD len)
+{
+    WORD crc=0;
+    WORD cnt,i,tmp;
+    
+    for (cnt = 0; cnt < len; cnt++)
+    {
+        tmp=(data>>(cnt*8)) & 0xff;
+       // TRACE("CRC8_Array buf[%x]\n",tmp);
+        crc ^= tmp;
+        for (i = 0; i < 8; i++)
+		{
+			if (crc & 0x80)
+			{
+				crc = (crc << 1) ^ 0x07;
+			}
+			else
+			{
+				crc <<= 1;
+			}
+		}
+    }    
+	 return crc&0x0ff;
+}
+WORD checkRangeValue(WORD cmd,int value)
+{
+    if(value<UI_VALUE_MIN)
+        value=UI_VALUE_MIN;
+    if(value>UI_VALUE_MAX)
+        value=UI_VALUE_MAX;   
+    return value;
+    // switch (cmd)
+    // {
+    // case MODE_VOL_MIC:        
+    // case MODE_ECHO:
+    // case MODE_DELAY:
+    // case MODE_REVERB:    
+    //     if(value<UI_VALUE_MIN)
+    //         value=UI_VALUE_MIN;
+    //     if(value>UI_VALUE_MAX)
+    //         value=UI_VALUE_MAX;   
+    //     break;        
+    // default:
+    //     break;
+    // }
+}
+WORD stt_old=0xff;
+void parseDataFromMic(DWORD usrdata)
+{
+    WORD cmd=usrdata & 0x0ff;
+    WORD value=(usrdata>>8) & 0x0ff;
+    WORD stt=(usrdata>>16) & 0x0ff;
+    if(stt_old!=stt && cmd>=CMD_MIC_VOL && cmd<=CMD_FILTER_H)
+    {
+        int tmp=0;
+        stt_old=stt;    
+        switch (cmd)
+        {
+        case CMD_MIC_VOL:
+            tmp=myData.Mic_Vol;            
+            break;
+        case CMD_ECHO:
+            tmp=myData.Echo; 
+            break;
+        case CMD_DELAY:
+            tmp=myData.Delay; 
+            break;
+        case CMD_REVERB:
+            tmp=myData.Reverb; 
+            break;    
+        case CMD_MIC_BASS:
+            tmp=myData.Mic_Bass; 
+            break;    
+        case CMD_MIC_TREB:
+            tmp=myData.Mic_Treb; 
+            break;    
+        case CMD_FILTER_L:
+            tmp=myData.Filter_L; 
+            break;    
+        case CMD_FILTER_H:
+            tmp=myData.Filter_H; 
+            break;                        
+        default:
+            break;
+        }
+
+        if(value==MOVE_UP)
+            tmp++;
+        else if(value==MOVE_DOWN)
+            tmp--;  
+        tmp=checkRangeValue(cmd,tmp);     
+        uart_cmd_parse(cmd,tmp,FALSE);
+        uart_send_cmd(cmd,tmp);
+    }
+}

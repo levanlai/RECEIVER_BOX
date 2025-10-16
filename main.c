@@ -181,7 +181,7 @@ void main_power_btn_check(void)
 			if(power_button_last_state!=SYS_POWER_BUTTON_ACTIVED)
 			{
 				power_button_last_state=SYS_POWER_BUTTON_ACTIVED;
-				TRACE("main_power_on_check %d",initPowerOn);
+				//TRACE("main_power_on_check %d",initPowerOn);
 				//if(initPowerOn==0)
 				{
 					powerState=POWER_ON;
@@ -205,7 +205,7 @@ void main_power_btn_check(void)
 				if(iFirstPowerPress)
 				{
 					delay++;
-					TRACE("main_power_off_check %d",delay);
+					//TRACE("main_power_off_check %d",delay);
 				 	if(delay >= 60)
 					{
 						powerState=POWER_OFF;
