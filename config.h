@@ -53,6 +53,7 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_VALUE_DB_MID    0
 #define UI_VALUE_DB_MAX    8//12
 
+#define UI_VALUE_EFFECT_MAX		3
 
 //các giá trị *10 để lấy giá trị x.x, vì kiểu float không dùng được
 #define GAIN_MIN        -1160 // dB
@@ -140,7 +141,8 @@ enum {
     CMD_MIC_TREB, 
     //CMD_MIC_MID,   
     CMD_FILTER_L, 
-    CMD_FILTER_H, 
+    CMD_FILTER_H,
+    CMD_EFFECT, 
     CMD_MIC_FBC, 
     
     CMD_POWER=20,   
@@ -166,6 +168,7 @@ typedef struct MyData{
   WORD Reverb;
   WORD Filter_L;
   WORD Filter_H;
+  WORD Effect;
   WORD Mic_FBC;  
 }MyData_t;
 typedef struct format_data

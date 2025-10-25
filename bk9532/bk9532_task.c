@@ -512,6 +512,15 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
         //TRACE("channel over range", bus);
         return ret;
     }
+    if(g_bk9532_rf_ctx[bus].pair_ok)
+    {
+        g_bk9532_rf_ctx[bus].pair_ok_cnt++;
+        if(g_bk9532_rf_ctx[bus].pair_ok_cnt>4000)//check timeout 20s after pair ok
+        {
+           TRACE("clear time pair ok, bus=%d", bus);
+           g_bk9532_rf_ctx[bus].pair_ok=FALSE;
+        }
+    }
 
     g_bk9532_rf_ctx[bus].last_time_freq_change += 1;
     //bk9532_rf_indicate_period(bus, g_bk9532_rf_ctx[bus].last_time_freq_change, 750);
@@ -657,7 +666,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
         //TRACE("bk9532 rf next freq %d", g_bk9532_rf_ctx[bus].rf_freq);
         aud_rssi = g_bk9532_rf_ctx[bus].rf_idc;
         //TRACE("bk9532 rf idc ", aud_rssi);
-        if(g_bk9532_rf_ctx[bus].is_connected)
+        if(g_bk9532_rf_ctx[bus].is_connected && !g_bk9532_rf_ctx[bus].pair_ok)
         {
             TRACE("BK9532_RF_STATE_TIMEOUT  %d", bus);
             g_bk9532_rf_ctx[bus].is_connected = FALSE;
@@ -699,12 +708,14 @@ int state;
                 g_bk9532_rf_ctx[bus].rf_idc =  g_bk9532_rf_ctx[bus].pair_idc;
                 bk9532_flash_save_idcode(bus, g_bk9532_rf_ctx[bus].rf_idc);                
                 tmp=g_bk9532_rf_ctx[bus].rf_idc;
-                TRACE("bk9532 flash save bus: %x", bus);
-                TRACE("idcode: %x", tmp);
+                TRACE("pair ok, bus: %x", bus);
+                TRACE("save idcode: %x", tmp);
                 bk9532_rf_indicate_onoff(bus, TRUE);
                 g_bk9532_rf_ctx[bus].is_connected = TRUE;
                 check_mics_connect(FALSE);
-
+                g_bk9532_rf_ctx[bus].pair_ok=TRUE;
+                g_bk9532_rf_ctx[bus].pair_ok_cnt=0;
+                state_pair[bus] = 1;
             }
             else
             {
@@ -712,8 +723,8 @@ int state;
 
                 bk9532_flash_load_idcode(bus, &g_bk9532_rf_ctx[bus].rf_idc);
                 tmp=g_bk9532_rf_ctx[bus].rf_idc;
-                TRACE("bk9532 flash load bus: %x", bus);
-                TRACE("idcode: %x", tmp);
+                TRACE("pair fail,bus: %x", bus);
+                TRACE("load idcode: %x", tmp);
                 state_pair[bus] = 1;
             }
                 //load freq from rom //
@@ -744,8 +755,9 @@ void  bk9532_mic_reset_pair(void)
     state_pair[1] = 0;
     state_machine[0] = 0;
     state_machine[1] = 0;
-    bk9532_rf_param_init(0);
-    bk9532_rf_param_init(1);    
+    bk9532_TurnLED(FALSE);
+    //bk9532_rf_param_init(0);
+    //bk9532_rf_param_init(1);    
 }
 
 DWORD bk9532_get_ID_pair(WORD bus)

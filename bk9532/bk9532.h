@@ -69,6 +69,8 @@ typedef struct bk9532_rf_context
     WORD pair_idc_flag;
     WORD pair_freq;
     DWORD pair_idc;
+    WORD pair_ok;
+    WORD pair_ok_cnt;
     // rf //
     WORD rf_freq;
     WORD rf_freq_max;

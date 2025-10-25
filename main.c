@@ -211,6 +211,7 @@ void main_power_btn_check(void)
 						powerState=POWER_OFF;
 						delay=0;
 						main_sendCmdPower();
+						bk9532_mic_reset_pair();
 						sys_power_latch(0);
 					}
 				}
@@ -490,11 +491,6 @@ void main(void)
 			
 }
 
-void resetPowerOff()
-{
-	bk9532_mic_reset_pair();
-	//bk9532_TurnLED(FALSE);	
-}
 void Send( UCHAR data )
 {
     _USBMC_Send( data );
