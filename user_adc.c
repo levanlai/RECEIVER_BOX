@@ -12,6 +12,7 @@ WORD adc_chn;
 WORD adc_iBtn_press_long= FALSE;
 WORD adc_last_Btn_time_press=0;
 WORD adc_timePressKeep=0;
+WORD adc_btn3_pressOK=FALSE;
 
 extern WORD powerState;
 
@@ -142,22 +143,26 @@ void ADC_check()
 				{
 					if(adc_lastStatus_btn!=Key3_press_value)
 					{
-						//TRACE("Key3_press %d", adc_curr_val);
+						TRACE("Key3_press %d", adc_curr_val);
 						adc_lastStatus_btn=Key3_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;
-						Button_3_Press();						
+						adc_btn3_pressOK=FALSE;
+						//Button_3_Press();						
 					}else
 					{
-						adc_last_Btn_time_press++;
-						//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
-						if(adc_last_Btn_time_press>=adc_timePressKeep)
-						{			
-							TRACE("Key3_press long %d", adc_curr_val);				
-							adc_last_Btn_time_press=0;	
-							adc_timePressKeep=TIME_PRESS_CONTINUE;
-							adc_lastStatus_btn=0;
-							Button_3_Press();
+						if(!adc_btn3_pressOK)
+						{
+							adc_last_Btn_time_press++;
+							//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+							if(adc_last_Btn_time_press>=adc_timePressKeep)
+							{			
+								TRACE("Key3_press long %d", adc_curr_val);				
+								adc_last_Btn_time_press=0;	
+								adc_timePressKeep=TIME_PRESS_CONTINUE;
+								adc_btn3_pressOK=TRUE;
+								Button_3_Press();								
+							}
 						}
 					}
 				}else

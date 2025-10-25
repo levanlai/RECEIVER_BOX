@@ -12,7 +12,7 @@
 
 #define ADC_Btn1_press_value    230
 #define ADC_Btn2_press_value    395
-#define ADC_Btn3_press_value    625
+#define ADC_Btn3_press_value    590
 
 #define TIME_PRESS_KEEP         10
 #define TIME_PRESS_CONTINUE    6
