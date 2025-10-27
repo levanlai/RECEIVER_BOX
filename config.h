@@ -142,7 +142,8 @@ enum {
     //CMD_MIC_MID,   
     CMD_FILTER_L, 
     CMD_FILTER_H,
-    CMD_EFFECT, 
+    //CMD_EFFECT,
+    CMD_MIC_DEFAULT, 
     CMD_MIC_FBC, 
     
     CMD_POWER=20,   
@@ -168,7 +169,7 @@ typedef struct MyData{
   WORD Reverb;
   WORD Filter_L;
   WORD Filter_H;
-  WORD Effect;
+ // WORD Effect;
   WORD Mic_FBC;  
 }MyData_t;
 typedef struct format_data

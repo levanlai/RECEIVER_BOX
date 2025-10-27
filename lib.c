@@ -43,7 +43,7 @@ void SysVarInit(void)
         myData.Mic_FBC=FALSE;
         myData.Filter_L=UI_VALUE_MID;
         myData.Filter_H=UI_VALUE_MID;
-        myData.Effect=0;
+        //myData.Effect=0;
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
    uart_cmd_parse(CMD_MIC_VOL,myData.Mic_Vol,TRUE);
@@ -55,7 +55,7 @@ void SysVarInit(void)
    uart_cmd_parse(CMD_REVERB,myData.Reverb,TRUE);
    uart_cmd_parse(CMD_FILTER_L,myData.Filter_L,TRUE);
    uart_cmd_parse(CMD_FILTER_H,myData.Filter_H,TRUE);
-   uart_cmd_parse(CMD_EFFECT,myData.Effect,TRUE);
+   //uart_cmd_parse(CMD_EFFECT,myData.Effect,TRUE);
    uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
 }
 
@@ -346,9 +346,9 @@ WORD CRC8_Array(DWORD data,WORD len)
 WORD checkRangeValue(WORD cmd,int value)
 {
     WORD maxRange=0;
-    if(cmd== CMD_EFFECT)
-        maxRange=UI_VALUE_EFFECT_MAX;
-    else
+    // if(cmd== CMD_EFFECT)
+    //     maxRange=UI_VALUE_EFFECT_MAX;
+    // else
         maxRange=UI_VALUE_MAX;
         
     if(value<UI_VALUE_MIN)
@@ -377,7 +377,7 @@ void parseDataFromMic(DWORD usrdata)
     WORD cmd=usrdata & 0x0ff;
     WORD value=(usrdata>>8) & 0x0ff;
     WORD stt=(usrdata>>16) & 0x0ff;
-    if(stt_old!=stt && cmd>=CMD_MIC_VOL && cmd<=CMD_EFFECT)
+    if(stt_old!=stt && cmd>=CMD_MIC_VOL && cmd<=CMD_MIC_DEFAULT)
     {
         int tmp=0;
         stt_old=stt;    
@@ -407,18 +407,23 @@ void parseDataFromMic(DWORD usrdata)
         case CMD_FILTER_H:
             tmp=myData.Filter_H; 
             break; 
-        case CMD_EFFECT:
-            tmp=myData.Effect; 
-            break;                            
+        // case CMD_EFFECT:
+        //     tmp=myData.Effect; 
+        //     break;  
+        case CMD_MIC_DEFAULT:           
+            break;                           
         default:
             break;
         }
-
-        if(value==MOVE_UP)
-            tmp++;
-        else if(value==MOVE_DOWN)
-            tmp--;  
-        tmp=checkRangeValue(cmd,tmp);     
+        if(cmd!=CMD_MIC_DEFAULT)
+        {
+            if(value==MOVE_UP)
+                tmp++;
+            else if(value==MOVE_DOWN)
+                tmp--;
+           tmp=checkRangeValue(cmd,tmp);           
+        }  
+        
         uart_cmd_parse(cmd,tmp,FALSE);
         uart_send_cmd(cmd,tmp);
     }

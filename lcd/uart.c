@@ -308,16 +308,14 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				//valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				//func_SendValueToSAM(DSP3_MIXPAXT,0x0464,valueConvert,FORMAT_14BIT_PRECISION);
 				break;	
-			case CMD_EFFECT: 
-				value=checkRangeValue(cmd,value);
-				if(!iInit)
-				{
-					iNeedSaveFlash=TRUE;
-					myData.Effect=value;
-				}
-				//valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				//func_SendValueToSAM(DSP3_MIXPAXT,0x0464,valueConvert,FORMAT_14BIT_PRECISION);
-				break;						
+			// case CMD_EFFECT: 
+			// 	value=checkRangeValue(cmd,value);
+			// 	if(!iInit)
+			// 	{
+			// 		iNeedSaveFlash=TRUE;
+			// 		myData.Effect=value;
+			// 	}
+			// 	break;						
 			case CMD_MIC_FBC:
 				if(!iInit)
 				{
@@ -332,6 +330,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				SaveFlash();
 				break;	
 			case CMD_RESET_FACTORY:
+			case CMD_MIC_DEFAULT:
 				resetFactory();
 				break;
 			default:
@@ -356,7 +355,7 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_REVERB, myData.Reverb);
 	uart_send_cmd(CMD_FILTER_L, myData.Filter_L);
 	uart_send_cmd(CMD_FILTER_H, myData.Filter_H);
-	uart_send_cmd(CMD_EFFECT, myData.Effect);
+	//uart_send_cmd(CMD_EFFECT, myData.Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
