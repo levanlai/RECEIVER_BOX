@@ -99,9 +99,10 @@ void ADC_check()
 				//TRACE("adc_Btn=%d", adc_curr_val[adc_chn]);
 				if((adc_curr_val[adc_chn]>=(ADC_Btn1_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn1_press_value+ADC_Threshold)))
 				{
+					//TRACE("1 %d", adc_lastStatus_btn);
 					if(adc_lastStatus_btn!=Key1_press_value)
 					{
-						//TRACE("Key1_press %d", adc_curr_val);
+						TRACE("Key1_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key1_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;	
@@ -112,7 +113,7 @@ void ADC_check()
 						TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
 						if(adc_last_Btn_time_press>=adc_timePressKeep)
 						{			
-							TRACE("Key1_press long %d", adc_curr_val);				
+							TRACE("Key1_press long %d", adc_curr_val[adc_chn]);				
 							adc_last_Btn_time_press=0;	
 							adc_timePressKeep=TIME_PRESS_CONTINUE;
 							Button_1_Press();
@@ -120,9 +121,10 @@ void ADC_check()
 					}
 				}else if((adc_curr_val[adc_chn]>=(ADC_Btn2_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn2_press_value+ADC_Threshold)))
 				{
+					//TRACE("2 %d", adc_lastStatus_btn);
 					if(adc_lastStatus_btn!=Key2_press_value)
 					{
-						//TRACE("Key2_press %d", adc_curr_val);
+						TRACE("Key2_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key2_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;	
@@ -133,7 +135,7 @@ void ADC_check()
 						//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
 						if(adc_last_Btn_time_press>=adc_timePressKeep)
 						{			
-							TRACE("Key2_press long %d", adc_curr_val);				
+							TRACE("Key2_press long %d", adc_curr_val[adc_chn]);				
 							adc_last_Btn_time_press=0;	
 							adc_timePressKeep=TIME_PRESS_CONTINUE;
 							Button_2_Press();
@@ -141,9 +143,10 @@ void ADC_check()
 					}
 				}else if((adc_curr_val[adc_chn]>=(ADC_Btn3_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn3_press_value+ADC_Threshold)))
 				{
+					//TRACE("3 %d", adc_lastStatus_btn);
 					if(adc_lastStatus_btn!=Key3_press_value)
 					{
-						TRACE("Key3_press %d", adc_curr_val);
+						TRACE("Key3_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key3_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;
@@ -157,7 +160,7 @@ void ADC_check()
 							//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
 							if(adc_last_Btn_time_press>=adc_timePressKeep)
 							{			
-								TRACE("Key3_press long %d", adc_curr_val);				
+								TRACE("Key3_press long %d", adc_curr_val[adc_chn]);				
 								adc_last_Btn_time_press=0;	
 								adc_timePressKeep=TIME_PRESS_CONTINUE;
 								adc_btn3_pressOK=TRUE;
@@ -197,5 +200,6 @@ void ADC_check()
 
 WORD getValueBatery()
 {
+	//TRACE("adc_Batery=%d", adc_curr_val[ADC_BATERY]);
 	return adc_curr_val[ADC_BATERY];
 }

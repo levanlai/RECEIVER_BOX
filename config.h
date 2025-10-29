@@ -49,19 +49,11 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_VALUE_MAX		16//254//100
 #define UI_VALUE_MID		(UI_VALUE_MAX - UI_VALUE_MIN)/2
 
-#define UI_VALUE_DB_MIN    -8//-12
-#define UI_VALUE_DB_MID    0
-#define UI_VALUE_DB_MAX    8//12
-
 #define UI_VALUE_EFFECT_MAX		3
 
 //các giá trị *10 để lấy giá trị x.x, vì kiểu float không dùng được
 #define GAIN_MIN        -1160 // dB
 #define GAIN_MIN_START    -200 // dB
-
-#define UI_MASTER_VOLUME_MIN    GAIN_MIN_START// dB
-#define UI_MASTER_VOLUME_MID    0//-35  
-#define UI_MASTER_VOLUME_MAX    60//50   
 
 #define UI_MIC_VOLUME_MIN     GAIN_MIN_START
 #define UI_MIC_VOLUME_MID      0  
@@ -70,18 +62,18 @@ log⁡(a)=b có nghĩa là 10^b=a
 /*
 //in range 0..0x7FFE = 0...100%
 ->linearValue=value/100*0x7FFF
-*/
+*///EchoInputLevel
 #define UI_MIC_ECHO_MIN         0   // %
 #define UI_MIC_ECHO_MID         500
 #define UI_MIC_ECHO_MAX         700 
-
+//RevLevel
 #define UI_MIC_REVERB_MIN       0   // %
 #define UI_MIC_REVERB_MID       150
 #define UI_MIC_REVERB_MAX       500
 /*
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
-*/
+*///EchoTime
 #define UI_MIC_DELAY_MIN        200//3000 // ms    
 #define UI_MIC_DELAY_MID        3500////5000    
 #define UI_MIC_DELAY_MAX        6500
@@ -102,8 +94,8 @@ log⁡(a)=b có nghĩa là 10^b=a
 
 #define EQ_GAIN_MID_SAM   0x40//0dB
 
-#define GAIN_0_SAM   0x2000
-#define GAIN_Minus_6_SAM   0x1000
+//#define GAIN_0_SAM   0x2000
+//#define GAIN_Minus_6_SAM   0x1000
 
 enum {
     cmd_OK,

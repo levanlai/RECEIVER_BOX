@@ -8,14 +8,14 @@
 #define ADC_10bit    0x44800000//1024
 #define V_ref        0x40533333//3.3f
 
-#define ADC_Threshold    30
+#define ADC_Threshold    50
 
-#define ADC_Btn1_press_value    230
-#define ADC_Btn2_press_value    395
-#define ADC_Btn3_press_value    590
+#define ADC_Btn1_press_value    250
+#define ADC_Btn2_press_value    420
+#define ADC_Btn3_press_value    620
 
 #define TIME_PRESS_KEEP         10
-#define TIME_PRESS_CONTINUE    6
+#define TIME_PRESS_CONTINUE    5
 
 enum {
     Key1_press_value=1,   

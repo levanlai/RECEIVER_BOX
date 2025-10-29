@@ -61,8 +61,8 @@ void uart1_send_byte(WORD data)
 }
 void uart1_send_cmd(WORD cmd, WORD value)
 {
-	TRACE("uart1_send_cmd=%x", cmd);
-	TRACE("value=%x", value);
+	//TRACE("uart1_send_cmd=%x", cmd);
+	//TRACE("value=%x", value);
 	 //uart1_send_byte(PACK_START_CODE1 & 0xFF);
 	// uart1_send_byte(PACK_START_CODE2 & 0xFF);
 	// uart1_send_byte(PACK_USER_CODE & 0xFF);
@@ -358,6 +358,7 @@ void syncDataToPanel(void)
 	//uart_send_cmd(CMD_EFFECT, myData.Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	check_mics_connect(TRUE);
+	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
 	//TRACE("syncDataToPanel %d",value);
 

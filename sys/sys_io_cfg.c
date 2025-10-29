@@ -116,13 +116,7 @@ void sys_io_i2c_init(void)
 }
 
 void sys_io_gpio_init(void)
-{
-    /* Configure I2C pins */
-    // P0.3 src audio i2s 0 select
-    // Reg. 0x08 PRM0[0]=0b Reg. 0x0E SEC1[12]=0b
-    _andio(PRM0PORT, ~(1 << 0));
-    _andio(SEC1PORT, ~(1 << 12));
-
+{    
 }
 
 void sys_io_audio_init(void)

@@ -18,7 +18,7 @@
 
 #define SYS_PLUGIN_DET_PORT_DIR P0DIRPORT
 #define SYS_PLUGIN_DET_PORT_VAL P0VALPORT
-#define SYS_PLUGIN_DET_PIN  5
+#define SYS_PLUGIN_DET_PIN  12//5
 
 extern void bk9532_TurnLED(WORD value);
 extern MyData_t  myData;
@@ -50,7 +50,7 @@ BOOL sys_power_button(void)
 }
 // cắm charge:
 // charge det 0
-// plugin det 0
+// plugin det 1
 
 // rút charge
 // charge det 1
@@ -73,13 +73,13 @@ BOOL check_plugin_det(void)
 
 void Button_1_Press()//Move UP
 {
-    TRACE("Button_1_Press powerState=%d",powerState);    
-    uart_send_cmd(CMD_MOVE, MOVE_UP);
+    TRACE("Button_1_Press powerState=%d",powerState);
+    uart_send_cmd(CMD_MOVE, MOVE_DOWN); 
 }
 void Button_2_Press()//Move UP
 {
     TRACE("Button_2_Press powerState=%d",powerState); 
-    uart_send_cmd(CMD_MOVE, MOVE_DOWN);
+     uart_send_cmd(CMD_MOVE, MOVE_UP);
 }
 void Button_3_Press()
 {
