@@ -322,7 +322,8 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					iNeedSaveFlash=TRUE;
 					myData.Mic_FBC=value;
 				}
-				_FBCancel_Bypass( dsp[DSP2_FBC], value );	
+				TRACE("CMD_MIC_FBC %x",value);
+				_FBCancel_Bypass( dsp[DSP2_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
 				//_FBCancel_SetMode( dsp[DSP2_FBC], value==0?FBC_OFF:FBC_ON);		
 				 	
 				break;

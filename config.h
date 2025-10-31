@@ -122,7 +122,11 @@ enum {
     MOVE_UP,    
     MOVE_DOWN,    
 };
-
+// bypass: 0=normal work, 1=bypass all notch filters
+enum {
+    FBC_ON,    
+    FBC_OFF,    
+};
 
 enum {    
     CMD_MIC_VOL,
@@ -134,9 +138,9 @@ enum {
     //CMD_MIC_MID,   
     CMD_FILTER_L, 
     CMD_FILTER_H,
-    //CMD_EFFECT,
-    CMD_MIC_DEFAULT, 
-    CMD_MIC_FBC, 
+    //CMD_EFFECT,   
+    CMD_MIC_FBC,
+    CMD_MIC_DEFAULT,  
     
     CMD_POWER=20,   
     CMD_PANEL_SYNC,
@@ -145,6 +149,7 @@ enum {
     CMD_DEVICES_CONNECT,
     CMD_SAVE,	
     CMD_RESET_FACTORY,
+    
 
     CMD_MOVE,
     CMD_SET_CHANGE,	

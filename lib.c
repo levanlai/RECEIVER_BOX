@@ -40,7 +40,7 @@ void SysVarInit(void)
         myData.Echo=UI_VALUE_MID;
         myData.Delay=UI_VALUE_MID;
         myData.Reverb=UI_VALUE_MID;
-        myData.Mic_FBC=FALSE;
+        myData.Mic_FBC=FBC_OFF;
         myData.Filter_L=UI_VALUE_MID;
         myData.Filter_H=UI_VALUE_MID;
         //myData.Effect=0;
