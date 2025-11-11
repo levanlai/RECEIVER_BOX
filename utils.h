@@ -20,4 +20,4 @@ BOOL check_plugin_det(void);
 void Button_1_Press();
 void Button_2_Press();
 void Button_3_Press();
-void Button_Power_Press();
+void Button_Power_Press(WORD value);

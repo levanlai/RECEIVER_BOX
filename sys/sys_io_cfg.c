@@ -15,6 +15,9 @@ extern void delayMsec(WORD ms);
 #define IO_HIGH_BIT(port,pin)       _orio (IO_PORT_VAL(port),  (1 << pin))
 #define IO_LOW_BIT(port,pin)        _andio(IO_PORT_VAL(port), ~(1 << pin))
 
+#define Mute_PORT             2
+#define Mute_PIN              2//0: unmute, 1: mute
+
 //xem config trong file ProgRef5000
 // void sys_io_i2c_init(void)
 // {
@@ -117,6 +120,8 @@ void sys_io_i2c_init(void)
 
 void sys_io_gpio_init(void)
 {    
+    SET_DIR_OUTPUT(Mute_PORT,Mute_PIN);
+    set_Mute_value(TRUE);
 }
 
 void sys_io_audio_init(void)
@@ -177,5 +182,16 @@ void sys_timer0_init(void)
     #endif
     _wrio(TIMER0PORT, TIMER0V);  //init timer 0  //Timer 0 reload value for ~10ms (base level timer)
 	_orio(CONTROLPORT, ENA_TIMER0);    
+    
+}
+
+WORD set_Mute_value(WORD value)
+{
+    if(value)
+        IO_HIGH_BIT(Mute_PORT,Mute_PIN);
+     else   
+        IO_LOW_BIT(Mute_PORT,Mute_PIN);
+    
+    //TRACE("set_Mute_value=%d",value);
     
 }

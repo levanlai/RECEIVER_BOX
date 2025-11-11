@@ -6,6 +6,7 @@
 
 /* Global preset header file */
 
+
 void dspDesigner_LoadGlobalPreset( PTR32 global_preset_table );
 
 // (s)Reverb/Echo preset structure.
@@ -137,16 +138,6 @@ typedef struct
 	WORD parameter5; // 180deg
 } globalCompressorPreset;
 
-// Delay preset structure.
-typedef struct 
-{
-	WORD parameter1; // ON/OFF
-	DWORD parameter2; // Time
-	WORD parameter3; // Gain
-	WORD parameter4; // 180deg
-	WORD parameter5; // -/-delay-/-
-} globalDelayPreset;
-
 
 // (s)Reverb/Echo preset control structure.
 typedef struct 
@@ -228,15 +219,7 @@ typedef struct
 	WORD control[5]; // controls array
 } globalCompressorControl;
 
-// Delay preset control structure.
-typedef struct 
-{
-	WORD numberOfControls; // number of controls
-	WORD sizeOfStruct; // size of this Structure
-	WORD control[5]; // controls array
-} globalDelayControl;
-
-#define	GLOBAL_S_REVERB_ECHO_PRESET_NB	2
+#define	GLOBAL_S_REVERB_ECHO_PRESET_NB	1
 extern const globalS_Reverb_EchoPreset global_s_reverb_echo_presets[GLOBAL_S_REVERB_ECHO_PRESET_NB];
 #define	GLOBAL_GAIN_PRESET_NB	1
 extern const globalGainPreset global_gain_presets[GLOBAL_GAIN_PRESET_NB];
@@ -256,9 +239,7 @@ extern const globalBiquad6Preset global_biquad6_presets[GLOBAL_BIQUAD6_PRESET_NB
 extern const globalLevelDetectPreset global_leveldetect_presets[GLOBAL_LEVELDETECT_PRESET_NB];
 #define	GLOBAL_COMPRESSOR_PRESET_NB	1
 extern const globalCompressorPreset global_compressor_presets[GLOBAL_COMPRESSOR_PRESET_NB];
-#define	GLOBAL_DELAY_PRESET_NB	1
-extern const globalDelayPreset global_delay_presets[GLOBAL_DELAY_PRESET_NB];
-#define	NUMBER_OF_PRESET_TABLE	11
+#define	NUMBER_OF_PRESET_TABLE	10
 extern const WORD_FAR_P global_preset_table_address[NUMBER_OF_PRESET_TABLE];
 extern const globalS_Reverb_EchoControl global_s_reverb_echo_controls;
 extern const globalGainControl global_gain_controls;
@@ -270,9 +251,8 @@ extern const globalFeedback_cancellerControl global_feedback_canceller_controls;
 extern const globalBiquad6Control global_biquad6_controls;
 extern const globalLevelDetectControl global_leveldetect_controls;
 extern const globalCompressorControl global_compressor_controls;
-extern const globalDelayControl global_delay_controls;
 extern const WORD_FAR_P global_preset_control_table_address[NUMBER_OF_PRESET_TABLE];
 #define	GLOBAL_NUMBER_OF_DSP	4
-extern const DWORD globalpreset[1][33];
+extern const DWORD globalpreset[1][31];
 
 #endif //__GLOBALPRESETS_H__

@@ -2,7 +2,6 @@
 #ifndef __CUSTOM_H__
 #define __CUSTOM_H__
 
-#define _BOARD_SPDIF_OUTPORT_PIN SAM5XXX_SPDIFOUT_P2_15
 //DSP#1 custom functions, uncomment the '#define' line where you want to add custom code, and implement the function below the '#define' in a separate C file
 //#define _customPreInitFunction1
 WORD customPreInitFunction1( WORD dspId );

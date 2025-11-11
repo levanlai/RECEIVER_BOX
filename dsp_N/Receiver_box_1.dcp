@@ -1,7 +1,7 @@
 [CURRENTCONFIG]
 <default>
 [NAME]
-qcc_sam1_48k_Thinh27Sep2024_1_V14_Guiter_22_axign_N
+Receiver_box_1
 [FILES]
 main.c
 custom.h
@@ -49,7 +49,7 @@ FFFFFFFF
 34
 8E80400
 [HEX]
-qcc_sam1_48k_Thinh27Sep2024_1_V14_Guiter_22_axign_N.hex
+Receiver_box_1.hex
 [PATH]
 $(LibDir)
 $(IncDir)
@@ -61,7 +61,7 @@ libmidi.a
 [OPTIMIZE]
 0;2;0;0
 [USERVARS]
-_BOARD_USE_SPDIF
+
 [EMBED]
 1;-1;-1;1;3
 [TRACE]
@@ -71,7 +71,7 @@ _BOARD_USE_SPDIF
 Lib.a
 1000
 [BINARY]
-qcc_sam1_48k_Thinh27Sep2024_1_V14_Guiter_22_axign_N.bin
+Receiver_box_1.bin
 17490;1;0;0;1;65535;0;65535
 
 [CONFIGEND]

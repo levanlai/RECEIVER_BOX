@@ -142,7 +142,7 @@ FLOAT GetSystemSamplingRate(void)
 
 void FBCStatus_Init( void )
 {
-	FBC_InitStatus( &fbcStatus1, dsp[1], 0, 0 );
+	FBC_InitStatus( &fbcStatus1, dsp[2], 0, 0 );
 }
 
 void FBC_BaseLevels( void )

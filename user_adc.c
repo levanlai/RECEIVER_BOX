@@ -94,7 +94,7 @@ void ADC_check()
 			//TRACE("ADC_check adc read=%d", adc_arrval[adc_cntSample]);
 			//TRACE("adc_curr_val=%d", adc_curr_val[adc_chn]);
 			adc_old_val[adc_chn]=adc_curr_val[adc_chn];	
-			if(adc_chn==ADC_BTN && powerState==POWER_ON)
+			if(adc_chn==ADC_BTN && powerState==TURN_ON)
 			{
 				//TRACE("adc_Btn=%d", adc_curr_val[adc_chn]);
 				if((adc_curr_val[adc_chn]>=(ADC_Btn1_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn1_press_value+ADC_Threshold)))
@@ -150,8 +150,7 @@ void ADC_check()
 						adc_lastStatus_btn=Key3_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;
-						adc_btn3_pressOK=FALSE;
-						//Button_3_Press();						
+						adc_btn3_pressOK=FALSE;				
 					}else
 					{
 						if(!adc_btn3_pressOK)

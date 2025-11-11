@@ -8,7 +8,5 @@
 
 void sys_io_init(void);
 void sys_timer0_init(void);
-WORD check_Mic_Wire_detect();
-WORD check_guitar_detect();
-WORD set_Power48v_value(WORD value);
+WORD set_Mute_value(WORD value);
 #endif /* __SYS_H__ */

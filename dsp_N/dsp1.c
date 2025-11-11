@@ -6,7 +6,7 @@
 #include "midictrl.h"
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "memorymap.h"
-
+#include <trace.h>
 
 WORD dsp1pcs[9];
 
@@ -165,7 +165,9 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 		switch (functionId)
 		{
 			//(s)Reverb/Echo
-			case 0x0000: _LiveMic_Effect_LoadProgram( dspId, val8bit ); return 1;
+			case 0x0000: 
+			TRACE("Mode=%d", val8bit);
+			_LiveMic_Effect_LoadProgram( dspId, val8bit ); return 1;
 			case 0x0001: _LiveMic_Effect_RevInputLevel( dspId, value ); return 1;
 			case 0x0002: _LiveMic_Effect_RevLevel( dspId, value ); return 1;
 			case 0x0003: _LiveMic_Effect_RevPreHP( dspId, value ); return 1;

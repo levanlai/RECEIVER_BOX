@@ -1,4 +1,5 @@
- 
+
+  
 #include <system.h>
 #include <sys5000.h>
 #include <libFX5000.h>
@@ -194,128 +195,142 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 			case CMD_PANEL_SYNC:				
 				TRACE("CMD_PANEL_SYNC %x",value);
 				syncDataToPanel();		
-				break;	
-			case CMD_MIC_VOL:
-				value=checkRangeValue(cmd,value);
+				break;				
+			case CMD_MIC_1_VOL:	
+				//TRACE("CMD_MIC1_VOL %d",value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;		
-					myData.Mic_Vol=value;
+					myData.Mic_1_Vol=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				_MixPaXT_Gain_LinearGainValue(dsp[DSP1_MIXPAXT], dsp1pcs[4],valueConvert);
+				_LiveMic_Gain_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[2], valueConvert);
 				break;
-			// case CMD_MIC1_VOL:	
-			// 	//TRACE("CMD_MIC1_VOL %d",value);
-			// 	if(!iInit)
-			// 	{
-			// 		iNeedSaveFlash=TRUE;		
-			// 		myData.Mic1_Vol=value;
-			// 	}
-			// 	valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-			// 	_MixPaXT_MixN_LinearGainValue(dsp[MIXPAXT], dsp1pcs[3], 1, valueConvert);//MixN#3,gain2
-			// 	break;
-			// case CMD_MIC2_VOL:
-			// 	//TRACE("CMD_MIC2_VOL %d",value);
-			// 	if(!iInit)
-			// 	{
-			// 		iNeedSaveFlash=TRUE;
-			// 		myData.Mic2_Vol=value;
-			// 	}
-			// 	valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-			// 	_MixPaXT_MixN_LinearGainValue(dsp[MIXPAXT], dsp1pcs[3], 0, valueConvert);//MixN#3,gain1
-			// 	break;	
-			case CMD_ECHO:
+			case CMD_MIC_2_VOL:
+				//TRACE("CMD_MIC2_VOL %d",value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_2_Vol=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				_LiveMic_Gain_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[1], valueConvert);
+				break;	
+			case CMD_MIC_1_ECHO:
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Echo=value;
+					myData.Mic_1_Echo=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				//TRACE("CMD_ECHO %x",valueConvert);
-				_LiveMic_Effect_EchoInputLevel(dsp[DSP4_LIVEMIC], valueConvert);
-				break;					
-			case CMD_DELAY:
+				_LiveMic_Effect_EchoInputLevel(dsp[DSP1_LIVEMIC], valueConvert);
+				break;	
+			case CMD_MIC_2_ECHO:
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Delay=value;
+					myData.Mic_2_Echo=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				//TRACE("CMD_ECHO %x",valueConvert);
+				_LiveMic_Effect_EchoInputLevel(dsp[DSP2_LIVEMIC], valueConvert);
+				break;							
+			case CMD_MIC_1_DELAY:
+				value=checkRangeValue(cmd,value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_1_Delay=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				//TRACE("CMD_DELAY %x",valueConvert);
-				_LiveMic_Effect_EchoTime(dsp[DSP4_LIVEMIC], valueConvert);
-				break;				 
-			case CMD_REVERB: 
+				_LiveMic_Effect_EchoTime(dsp[DSP1_LIVEMIC], valueConvert);
+				break;		
+			case CMD_MIC_2_DELAY:
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Reverb=value;
+					myData.Mic_2_Delay=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				//TRACE("CMD_DELAY %x",valueConvert);
+				_LiveMic_Effect_EchoTime(dsp[DSP2_LIVEMIC], valueConvert);
+				break;						 
+			case CMD_MIC_1_REVERB: 
+				value=checkRangeValue(cmd,value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_1_Reverb=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				//TRACE("CMD_REVERB %x",valueConvert);
-				_LiveMic_Effect_RevLevel(dsp[DSP4_LIVEMIC], valueConvert);
+				_LiveMic_Effect_RevLevel(dsp[DSP1_LIVEMIC], valueConvert);
 				break;
-			
-			case CMD_MIC_BASS:
+			case CMD_MIC_2_REVERB: 
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Mic_Bass=value;
+					myData.Mic_2_Reverb=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				func_SendValueToSAM(DSP3_MIXPAXT,0x0460,valueConvert,FORMAT_14BIT_PRECISION);
+				//TRACE("CMD_REVERB %x",valueConvert);
+				_LiveMic_Effect_RevLevel(dsp[DSP2_LIVEMIC], valueConvert);
+				break;
+			case CMD_MIC_1_BASS:
+				value=checkRangeValue(cmd,value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_1_Bass=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				func_SendValueToSAM(DSP4_MIXPAXT,0x0160,valueConvert,FORMAT_14BIT_PRECISION);
 				break;	
-			// case CMD_MIC_MID:
-			// 	if(!iInit)
-			// 	{
-			// 		iNeedSaveFlash=TRUE;
-			// 		myData.Mic_Mid=value;
-			// 	}
-			// 	valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-			// 	func_SendValueToSAM(DSP3_MIXPAXT,0x0461,valueConvert,FORMAT_14BIT_PRECISION);
-			// 	break;			
-			case CMD_MIC_TREB:
+			case CMD_MIC_2_BASS:
+				value=checkRangeValue(cmd,value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_2_Bass=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				func_SendValueToSAM(DSP4_MIXPAXT,0x0260,valueConvert,FORMAT_14BIT_PRECISION);
+				break;					
+			case CMD_MIC_1_TREBLE:
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE; 
-					myData.Mic_Treb=value;
+					myData.Mic_1_Treb=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				func_SendValueToSAM(DSP3_MIXPAXT,0x0462,valueConvert,FORMAT_14BIT_PRECISION);
+				func_SendValueToSAM(DSP4_MIXPAXT,0x0162,valueConvert,FORMAT_14BIT_PRECISION);
 				break;  
-			case CMD_FILTER_L: 
+			case CMD_MIC_2_TREBLE:
 				value=checkRangeValue(cmd,value);
 				if(!iInit)
 				{
-					iNeedSaveFlash=TRUE;
-					myData.Filter_L=value;
+					iNeedSaveFlash=TRUE; 
+					myData.Mic_2_Treb=value;
 				}
-				//valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				//func_SendValueToSAM(DSP3_MIXPAXT,0x0463,valueConvert,FORMAT_14BIT_PRECISION);
-				break;	
-			case CMD_FILTER_H: 
-				value=checkRangeValue(cmd,value);
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				func_SendValueToSAM(DSP4_MIXPAXT,0x0262,valueConvert,FORMAT_14BIT_PRECISION);
+				break; 
+			case CMD_MIC_EFFECT: 
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Filter_H=value;
+					myData.Mic_Effect=value;
 				}
-				//valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				//func_SendValueToSAM(DSP3_MIXPAXT,0x0464,valueConvert,FORMAT_14BIT_PRECISION);
-				break;	
-			// case CMD_EFFECT: 
-			// 	value=checkRangeValue(cmd,value);
-			// 	if(!iInit)
-			// 	{
-			// 		iNeedSaveFlash=TRUE;
-			// 		myData.Effect=value;
-			// 	}
-			// 	break;						
+				_LiveMic_Effect_LoadProgram(dsp[DSP1_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
+				_LiveMic_Effect_LoadProgram(dsp[DSP2_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
+				break;						
 			case CMD_MIC_FBC:
 				if(!iInit)
 				{
@@ -323,15 +338,14 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Mic_FBC=value;
 				}
 				TRACE("CMD_MIC_FBC %x",value);
-				_FBCancel_Bypass( dsp[DSP2_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
-				//_FBCancel_SetMode( dsp[DSP2_FBC], value==0?FBC_OFF:FBC_ON);		
-				 	
-				break;
+				_FBCancel_Bypass( dsp[DSP3_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
+				//_FBCancel_SetMode( dsp[DSP3_FBC], value==0?FBC_OFF:FBC_ON);
+			 	break;
 			case CMD_SAVE:
 				SaveFlash();
 				break;	
-			case CMD_RESET_FACTORY:
-			case CMD_MIC_DEFAULT:
+			case CMD_RESET:
+			case CMD_RESET_FORM_MIC:
 				resetFactory();
 				break;
 			default:
@@ -347,22 +361,27 @@ void TurnFBC(WORD value,WORD iInit)
 
 void syncDataToPanel(void)
 {	
-	uart_send_cmd(CMD_MIC_VOL, myData.Mic_Vol);
-	uart_send_cmd(CMD_MIC_BASS, myData.Mic_Bass);
-	uart_send_cmd(CMD_MIC_TREB, myData.Mic_Treb);
-	//uart_send_cmd(CMD_MIC_MID, myData.Mic_Mid);
-	uart_send_cmd(CMD_ECHO, myData.Echo);
-	uart_send_cmd(CMD_DELAY, myData.Delay);
-	uart_send_cmd(CMD_REVERB, myData.Reverb);
-	uart_send_cmd(CMD_FILTER_L, myData.Filter_L);
-	uart_send_cmd(CMD_FILTER_H, myData.Filter_H);
-	//uart_send_cmd(CMD_EFFECT, myData.Effect);
+	uart_send_cmd(CMD_MIC_1_VOL, myData.Mic_1_Vol);
+	uart_send_cmd(CMD_MIC_1_ECHO, myData.Mic_1_Echo);
+	uart_send_cmd(CMD_MIC_1_DELAY, myData.Mic_1_Delay);
+	uart_send_cmd(CMD_MIC_1_REVERB, myData.Mic_1_Reverb);
+	uart_send_cmd(CMD_MIC_1_BASS, myData.Mic_1_Bass);
+	uart_send_cmd(CMD_MIC_1_TREBLE, myData.Mic_1_Treb);
+
+	uart_send_cmd(CMD_MIC_2_VOL, myData.Mic_2_Vol);
+	uart_send_cmd(CMD_MIC_2_ECHO, myData.Mic_2_Echo);
+	uart_send_cmd(CMD_MIC_2_DELAY, myData.Mic_2_Delay);
+	uart_send_cmd(CMD_MIC_2_REVERB, myData.Mic_2_Reverb);
+	uart_send_cmd(CMD_MIC_2_BASS, myData.Mic_2_Bass);
+	uart_send_cmd(CMD_MIC_2_TREBLE, myData.Mic_2_Treb);
+
+	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
 	//TRACE("syncDataToPanel %d",value);
-
+	
 }
 
 

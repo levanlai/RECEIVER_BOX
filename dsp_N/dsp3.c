@@ -7,9 +7,9 @@
 #endif	// _SKIP_DDD_NRPN_CTRL
 
 
-WORD dsp2pcs[3];
+WORD dsp3pcs[3];
 
-WORD dsp2InitAndRoute(void)
+WORD dsp3InitAndRoute(void)
 {
 	WORD dspId;
 
@@ -17,8 +17,8 @@ WORD dsp2InitAndRoute(void)
 
 	if ( dspId == -1 ) return 0;
 
-#ifdef _customPreInitFunction2
-customPreInitFunction2( dspId );// Do all your custom pre initialization code into this function
+#ifdef _customPreInitFunction3
+customPreInitFunction3( dspId );// Do all your custom pre initialization code into this function
 #endif
 
 	// Process #1: Feedback canceller
@@ -26,12 +26,12 @@ customPreInitFunction2( dspId );// Do all your custom pre initialization code in
 	_FBCancel_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT, PCS_NODE | 0 );
 
 	// Process #2: Gain
-	dsp2pcs[2] = _FBCancel_Gain_Allocate( dspId );
-	_FBCancel_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp2pcs[2], PCS_NODE | 0 );
-	_FBCancel_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp2pcs[2], PCS_DSP_OUT | 0 );
+	dsp3pcs[2] = _FBCancel_Gain_Allocate( dspId );
+	_FBCancel_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp3pcs[2], PCS_NODE | 0 );
+	_FBCancel_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp3pcs[2], PCS_DSP_OUT | 0 );
 
-#ifdef _customPostInitFunction2
-customPostInitFunction2( dspId );// Do all your custom post initialization code into this function
+#ifdef _customPostInitFunction3
+customPostInitFunction3( dspId );// Do all your custom post initialization code into this function
 #endif
 
 	return( dspId );
@@ -40,7 +40,7 @@ customPostInitFunction2( dspId );// Do all your custom post initialization code 
 
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
-const WORD nrpn2List[NUMBEROFCOMMAND2][2]=
+const WORD nrpn3List[NUMBEROFCOMMAND3][2]=
 {
 	{ 0x0100, 0x0000 }, // _FBCancel_Bypass
 	{ 0x0101, 0x0001 }, // _FBCancel_LockFilters
@@ -53,13 +53,13 @@ const WORD nrpn2List[NUMBEROFCOMMAND2][2]=
 
 };
 
-WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format )
+WORD dsp3NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format )
 {
 	
 	WORD i, functionId, index = 0, val8bit;
 	DWORD dvalue;
-	#ifdef _customPreNrpnFunction2
-	if ( customPreNrpnFunction2( dspId, nrpn, &value, format ) )// Do all your custom pre NRPN code into this function
+	#ifdef _customPreNrpnFunction3
+	if ( customPreNrpnFunction3( dspId, nrpn, &value, format ) )// Do all your custom pre NRPN code into this function
 		return 1;
 	#endif
 	
@@ -69,27 +69,27 @@ WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 	else
 		dvalue=value;
 	
-	i = dichotomicSearch( _cptr32(nrpn2List), 2, 0, NUMBEROFCOMMAND2, nrpn );
+	i = dichotomicSearch( _cptr32(nrpn3List), 2, 0, NUMBEROFCOMMAND3, nrpn );
 	
 	if ((i&(1<<15)))
 	{
 		i &= 0x7FFF;
-		if ( i == NUMBEROFCOMMAND2 ) // higher bound test
+		if ( i == NUMBEROFCOMMAND3 ) // higher bound test
 			i--;
 		else
 		{
-			if ( nrpn < nrpn2List[i][0] )
+			if ( nrpn < nrpn3List[i][0] )
 				i--;		
 		}
-		if ( !(nrpn2List[i][1] & (1<<14)) )
+		if ( !(nrpn3List[i][1] & (1<<14)) )
 			i=-1;	
 	}
 	
 	if ( i != -1 )
 	{
-		index = nrpn - nrpn2List[i][0];
-		functionId = nrpn2List[i][1];
-		processId = dsp2pcs[processId];
+		index = nrpn - nrpn3List[i][0];
+		functionId = nrpn3List[i][1];
+		processId = dsp3pcs[processId];
 	}
 	else
 		return 0;	
@@ -112,8 +112,8 @@ WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 	
 	}
 	
-	#ifdef _customPostNrpnFunction2
-	if ( customPostNrpnFunction2( dspId, nrpn, val8bit, value, dvalue ) )// Do all your custom post NRPN code into this function
+	#ifdef _customPostNrpnFunction3
+	if ( customPostNrpnFunction3( dspId, nrpn, val8bit, value, dvalue ) )// Do all your custom post NRPN code into this function
 		return 1;
 	#endif
 	return 0;

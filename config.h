@@ -57,7 +57,7 @@ log⁡(a)=b có nghĩa là 10^b=a
 
 #define UI_MIC_VOLUME_MIN     GAIN_MIN_START
 #define UI_MIC_VOLUME_MID      0  
-#define UI_MIC_VOLUME_MAX      60  
+#define UI_MIC_VOLUME_MAX      120  
 
 /*
 //in range 0..0x7FFE = 0...100%
@@ -65,11 +65,11 @@ log⁡(a)=b có nghĩa là 10^b=a
 *///EchoInputLevel
 #define UI_MIC_ECHO_MIN         0   // %
 #define UI_MIC_ECHO_MID         500
-#define UI_MIC_ECHO_MAX         700 
+#define UI_MIC_ECHO_MAX         1000//700 
 //RevLevel
 #define UI_MIC_REVERB_MIN       0   // %
-#define UI_MIC_REVERB_MID       150
-#define UI_MIC_REVERB_MAX       500
+#define UI_MIC_REVERB_MID       500//150
+#define UI_MIC_REVERB_MAX       1000//500
 /*
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
@@ -103,15 +103,12 @@ enum {
 };
 
 enum {
-    DSP1_MIXPAXT,
-    DSP2_FBC,    
-    DSP3_MIXPAXT,
-    DSP4_LIVEMIC,
+    DSP1_LIVEMIC,
+    DSP2_LIVEMIC,
+    DSP3_FBC,    
+    DSP4_MIXPAXT,
 };
-enum {
-    POWER_OFF,   
-    POWER_ON,
-};
+
 enum {
     CHARGE_PLUS,    
     CHARGE_UN_PLUS,
@@ -127,47 +124,98 @@ enum {
     FBC_ON,    
     FBC_OFF,    
 };
-
-enum {    
-    CMD_MIC_VOL,
-    CMD_ECHO,
-    CMD_DELAY,    
-    CMD_REVERB, 
-    CMD_MIC_BASS,    
-    CMD_MIC_TREB, 
-    //CMD_MIC_MID,   
-    CMD_FILTER_L, 
-    CMD_FILTER_H,
-    //CMD_EFFECT,   
-    CMD_MIC_FBC,
-    CMD_MIC_DEFAULT,  
+enum {        
+    TURN_OFF, 
+    TURN_ON,
+    TURN_NONE,   
+};
+enum {        
+    EFFECT_OFF,
+    EFFECT_MonoEcho_Reverb=12,  
+};
+// enum {    
+//     CMD_MIC_VOL,
+//     CMD_ECHO,
+//     CMD_DELAY,    
+//     CMD_REVERB, 
+//     CMD_MIC_BASS,    
+//     CMD_MIC_TREB, 
+//     //CMD_MIC_MID,   
+//     CMD_FILTER_L, 
+//     CMD_FILTER_H,
+//     //CMD_EFFECT,   
+//     CMD_MIC_FBC,
+//     CMD_MIC_DEFAULT,  
     
+//     CMD_POWER=20,   
+//     CMD_PANEL_SYNC,
+//     CMD_CHARGE_DET,
+//     CMD_BATTERY_VALUE,
+//     CMD_DEVICES_CONNECT,
+//     CMD_SAVE,	
+//     CMD_RESET_FACTORY,
+    
+
+//     CMD_MOVE,
+//     CMD_SET_CHANGE,	
+//     CMD_SELECT_CHANGE,
+// };
+
+enum {
+    CMD_MIC_1_VOL,    
+    CMD_MIC_1_ECHO,     
+    CMD_MIC_1_DELAY,
+    CMD_MIC_1_REVERB,       
+    CMD_MIC_1_BASS, 
+    CMD_MIC_1_TREBLE,
+
+    CMD_MIC_2_VOL,  
+    CMD_MIC_2_ECHO, 
+    CMD_MIC_2_DELAY,
+    CMD_MIC_2_REVERB,
+    CMD_MIC_2_BASS, 
+    CMD_MIC_2_TREBLE,    
+
+    CMD_MIC_EFFECT,
+    CMD_MIC_FBC,
+    //CMD_MIC_CONFIG,
+    CMD_SAVE,
+    CMD_RESET,
+    CMD_RESET_FORM_MIC,
+
     CMD_POWER=20,   
     CMD_PANEL_SYNC,
     CMD_CHARGE_DET,
     CMD_BATTERY_VALUE,
     CMD_DEVICES_CONNECT,
-    CMD_SAVE,	
-    CMD_RESET_FACTORY,
-    
 
     CMD_MOVE,
-    CMD_SET_CHANGE,	
     CMD_SELECT_CHANGE,
+    //CMD_HOT_CHANGE_MIC1,	
+    //CMD_HOT_CHANGE_MIC2,
+
+    CMD_TOTAL,
 };
+
 typedef struct MyData{
   //WORD init;
-  WORD Mic_Vol;
-  WORD Mic_Bass;
-  //WORD Mic_Mid;
-  WORD Mic_Treb;
-  WORD Echo;
-  WORD Delay;
-  WORD Reverb;
-  WORD Filter_L;
-  WORD Filter_H;
- // WORD Effect;
-  WORD Mic_FBC;  
+  WORD Mic_1_Vol; 
+  WORD Mic_1_Echo;
+  WORD Mic_1_Delay;
+  WORD Mic_1_Reverb;
+  WORD Mic_1_Bass;  
+  WORD Mic_1_Treb;
+  
+  WORD Mic_2_Vol; 
+  WORD Mic_2_Echo;
+  WORD Mic_2_Delay;
+  WORD Mic_2_Reverb;
+  WORD Mic_2_Bass;  
+  WORD Mic_2_Treb;
+
+  WORD Mic_Effect;
+  WORD Mic_FBC; 
+  //WORD Mic_Config;
 }MyData_t;
 typedef struct format_data
 {

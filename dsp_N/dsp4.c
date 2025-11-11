@@ -6,7 +6,6 @@
 #include "midictrl.h"
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "BiquadCtrl.h"
-#include "memorymap.h"
 
 // Biquad(s) - define, variable, ... 
 #define BIQUAD_ITEMCOUNT 2
@@ -29,7 +28,7 @@ BiquadParameters biquad4ParamAddr1 = { biquad4Parameters1, biquad4Type1, biquad4
 BiquadParameters biquad4ParamAddr2 = { biquad4Parameters2, biquad4Type2, biquad4XoverType2, biquad4RawFrequency2, BIQUAD2BANDCOUNT };
 #endif	// _SKIP_DDD_NRPN_CTRL
 
-WORD dsp4pcs[12];
+WORD dsp4pcs[10];
 
 WORD dsp4InitAndRoute(void)
 {
@@ -67,32 +66,20 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	dsp4pcs[6] = _MixPaXT_LevelDetect_Allocate( dspId );
 	_MixPaXT_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp4pcs[6], PCS_NODE | 3 );
 
-	// Process #10: Delay
-	dsp4pcs[10] = _MixPaXT_Delay_Allocate( dspId );
-	_MixPaXT_SetProcIN( dspId, DELAY_SAMPLE_IN|dsp4pcs[10], PCS_NODE | 5 );
-	_MixPaXT_SetProcOUT( dspId, DELAY_SAMPLE_OUT|dsp4pcs[10], PCS_NODE | 7 );
-	_MixPaXT_Delay_SetStartAddr( dspId, dsp4pcs[10], MEMADDR_DSP04_PCS05PAR02 );
+	// Process #5: Gain
+	dsp4pcs[5] = _MixPaXT_Gain_Allocate( dspId );
+	_MixPaXT_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp4pcs[5], PCS_NODE | 5 );
+	_MixPaXT_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 0 );
 
 	// Process #7: Compressor
 	dsp4pcs[7] = _MixPaXT_Compressor_Allocate( dspId );
 	_MixPaXT_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp4pcs[7], PCS_NODE | 3 );
-	_MixPaXT_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp4pcs[7], PCS_NODE | 8 );
+	_MixPaXT_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp4pcs[7], PCS_NODE | 7 );
 	_MixPaXT_Compressor_ConnectLevel( dspId, dsp4pcs[7], dsp4pcs[6] );
-
-	// Process #11: Delay
-	dsp4pcs[11] = _MixPaXT_Delay_Allocate( dspId );
-	_MixPaXT_SetProcIN( dspId, DELAY_SAMPLE_IN|dsp4pcs[11], PCS_NODE | 8 );
-	_MixPaXT_SetProcOUT( dspId, DELAY_SAMPLE_OUT|dsp4pcs[11], PCS_NODE | 9 );
-	_MixPaXT_Delay_SetStartAddr( dspId, dsp4pcs[11], MEMADDR_DSP04_PCS07PAR02 );
-
-	// Process #5: Gain
-	dsp4pcs[5] = _MixPaXT_Gain_Allocate( dspId );
-	_MixPaXT_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp4pcs[5], PCS_NODE | 7 );
-	_MixPaXT_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 0 );
 
 	// Process #8: Gain
 	dsp4pcs[8] = _MixPaXT_Gain_Allocate( dspId );
-	_MixPaXT_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp4pcs[8], PCS_NODE | 9 );
+	_MixPaXT_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp4pcs[8], PCS_NODE | 7 );
 	_MixPaXT_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp4pcs[8], PCS_NODE | 1 );
 
 	// Process #9: MixN
@@ -139,15 +126,7 @@ const WORD nrpn4List[NUMBEROFCOMMAND4][2]=
 	{ 0x0800, 0x002F }, // _MixPaXT_Gain_Value
 	{ 0x0801, 0x0030 }, // _MixPaXT_Gain_Phase
 	{ 0x0900, 0x403A }, // _MixPaXT_MixN_GainPhase
-	{ 0x091F, 0x403B }, // _MixPaXT_MixN_GainValue
-	{ 0x0A00, 0x001F }, // _MixPaXT_Delay_OnOff
-	{ 0x0A01, 0x0020 }, // _MixPaXT_Delay_SetTime
-	{ 0x0A02, 0x0021 }, // _MixPaXT_Delay_OutGainValue
-	{ 0x0A03, 0x0022 }, // _MixPaXT_Delay_OutGainPhase
-	{ 0x0B00, 0x001F }, // _MixPaXT_Delay_OnOff
-	{ 0x0B01, 0x0020 }, // _MixPaXT_Delay_SetTime
-	{ 0x0B02, 0x0021 }, // _MixPaXT_Delay_OutGainValue
-	{ 0x0B03, 0x0022 } // _MixPaXT_Delay_OutGainPhase
+	{ 0x091F, 0x403B } // _MixPaXT_MixN_GainValue
 
 };
 
@@ -266,11 +245,6 @@ WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			//MixN
 			case 0x403A: _MixPaXT_MixN_GainPhase( dspId, processId, index, val8bit ); return 1;
 			case 0x403B: _MixPaXT_MixN_GainValue( dspId, processId, index, value ); return 1;
-			//Delay
-			case 0x001F: _MixPaXT_Delay_OnOff( dspId, processId, val8bit ); return 1;
-			case 0x0020: _MixPaXT_Delay_SetTime( dspId, processId, dvalue ); return 1;
-			case 0x0021: _MixPaXT_Delay_OutGainValue( dspId, processId, value ); return 1;
-			case 0x0022: _MixPaXT_Delay_OutGainPhase( dspId, processId, val8bit ); return 1;
 		
 		}
 	

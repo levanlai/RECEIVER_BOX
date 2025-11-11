@@ -84,12 +84,12 @@ void Button_2_Press()//Move UP
 void Button_3_Press()
 {
     TRACE("Button_3_Press powerState=%d",powerState);
-    uart_cmd_parse(CMD_RESET_FACTORY, 0,FALSE); 
-   uart_send_cmd(CMD_RESET_FACTORY, 0);   
+    uart_cmd_parse(CMD_RESET, 0,FALSE); 
+   uart_send_cmd(CMD_RESET, 0);   
 }
-void Button_Power_Press()
+void Button_Power_Press(WORD value)
 {
-    TRACE("Button_Power_Press powerState=%d",powerState); 
-    uart_send_cmd(CMD_SELECT_CHANGE, 0);
+    TRACE("Button_Power_Press value=%d",value); 
+    uart_send_cmd(CMD_SELECT_CHANGE, value);
 }
 
