@@ -49,6 +49,7 @@ void SysVarInit(void)
 
         myData.Mic_FBC=FBC_OFF;        
         myData.Mic_Effect=TURN_ON;
+        myData.Mic_Control_link=TURN_ON;
         //myData.Mic_Config=0;
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
@@ -58,13 +59,16 @@ void SysVarInit(void)
     uart_cmd_parse(CMD_MIC_1_REVERB,myData.Mic_1_Reverb,TRUE);
     uart_cmd_parse(CMD_MIC_1_BASS,myData.Mic_1_Bass,TRUE);
     uart_cmd_parse(CMD_MIC_1_TREBLE,myData.Mic_1_Treb,TRUE);
-
-    uart_cmd_parse(CMD_MIC_2_VOL,myData.Mic_2_Vol,TRUE);
-    uart_cmd_parse(CMD_MIC_2_ECHO,myData.Mic_2_Echo,TRUE);
-    uart_cmd_parse(CMD_MIC_2_DELAY,myData.Mic_2_Delay,TRUE);
-    uart_cmd_parse(CMD_MIC_2_REVERB,myData.Mic_2_Reverb,TRUE);
-    uart_cmd_parse(CMD_MIC_2_BASS,myData.Mic_2_Bass,TRUE);
-    uart_cmd_parse(CMD_MIC_2_TREBLE,myData.Mic_2_Treb,TRUE);
+    if(!myData.Mic_Control_link)
+    {
+        uart_cmd_parse(CMD_MIC_2_VOL,myData.Mic_2_Vol,TRUE);
+        uart_cmd_parse(CMD_MIC_2_ECHO,myData.Mic_2_Echo,TRUE);
+        uart_cmd_parse(CMD_MIC_2_DELAY,myData.Mic_2_Delay,TRUE);
+        uart_cmd_parse(CMD_MIC_2_REVERB,myData.Mic_2_Reverb,TRUE);
+        uart_cmd_parse(CMD_MIC_2_BASS,myData.Mic_2_Bass,TRUE);
+        uart_cmd_parse(CMD_MIC_2_TREBLE,myData.Mic_2_Treb,TRUE);
+    }
+    
 
    uart_cmd_parse(CMD_MIC_EFFECT,myData.Mic_Effect,TRUE);
    uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);

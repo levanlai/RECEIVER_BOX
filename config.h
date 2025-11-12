@@ -179,6 +179,7 @@ enum {
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
     //CMD_MIC_CONFIG,
+    CMD_CONTROL_LINK,
     CMD_SAVE,
     CMD_RESET,
     CMD_RESET_FORM_MIC,
@@ -215,6 +216,7 @@ typedef struct MyData{
 
   WORD Mic_Effect;
   WORD Mic_FBC; 
+  WORD Mic_Control_link; 
   //WORD Mic_Config;
 }MyData_t;
 typedef struct format_data

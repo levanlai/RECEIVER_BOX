@@ -153,7 +153,7 @@ void main_loop(void)
 				// 	cntPressContinue=0;
 				// }
 
-				timer_count++;
+				timer_count++;					
 				if( timer_count>=100)//2s
 				{					
 					timer_count=0;
