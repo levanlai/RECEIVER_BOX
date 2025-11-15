@@ -162,7 +162,8 @@ enum {
 // };
 
 enum {
-    CMD_MIC_1_VOL,    
+    CMD_MIC_1_VOL,   
+    CMD_MIC_1_EFFECT, 
     CMD_MIC_1_ECHO,     
     CMD_MIC_1_DELAY,
     CMD_MIC_1_REVERB,       
@@ -170,15 +171,16 @@ enum {
     CMD_MIC_1_TREBLE,
 
     CMD_MIC_2_VOL,  
+    CMD_MIC_2_EFFECT, 
     CMD_MIC_2_ECHO, 
     CMD_MIC_2_DELAY,
     CMD_MIC_2_REVERB,
     CMD_MIC_2_BASS, 
     CMD_MIC_2_TREBLE,    
 
+    CMD_VOL_OUT,
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
-    //CMD_MIC_CONFIG,
     CMD_CONTROL_LINK,
     CMD_SAVE,
     CMD_RESET,
@@ -201,6 +203,7 @@ enum {
 typedef struct MyData{
   //WORD init;
   WORD Mic_1_Vol; 
+  WORD Mic_1_Effect; 
   WORD Mic_1_Echo;
   WORD Mic_1_Delay;
   WORD Mic_1_Reverb;
@@ -208,12 +211,14 @@ typedef struct MyData{
   WORD Mic_1_Treb;
   
   WORD Mic_2_Vol; 
+  WORD Mic_2_Effect; 
   WORD Mic_2_Echo;
   WORD Mic_2_Delay;
   WORD Mic_2_Reverb;
   WORD Mic_2_Bass;  
   WORD Mic_2_Treb;
 
+  WORD Mic_Vol_Out;
   WORD Mic_Effect;
   WORD Mic_FBC; 
   WORD Mic_Control_link; 

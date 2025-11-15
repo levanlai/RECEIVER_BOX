@@ -8,5 +8,5 @@
 
 void sys_io_init(void);
 void sys_timer0_init(void);
-WORD set_Mute_value(WORD value);
+void set_Mute_value(WORD value);
 #endif /* __SYS_H__ */

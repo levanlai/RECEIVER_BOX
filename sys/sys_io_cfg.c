@@ -185,7 +185,7 @@ void sys_timer0_init(void)
     
 }
 
-WORD set_Mute_value(WORD value)
+void set_Mute_value(WORD value)
 {
     if(value)
         IO_HIGH_BIT(Mute_PORT,Mute_PIN);

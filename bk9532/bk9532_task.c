@@ -25,10 +25,9 @@ static void bk9532_task_handler(WORD bus);
 /**********************************************************************
  *                              variables                             *
  **********************************************************************/
-DWORD timeoutQUERY_IDCODE[BK9532_MAX_CHANNELS];
-WORD idCode5bit[BK9532_MAX_CHANNELS][BK9532_IDCODE_RX_LENGTH];
-WORD idCodeRecvFlag[BK9532_MAX_CHANNELS];
-WORD last_time_ReceiveData[BK9532_MAX_CHANNELS];
+// WORD idCode5bit[BK9532_MAX_CHANNELS][BK9532_IDCODE_RX_LENGTH];
+// WORD idCodeRecvFlag[BK9532_MAX_CHANNELS];
+// WORD last_time_ReceiveData[BK9532_MAX_CHANNELS];
 
 static  struct bk9532_rf_context g_bk9532_rf_ctx[BK9532_MAX_CHANNELS];
 
@@ -563,72 +562,52 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
         }
         else 
         {
-            // get user data //
-            // callback indicate new userdata //     
-            WORD tmp;       
-            DWORD reg_usrdata;
-            tmp = bk9532_get_user_data(bus, &reg_usrdata);
-            last_time_ReceiveData[bus]++;
-            if (tmp == BK9532_PASS)
-            {                
-                if (bk9532_timeout(last_time_ReceiveData[bus], 2000))
-                {
-                    idCodeRecvFlag[bus]=0;
-                    last_time_ReceiveData[bus]=0;
-                    //TRACE("timeout ReceiveData %x", bus);
-                }else
-                {
-                    WORD index, datatmp;  
-                    DWORD i;  
-                    datatmp = reg_usrdata & 0xFF;
-                    index = datatmp >> 5;
-                    idCode5bit[bus][index] = datatmp & 0x1F;
-                    idCodeRecvFlag[bus] |= 1 << index;
-                    //TRACE("reg_usrdata %x", reg_usrdata);
-                    //TRACE("Flag %x", idCodeRecvFlag[bus]);
-                    if (idCodeRecvFlag[bus] == 0x7f)
-                    {
-                        reg_usrdata=0;
-                        for (i = 0; i < BK9532_IDCODE_RX_LENGTH; i++)
-                        {
-                            reg_usrdata <<= 5;
-                            reg_usrdata |= idCode5bit[bus][i];
-                        }
-                        //TRACE("here reg_usrdata %x", reg_usrdata);
-                        //i=cpu_swap_edian(reg_usrdata);
-                        //TRACE("swap %x", i);
-                        //i=CRC8_Array((WORD *)&i,3);
-                        //i=CRC8_Array((WORD *)&reg_usrdata,3);
-                        i=CRC8_Array(reg_usrdata,3);
+            // // get user data //
+            // // callback indicate new userdata //     
+            // WORD tmp;       
+            // DWORD reg_usrdata;
+            // tmp = bk9532_get_user_data(bus, &reg_usrdata);
+            // last_time_ReceiveData[bus]++;
+            // if (tmp == BK9532_PASS)
+            // {                
+            //     if (bk9532_timeout(last_time_ReceiveData[bus], 2000))
+            //     {
+            //         idCodeRecvFlag[bus]=0;
+            //         last_time_ReceiveData[bus]=0;
+            //         //TRACE("timeout ReceiveData %x", bus);
+            //     }else
+            //     {
+            //         WORD index, datatmp;  
+            //         DWORD i;  
+            //         datatmp = reg_usrdata & 0xFF;
+            //         index = datatmp >> 5;
+            //         idCode5bit[bus][index] = datatmp & 0x1F;
+            //         idCodeRecvFlag[bus] |= 1 << index;
+            //         //TRACE("reg_usrdata %x", reg_usrdata);
+            //         //TRACE("Flag %x", idCodeRecvFlag[bus]);
+            //         if (idCodeRecvFlag[bus] == 0x7f)
+            //         {
+            //             reg_usrdata=0;
+            //             for (i = 0; i < BK9532_IDCODE_RX_LENGTH; i++)
+            //             {
+            //                 reg_usrdata <<= 5;
+            //                 reg_usrdata |= idCode5bit[bus][i];
+            //             }
+            //             //TRACE("here reg_usrdata %x", reg_usrdata);
+            //             //i=cpu_swap_edian(reg_usrdata);
+            //             //TRACE("swap %x", i);
+            //             //i=CRC8_Array((WORD *)&i,3);
+            //             //i=CRC8_Array((WORD *)&reg_usrdata,3);
+            //             i=CRC8_Array(reg_usrdata,3);
                        
-                        //TRACE("i %x", i);
-                        if(i==((reg_usrdata>>24)&0x0ff))
-                        {
-                            // WORD header=reg_usrdata & 0x0ff;
-                            // WORD value=(reg_usrdata>>8) & 0x0ff;
-                            // WORD stt=(reg_usrdata>>16) & 0x0ff;
-                            //TRACE("header %x", header);
-                            //TRACE("value %x", value);
-                            //TRACE("stt %x", stt);
-                            parseDataFromMic(reg_usrdata);
-                        }
-                        idCodeRecvFlag[bus]=0;  
-                        last_time_ReceiveData[bus]=0;    
-                    }
-                    // DWORD udata = reg_usrdata & 0xFF;
-                    // WORD ud_idx = (udata >> 5);
-                    // WORD ud_dat = (udata & 0x1f);
-                    // TRACE("bk9532 query idcode %x", udata);
-                    // TRACE("bk9532 query idcode at %d", ud_idx);
-                    // TRACE("bk9532 query idcode val %x", ud_dat);
-                    // *idcode &= ~(((DWORD)0x1f) << (30 - 5*((udata >> 5) & 0x07)));
-                    // *idcode |= ((udata & 0x1f) << (30 - 5*((udata >> 5) & 0x07)));
-                    // *flag |= 1 << ((udata >> 5) & 0x07);
-                    // udata = *idcode;
-                    // TRACE("bk9532 query idcode flag %x", *flag);
-                    // TRACE("bk9532 query idcode data %x", udata);                    
-                }               
-            }
+            //             //TRACE("i %x", i);
+            //             if(i==((reg_usrdata>>24)&0x0ff))
+            //                 parseDataFromMic(reg_usrdata);
+            //             idCodeRecvFlag[bus]=0;  
+            //             last_time_ReceiveData[bus]=0;    
+            //         }                                
+            //     }               
+            // }
             
             // audio rssi //
             bk9532_get_audio_rssi(bus, &aud_rssi);

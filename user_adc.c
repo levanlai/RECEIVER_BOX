@@ -7,8 +7,8 @@
 #include "config.h"
 WORD adc_old_val[ADC_CHANNELS], adc_curr_val[ADC_CHANNELS],adc_cntSample[ADC_CHANNELS];	//value of 8 channel ADC
 WORD adc_arrval[ADC_CHANNELS][ADC_sample_num];
-WORD adc_lastStatus_btn;
-WORD adc_chn;
+WORD adc_lastStatus_btn=0;
+WORD adc_chn=0;
 WORD adc_iBtn_press_long= FALSE;
 WORD adc_last_Btn_time_press=0;
 WORD adc_timePressKeep=0;
@@ -100,7 +100,7 @@ void ADC_check()
 				if((adc_curr_val[adc_chn]>=(ADC_Btn1_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn1_press_value+ADC_Threshold)))
 				{
 					//TRACE("1 %d", adc_lastStatus_btn);
-					if(adc_lastStatus_btn!=Key1_press_value)
+					if(adc_lastStatus_btn==0)
 					{
 						TRACE("Key1_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key1_press_value;
@@ -109,20 +109,23 @@ void ADC_check()
 						Button_1_Press();		
 					}else
 					{
-						adc_last_Btn_time_press++;
-						TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
-						if(adc_last_Btn_time_press>=adc_timePressKeep)
-						{			
-							TRACE("Key1_press long %d", adc_curr_val[adc_chn]);				
-							adc_last_Btn_time_press=0;	
-							adc_timePressKeep=TIME_PRESS_CONTINUE;
-							Button_1_Press();
+						if(adc_lastStatus_btn==Key1_press_value)
+						{
+							adc_last_Btn_time_press++;
+							TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+							if(adc_last_Btn_time_press>=adc_timePressKeep)
+							{			
+								TRACE("Key1_press long %d", adc_curr_val[adc_chn]);				
+								adc_last_Btn_time_press=0;	
+								adc_timePressKeep=TIME_PRESS_CONTINUE;
+								Button_1_Press();
+							}
 						}
 					}
 				}else if((adc_curr_val[adc_chn]>=(ADC_Btn2_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn2_press_value+ADC_Threshold)))
 				{
 					//TRACE("2 %d", adc_lastStatus_btn);
-					if(adc_lastStatus_btn!=Key2_press_value)
+					if(adc_lastStatus_btn==0)
 					{
 						TRACE("Key2_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key2_press_value;
@@ -131,20 +134,23 @@ void ADC_check()
 						Button_2_Press();					
 					}else
 					{
-						adc_last_Btn_time_press++;
-						//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
-						if(adc_last_Btn_time_press>=adc_timePressKeep)
-						{			
-							TRACE("Key2_press long %d", adc_curr_val[adc_chn]);				
-							adc_last_Btn_time_press=0;	
-							adc_timePressKeep=TIME_PRESS_CONTINUE;
-							Button_2_Press();
+						if(adc_lastStatus_btn==Key2_press_value)
+						{
+							adc_last_Btn_time_press++;
+							//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
+							if(adc_last_Btn_time_press>=adc_timePressKeep)
+							{			
+								TRACE("Key2_press long %d", adc_curr_val[adc_chn]);				
+								adc_last_Btn_time_press=0;	
+								adc_timePressKeep=TIME_PRESS_CONTINUE;
+								Button_2_Press();
+							}
 						}
 					}
 				}else if((adc_curr_val[adc_chn]>=(ADC_Btn3_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn3_press_value+ADC_Threshold)))
 				{
 					//TRACE("3 %d", adc_lastStatus_btn);
-					if(adc_lastStatus_btn!=Key3_press_value)
+					if(adc_lastStatus_btn==0)
 					{
 						TRACE("Key3_press %d", adc_curr_val[adc_chn]);
 						adc_lastStatus_btn=Key3_press_value;
@@ -153,7 +159,7 @@ void ADC_check()
 						adc_btn3_pressOK=FALSE;				
 					}else
 					{
-						if(!adc_btn3_pressOK)
+						if(adc_lastStatus_btn==Key3_press_value && !adc_btn3_pressOK)
 						{
 							adc_last_Btn_time_press++;
 							//TRACE("adc_last_Btn_time_press=%d", adc_last_Btn_time_press);
@@ -190,7 +196,12 @@ void ADC_check()
 		}
 	}
 	
-	if( ++adc_chn==ADC_CHANNELS ) adc_chn=0;	//select next adc channel
+	if(powerState==TURN_OFF)
+		adc_chn=ADC_BATERY;
+	else
+	{
+		if( ++adc_chn==ADC_CHANNELS ) adc_chn=ADC_BATERY;	//select next adc channel
+	}			
 	_andio( CLOCK_AND_RESET_CONTROL1_PORT, ~(3<<11));
 	if(adc_chn==ADC_BTN)
 		_orio(CLOCK_AND_RESET_CONTROL1_PORT, 1 << 12);

@@ -12,7 +12,7 @@ void SaveFlash(void);
 void resetFactory(void);
 DWORD cpu_swap_edian(DWORD i);
 WORD CRC8_Array(DWORD data,WORD len);
-void parseDataFromMic(DWORD usrdata);
+//void parseDataFromMic(DWORD usrdata);
 WORD checkRangeValue(WORD cmd,int value);
 WORD checkCMDGainEQ(WORD cmd);
 #endif

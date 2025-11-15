@@ -6,6 +6,7 @@
 
 /* Global preset header file */
 
+
 void dspDesigner_LoadGlobalPreset( PTR32 global_preset_table );
 
 // (s)Reverb/Echo preset structure.
@@ -236,7 +237,7 @@ typedef struct
 	WORD control[5]; // controls array
 } globalDelayControl;
 
-#define	GLOBAL_S_REVERB_ECHO_PRESET_NB	2
+#define	GLOBAL_S_REVERB_ECHO_PRESET_NB	1
 extern const globalS_Reverb_EchoPreset global_s_reverb_echo_presets[GLOBAL_S_REVERB_ECHO_PRESET_NB];
 #define	GLOBAL_GAIN_PRESET_NB	1
 extern const globalGainPreset global_gain_presets[GLOBAL_GAIN_PRESET_NB];

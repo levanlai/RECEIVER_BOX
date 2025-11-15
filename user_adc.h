@@ -15,7 +15,7 @@
 #define ADC_Btn3_press_value    620
 
 #define TIME_PRESS_KEEP         10
-#define TIME_PRESS_CONTINUE    5
+#define TIME_PRESS_CONTINUE    4
 
 enum {
     Key1_press_value=1,   
