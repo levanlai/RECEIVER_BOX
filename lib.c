@@ -315,10 +315,11 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
         valueToSAM=func_convertDelayToSam(valueConvert);
     }else
     {       
-        if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT||cmd==CMD_VOL_OUT)
-        {
+        if(cmd==CMD_VOL_OUT)
+            valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_OUT_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
+        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT)
             valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
-        }
+        
          valueToSAM=func_calRangeLinearGainValue(valueConvert);
     } 
     

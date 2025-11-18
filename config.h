@@ -55,6 +55,8 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define GAIN_MIN        -1160 // dB
 #define GAIN_MIN_START    -200 // dB
 
+#define UI_MIC_OUT_VOLUME_MIN     GAIN_MIN
+
 #define UI_MIC_VOLUME_MIN     GAIN_MIN_START
 #define UI_MIC_VOLUME_MID      0  
 #define UI_MIC_VOLUME_MAX      120  
@@ -75,7 +77,7 @@ log⁡(a)=b có nghĩa là 10^b=a
 -> linearValue=(value-20)*0x7FFE/(650-20);
 *///EchoTime
 #define UI_MIC_DELAY_MIN        200//3000 // ms    
-#define UI_MIC_DELAY_MID        3500////5000    
+#define UI_MIC_DELAY_MID        4420////5000    
 #define UI_MIC_DELAY_MAX        6500
 
 // #define UI_MIC_BASS_MIN       -120 
