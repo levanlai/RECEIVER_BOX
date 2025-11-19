@@ -35,19 +35,23 @@ void SysVarInit(void)
     {        
         myData.Mic_1_Vol=UI_VALUE_MID;  
         myData.Mic_1_Effect=UI_VALUE_MID;           
-        myData.Mic_1_Bass=UI_VALUE_MID;        
+        myData.Mic_1_Bass=UI_VALUE_MID;    
+        myData.Mic_1_Mid=UI_VALUE_MID;       
         myData.Mic_1_Treb=UI_VALUE_MID;
         myData.Mic_1_Echo=UI_VALUE_MID;
         myData.Mic_1_Delay=UI_VALUE_MID;
         myData.Mic_1_Reverb=UI_VALUE_MID;
+        myData.Mic_1_Repeat=UI_VALUE_MID;
 
         myData.Mic_2_Vol=UI_VALUE_MID;
         myData.Mic_2_Effect=UI_VALUE_MID;        
-        myData.Mic_2_Bass=UI_VALUE_MID;        
+        myData.Mic_2_Bass=UI_VALUE_MID;  
+        myData.Mic_2_Mid=UI_VALUE_MID;             
         myData.Mic_2_Treb=UI_VALUE_MID;
         myData.Mic_2_Echo=UI_VALUE_MID;
         myData.Mic_2_Delay=UI_VALUE_MID;
         myData.Mic_2_Reverb=UI_VALUE_MID;
+        myData.Mic_2_Repeat=UI_VALUE_MID;
 
         myData.Mic_Vol_Out=UI_VALUE_MID;
         myData.Mic_FBC=FBC_OFF;        
@@ -60,7 +64,9 @@ void SysVarInit(void)
     uart_cmd_parse(CMD_MIC_1_ECHO,myData.Mic_1_Echo,TRUE);
     uart_cmd_parse(CMD_MIC_1_DELAY,myData.Mic_1_Delay,TRUE);
     uart_cmd_parse(CMD_MIC_1_REVERB,myData.Mic_1_Reverb,TRUE);
+    uart_cmd_parse(CMD_MIC_1_REPEAT,myData.Mic_1_Repeat,TRUE);
     uart_cmd_parse(CMD_MIC_1_BASS,myData.Mic_1_Bass,TRUE);
+    uart_cmd_parse(CMD_MIC_1_MID,myData.Mic_1_Mid,TRUE);
     uart_cmd_parse(CMD_MIC_1_TREBLE,myData.Mic_1_Treb,TRUE);
     if(!myData.Mic_Control_link)
     {
@@ -69,7 +75,9 @@ void SysVarInit(void)
         uart_cmd_parse(CMD_MIC_2_ECHO,myData.Mic_2_Echo,TRUE);
         uart_cmd_parse(CMD_MIC_2_DELAY,myData.Mic_2_Delay,TRUE);
         uart_cmd_parse(CMD_MIC_2_REVERB,myData.Mic_2_Reverb,TRUE);
+        uart_cmd_parse(CMD_MIC_2_REPEAT,myData.Mic_2_Repeat,TRUE);
         uart_cmd_parse(CMD_MIC_2_BASS,myData.Mic_2_Bass,TRUE);
+        uart_cmd_parse(CMD_MIC_2_MID,myData.Mic_2_Mid,TRUE);
         uart_cmd_parse(CMD_MIC_2_TREBLE,myData.Mic_2_Treb,TRUE);
     }
     
@@ -313,6 +321,10 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     {
         valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_DELAY_MIN,(DWORD)UI_MIC_DELAY_MID,(DWORD)UI_MIC_DELAY_MAX);
         valueToSAM=func_convertDelayToSam(valueConvert);
+    }else if(cmd==CMD_MIC_1_REPEAT ||cmd==CMD_MIC_2_REPEAT)
+    {
+        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REPEAT_MIN,(DWORD)UI_MIC_REPEAT_MID,(DWORD)UI_MIC_REPEAT_MAX);
+        valueToSAM=func_convertEchoToSam(valueConvert);
     }else
     {       
         if(cmd==CMD_VOL_OUT)
@@ -464,8 +476,8 @@ WORD checkRangeValue(WORD cmd,int value)
 WORD checkCMDGainEQ(WORD cmd)
 {
   WORD result=FALSE;
-  if(cmd==CMD_MIC_1_BASS || cmd==CMD_MIC_1_TREBLE
-   ||cmd==CMD_MIC_2_BASS || cmd==CMD_MIC_2_TREBLE)
+  if(cmd==CMD_MIC_1_BASS || cmd==CMD_MIC_1_TREBLE || cmd==CMD_MIC_1_MID
+   ||cmd==CMD_MIC_2_BASS || cmd==CMD_MIC_2_TREBLE || cmd==CMD_MIC_2_MID)
    result=TRUE;
    return result;
 }

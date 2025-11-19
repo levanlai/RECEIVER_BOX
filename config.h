@@ -67,11 +67,15 @@ log⁡(a)=b có nghĩa là 10^b=a
 *///EchoInputLevel
 #define UI_MIC_ECHO_MIN         0   // %
 #define UI_MIC_ECHO_MID         500
-#define UI_MIC_ECHO_MAX         1000//700 
+#define UI_MIC_ECHO_MAX         1000
 //RevLevel
-#define UI_MIC_REVERB_MIN       0   // %
-#define UI_MIC_REVERB_MID       500//150
-#define UI_MIC_REVERB_MAX       1000//500
+#define UI_MIC_REVERB_MIN       0   
+#define UI_MIC_REVERB_MID       500
+#define UI_MIC_REVERB_MAX       1000
+//EchoFeedback
+#define UI_MIC_REPEAT_MIN       0  
+#define UI_MIC_REPEAT_MID       700
+#define UI_MIC_REPEAT_MAX       1000
 /*
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
@@ -168,8 +172,10 @@ enum {
     CMD_MIC_1_EFFECT, 
     CMD_MIC_1_ECHO,     
     CMD_MIC_1_DELAY,
-    CMD_MIC_1_REVERB,       
+    CMD_MIC_1_REVERB,   
+    CMD_MIC_1_REPEAT,        
     CMD_MIC_1_BASS, 
+    CMD_MIC_1_MID, 
     CMD_MIC_1_TREBLE,
 
     CMD_MIC_2_VOL,  
@@ -177,25 +183,29 @@ enum {
     CMD_MIC_2_ECHO, 
     CMD_MIC_2_DELAY,
     CMD_MIC_2_REVERB,
+    CMD_MIC_2_REPEAT,
     CMD_MIC_2_BASS, 
+    CMD_MIC_2_MID, 
     CMD_MIC_2_TREBLE,    
 
     CMD_VOL_OUT,
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
+    //CMD_MIC_CONFIG,
     CMD_CONTROL_LINK,
     CMD_SAVE,
     CMD_RESET,
     CMD_RESET_FORM_MIC,
 
-    CMD_POWER=20,   
+    CMD_POWER=50,   
     CMD_PANEL_SYNC,
     CMD_CHARGE_DET,
     CMD_BATTERY_VALUE,
     CMD_DEVICES_CONNECT,
 
     CMD_MOVE,
-    CMD_SELECT_CHANGE,
+    CMD_SELECT_CHANGE,	
+
     //CMD_HOT_CHANGE_MIC1,	
     //CMD_HOT_CHANGE_MIC2,
 
@@ -209,7 +219,9 @@ typedef struct MyData{
   WORD Mic_1_Echo;
   WORD Mic_1_Delay;
   WORD Mic_1_Reverb;
+  WORD Mic_1_Repeat;
   WORD Mic_1_Bass;  
+  WORD Mic_1_Mid;  
   WORD Mic_1_Treb;
   
   WORD Mic_2_Vol; 
@@ -217,14 +229,15 @@ typedef struct MyData{
   WORD Mic_2_Echo;
   WORD Mic_2_Delay;
   WORD Mic_2_Reverb;
+  WORD Mic_2_Repeat;
   WORD Mic_2_Bass;  
+  WORD Mic_2_Mid;  
   WORD Mic_2_Treb;
 
   WORD Mic_Vol_Out;
   WORD Mic_Effect;
   WORD Mic_FBC; 
-  WORD Mic_Control_link; 
-  //WORD Mic_Config;
+  WORD Mic_Control_link;
 }MyData_t;
 typedef struct format_data
 {

@@ -234,6 +234,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
 					cmd_execute(CMD_MIC_2_DELAY,value,iInit,TRUE,valueConvert);
+				break;	
 			case CMD_MIC_2_DELAY:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
@@ -249,6 +250,16 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				if(myData.Mic_Control_link)
 					cmd_execute(CMD_MIC_1_REVERB,value,iInit,TRUE,valueConvert);
 				break;
+			case CMD_MIC_1_REPEAT: 
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_2_REPEAT,value,iInit,TRUE,valueConvert);
+				break;
+			case CMD_MIC_2_REPEAT: 
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_1_REPEAT,value,iInit,TRUE,valueConvert);
+				break;	
 			case CMD_MIC_1_BASS:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
@@ -258,7 +269,17 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
 					cmd_execute(CMD_MIC_1_BASS,value,iInit,TRUE,valueConvert);
-				break;					
+				break;
+			case CMD_MIC_1_MID:
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_2_MID,value,iInit,TRUE,valueConvert);
+				break;	
+			case CMD_MIC_2_MID:
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_1_MID,value,iInit,TRUE,valueConvert);
+				break;						
 			case CMD_MIC_1_TREBLE:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
@@ -455,6 +476,32 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 			_LiveMic_Effect_RevLevel(dsp[DSP2_LIVEMIC], valueConvert);
 			break;
+		case CMD_MIC_1_REPEAT: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_1_Repeat=value;
+			}
+			if(iLink)
+				valueConvert=valueSam;
+			else
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_EchoFeedback(dsp[DSP1_LIVEMIC], valueConvert);
+			break;
+		case CMD_MIC_2_REPEAT: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_2_Repeat=value;
+			}
+			if(iLink)
+				valueConvert=valueSam;
+			else
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_EchoFeedback(dsp[DSP2_LIVEMIC], valueConvert);
+			break;	
 		case CMD_MIC_1_BASS:
 			value=checkRangeValue(cmd,value);
 			if(!iInit)
@@ -480,7 +527,33 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 			else
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 			func_SendValueToSAM(DSP4_MIXPAXT,0x0260,valueConvert,FORMAT_14BIT_PRECISION);
-			break;					
+			break;	
+		case CMD_MIC_1_MID:
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_1_Mid=value;
+			}
+			if(iLink)
+				valueConvert=valueSam;
+			else
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+			func_SendValueToSAM(DSP4_MIXPAXT,0x0161,valueConvert,FORMAT_14BIT_PRECISION);
+			break;	
+		case CMD_MIC_2_MID:
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_2_Mid=value;
+			}
+			if(iLink)
+				valueConvert=valueSam;
+			else
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+			func_SendValueToSAM(DSP4_MIXPAXT,0x0261,valueConvert,FORMAT_14BIT_PRECISION);
+			break;						
 		case CMD_MIC_1_TREBLE:
 			value=checkRangeValue(cmd,value);
 			if(!iInit)
@@ -528,7 +601,9 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MIC_1_ECHO, myData.Mic_1_Echo);
 	uart_send_cmd(CMD_MIC_1_DELAY, myData.Mic_1_Delay);
 	uart_send_cmd(CMD_MIC_1_REVERB, myData.Mic_1_Reverb);
+	uart_send_cmd(CMD_MIC_1_REPEAT, myData.Mic_1_Repeat);
 	uart_send_cmd(CMD_MIC_1_BASS, myData.Mic_1_Bass);
+	uart_send_cmd(CMD_MIC_1_MID, myData.Mic_1_Mid);
 	uart_send_cmd(CMD_MIC_1_TREBLE, myData.Mic_1_Treb);
 	if(!myData.Mic_Control_link)
 	{
@@ -537,7 +612,9 @@ void syncDataToPanel(void)
 		uart_send_cmd(CMD_MIC_2_ECHO, myData.Mic_2_Echo);
 		uart_send_cmd(CMD_MIC_2_DELAY, myData.Mic_2_Delay);
 		uart_send_cmd(CMD_MIC_2_REVERB, myData.Mic_2_Reverb);
+		uart_send_cmd(CMD_MIC_2_REPEAT, myData.Mic_2_Repeat);
 		uart_send_cmd(CMD_MIC_2_BASS, myData.Mic_2_Bass);
+		uart_send_cmd(CMD_MIC_2_MID, myData.Mic_2_Mid);
 		uart_send_cmd(CMD_MIC_2_TREBLE, myData.Mic_2_Treb);
 	}
 	uart_send_cmd(CMD_VOL_OUT, myData.Mic_Vol_Out);
