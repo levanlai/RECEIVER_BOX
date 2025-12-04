@@ -5,7 +5,7 @@
 const globalS_Reverb_EchoPreset global_s_reverb_echo_presets[GLOBAL_S_REVERB_ECHO_PRESET_NB] = 
 {
 	// GlobalPresetA_DSP01-PCS01
-	{ 12, 8192, 8192, 1251, 8192, 8192, 8192, 8192, 8192, 10981, 0, 8192, 8192, 11468, 8192, 127, 8192, 127 }
+	{ 12, 8192, 8192, 1251, 8192, 8192, 8192, 8192, 8192, 4681, 0, 8192, 8192, 11468, 8192, 127, 8192, 127 }
 };
 // Gain preset list. Table ID: 0x1
 const globalGainPreset global_gain_presets[GLOBAL_GAIN_PRESET_NB] = 
@@ -47,7 +47,7 @@ const globalFeedback_cancellerPreset global_feedback_canceller_presets[GLOBAL_FE
 const globalBiquad6Preset global_biquad6_presets[GLOBAL_BIQUAD6_PRESET_NB] = 
 {
 	// GlobalPresetA_DSP04-PCS01
-	{ 1, 0, 14847, 7, 955, 1228800, 64, 1, 955, 6144000, 64, 6, 955, 20480000, 64, 1, 955, 81956, 64, 1, 955, 81968, 64, 1, 955, 81980, 64 }
+	{ 1, 0, 14847, 7, 955, 1228800, 64, 1, 955, 6144000, 64, 6, 955, 20480000, 64, 2, 955, 245760, 64, 3, 955, 81920000, 64, 1, 955, 81980, 64 }
 };
 // LevelDetect preset list. Table ID: 0x8
 const globalLevelDetectPreset global_leveldetect_presets[GLOBAL_LEVELDETECT_PRESET_NB] = 

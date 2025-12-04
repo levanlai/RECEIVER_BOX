@@ -514,7 +514,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
     if(g_bk9532_rf_ctx[bus].pair_ok)
     {
         g_bk9532_rf_ctx[bus].pair_ok_cnt++;
-        if(g_bk9532_rf_ctx[bus].pair_ok_cnt>4000)//check timeout 20s after pair ok
+        if(g_bk9532_rf_ctx[bus].pair_ok_cnt>4000)//check timeout 40s after pair ok
         {
            TRACE("clear time pair ok, bus=%d", bus);
            g_bk9532_rf_ctx[bus].pair_ok=FALSE;

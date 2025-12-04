@@ -81,8 +81,8 @@ log⁡(a)=b có nghĩa là 10^b=a
 -> linearValue=(value-20)*0x7FFE/(650-20);
 *///EchoTime
 #define UI_MIC_DELAY_MIN        200//3000 // ms    
-#define UI_MIC_DELAY_MID        4420////5000    
-#define UI_MIC_DELAY_MAX        6500
+#define UI_MIC_DELAY_MID        4000//2000//2210//4420 
+#define UI_MIC_DELAY_MAX        6500//2500//6500
 
 // #define UI_MIC_BASS_MIN       -120 
 // #define UI_MIC_BASS_MID       0 

@@ -433,7 +433,6 @@ void main(void)
 #endif
 
 	FBCStatus_Init();	
-	
 	adc_init();	
 #if ENABLE_USB
     InitUSB();	

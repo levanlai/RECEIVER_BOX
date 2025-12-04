@@ -6,7 +6,7 @@
 #include "midictrl.h"
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "memorymap.h"
-
+#include <trace.h>
 
 WORD dsp2pcs[9];
 
@@ -191,7 +191,9 @@ WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x0006: _LiveMic_Effect_RevToneGain( dspId, value ); return 1;
 			case 0x0007: _LiveMic_Effect_RevToneFreq( dspId, value ); return 1;
 			case 0x0008: _LiveMic_Effect_EchoInputLevel( dspId, value ); return 1;
-			case 0x0009: _LiveMic_Effect_EchoTime( dspId, value ); return 1;
+			case 0x0009: 
+			TRACE("EchoTime %x",value);
+			_LiveMic_Effect_EchoTime( dspId, value ); return 1;
 			case 0x000A: _LiveMic_Effect_LongEchoMode( dspId, val8bit ); return 1;
 			case 0x000B: _LiveMic_Effect_EchoLDamp( dspId, value ); return 1;
 			case 0x000C: _LiveMic_Effect_EchoHDamp( dspId, value ); return 1;
