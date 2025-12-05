@@ -328,8 +328,31 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					iNeedSaveFlash=TRUE;
 					myData.Mic_Effect=value;
 				}
-				_LiveMic_Effect_LoadProgram(dsp[DSP1_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
-				_LiveMic_Effect_LoadProgram(dsp[DSP2_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
+				if(myData.Mic_Effect==TURN_OFF)
+				{
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],0, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],1, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],0, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],1, 0);
+
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[5],0, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[5],1, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[6],0, 0);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[6],1, 0);
+				}else
+				{
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],0, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],1, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],0, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],1, GAIN_0_SAM);
+
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[5],0, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[5],1, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[6],0, GAIN_0_SAM);
+					_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp2pcs[6],1, GAIN_0_SAM);
+				}
+				//_LiveMic_Effect_LoadProgram(dsp[DSP1_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
+				//_LiveMic_Effect_LoadProgram(dsp[DSP2_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
 				break;						
 			case CMD_MIC_FBC:
 				if(!iInit)

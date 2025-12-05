@@ -100,7 +100,7 @@ log⁡(a)=b có nghĩa là 10^b=a
 
 #define EQ_GAIN_MID_SAM   0x40//0dB
 
-//#define GAIN_0_SAM   0x2000
+#define GAIN_0_SAM   0x2000
 //#define GAIN_Minus_6_SAM   0x1000
 
 enum {
