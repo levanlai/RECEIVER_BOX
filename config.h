@@ -54,8 +54,9 @@ log⁡(a)=b có nghĩa là 10^b=a
 //các giá trị *10 để lấy giá trị x.x, vì kiểu float không dùng được
 #define GAIN_MIN        -1160 // dB
 #define GAIN_MIN_START    -200 // dB
+#define GAIN_OUT_VOLUME_MIN_START    -400 // dB
 
-#define UI_MIC_OUT_VOLUME_MIN     GAIN_MIN
+#define UI_MIC_OUT_VOLUME_MIN    GAIN_OUT_VOLUME_MIN_START //GAIN_MIN
 
 #define UI_MIC_VOLUME_MIN     GAIN_MIN_START
 #define UI_MIC_VOLUME_MID      0  
@@ -66,23 +67,25 @@ log⁡(a)=b có nghĩa là 10^b=a
 ->linearValue=value/100*0x7FFF
 *///EchoInputLevel
 #define UI_MIC_ECHO_MIN         0   // %
-#define UI_MIC_ECHO_MID         500
-#define UI_MIC_ECHO_MAX         1000
+#define UI_MIC_ECHO_MID         450
+#define UI_MIC_ECHO_MAX         900//1000
 //RevLevel
 #define UI_MIC_REVERB_MIN       0   
 #define UI_MIC_REVERB_MID       500
 #define UI_MIC_REVERB_MAX       1000
 //EchoFeedback
 #define UI_MIC_REPEAT_MIN       0  
+#define UI_MIC_REPEAT_MIN_START 400 
 #define UI_MIC_REPEAT_MID       700
 #define UI_MIC_REPEAT_MAX       1000
 /*
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
 *///EchoTime
-#define UI_MIC_DELAY_MIN        200//3000 // ms    
-#define UI_MIC_DELAY_MID        4000//2000//2210//4420 
-#define UI_MIC_DELAY_MAX        6500//2500//6500
+#define UI_MIC_DELAY_MIN        200
+#define UI_MIC_DELAY_MIN_START  1000
+#define UI_MIC_DELAY_MID        2000//2210//4420 
+#define UI_MIC_DELAY_MAX        2500//6500//2500//6500
 
 // #define UI_MIC_BASS_MIN       -120 
 // #define UI_MIC_BASS_MID       0 
@@ -112,7 +115,8 @@ enum {
     DSP1_LIVEMIC,
     DSP2_LIVEMIC,
     DSP3_FBC,    
-    DSP4_MIXPAXT,
+    //DSP4_MIXPAXT,
+    DSP4_LIVEMIC
 };
 
 enum {
@@ -169,29 +173,29 @@ enum {
 
 enum {
     CMD_MIC_1_VOL,   
-    CMD_MIC_1_EFFECT, 
+    //CMD_MIC_1_EFFECT, 
     CMD_MIC_1_ECHO,     
     CMD_MIC_1_DELAY,
-    CMD_MIC_1_REVERB,   
-    CMD_MIC_1_REPEAT,        
+    //CMD_MIC_1_REVERB, 
+    CMD_MIC_1_REPEAT,         
     CMD_MIC_1_BASS, 
-    CMD_MIC_1_MID, 
+    CMD_MIC_1_MID,
     CMD_MIC_1_TREBLE,
 
     CMD_MIC_2_VOL,  
-    CMD_MIC_2_EFFECT, 
+    //CMD_MIC_2_EFFECT, 
     CMD_MIC_2_ECHO, 
     CMD_MIC_2_DELAY,
-    CMD_MIC_2_REVERB,
-    CMD_MIC_2_REPEAT,
+    //CMD_MIC_2_REVERB,
+    CMD_MIC_2_REPEAT,  
     CMD_MIC_2_BASS, 
-    CMD_MIC_2_MID, 
+    CMD_MIC_2_MID,
     CMD_MIC_2_TREBLE,    
 
     CMD_VOL_OUT,
+    CMD_MIC_REVERB,
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
-    //CMD_MIC_CONFIG,
     CMD_CONTROL_LINK,
     CMD_SAVE,
     CMD_RESET,
@@ -204,8 +208,7 @@ enum {
     CMD_DEVICES_CONNECT,
 
     CMD_MOVE,
-    CMD_SELECT_CHANGE,	
-
+    CMD_SELECT_CHANGE,
     //CMD_HOT_CHANGE_MIC1,	
     //CMD_HOT_CHANGE_MIC2,
 
@@ -215,26 +218,27 @@ enum {
 typedef struct MyData{
   //WORD init;
   WORD Mic_1_Vol; 
-  WORD Mic_1_Effect; 
+  //WORD Mic_1_Effect; 
   WORD Mic_1_Echo;
   WORD Mic_1_Delay;
-  WORD Mic_1_Reverb;
+  //WORD Mic_1_Reverb;
   WORD Mic_1_Repeat;
   WORD Mic_1_Bass;  
   WORD Mic_1_Mid;  
   WORD Mic_1_Treb;
   
   WORD Mic_2_Vol; 
-  WORD Mic_2_Effect; 
+  //WORD Mic_2_Effect; 
   WORD Mic_2_Echo;
   WORD Mic_2_Delay;
-  WORD Mic_2_Reverb;
+  //WORD Mic_2_Reverb;
   WORD Mic_2_Repeat;
   WORD Mic_2_Bass;  
   WORD Mic_2_Mid;  
   WORD Mic_2_Treb;
 
   WORD Mic_Vol_Out;
+  WORD Mic_Reverb;
   WORD Mic_Effect;
   WORD Mic_FBC; 
   WORD Mic_Control_link;

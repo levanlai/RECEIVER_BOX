@@ -37,40 +37,41 @@ void SysVarInit(void)
     if(rc==-1)
     {        
         myData.Mic_1_Vol=UI_VALUE_MID;  
-        myData.Mic_1_Effect=UI_VALUE_MID;           
+        //myData.Mic_1_Effect=UI_VALUE_MID;           
         myData.Mic_1_Bass=UI_VALUE_MID;    
         myData.Mic_1_Mid=UI_VALUE_MID;       
         myData.Mic_1_Treb=UI_VALUE_MID;
         myData.Mic_1_Echo=UI_VALUE_MID;
         myData.Mic_1_Delay=UI_VALUE_MID;
-        myData.Mic_1_Reverb=UI_VALUE_MID;
+        //myData.Mic_1_Reverb=UI_VALUE_MID;
         myData.Mic_1_Repeat=UI_VALUE_MID;
 
         myData.Mic_2_Vol=UI_VALUE_MID;
-        myData.Mic_2_Effect=UI_VALUE_MID;        
+        //myData.Mic_2_Effect=UI_VALUE_MID;        
         myData.Mic_2_Bass=UI_VALUE_MID;  
         myData.Mic_2_Mid=UI_VALUE_MID;             
         myData.Mic_2_Treb=UI_VALUE_MID;
         myData.Mic_2_Echo=UI_VALUE_MID;
         myData.Mic_2_Delay=UI_VALUE_MID;
-        myData.Mic_2_Reverb=UI_VALUE_MID;
+        //myData.Mic_2_Reverb=UI_VALUE_MID;
         myData.Mic_2_Repeat=UI_VALUE_MID;
 
         myData.Mic_Vol_Out=UI_VALUE_MID;
+        myData.Mic_Reverb=UI_VALUE_MID;
         myData.Mic_FBC=FBC_OFF;        
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
     uart_cmd_parse(CMD_VOL_OUT,myData.Mic_Vol_Out,TRUE); 
-   uart_cmd_parse(CMD_MIC_EFFECT,myData.Mic_Effect,TRUE);
-   uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
+    uart_cmd_parse(CMD_MIC_REVERB,myData.Mic_Reverb,TRUE);
+    uart_cmd_parse(CMD_MIC_EFFECT,myData.Mic_Effect,TRUE);
+    uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
 
     uart_cmd_parse(CMD_MIC_1_VOL,myData.Mic_1_Vol,TRUE);
-    uart_cmd_parse(CMD_MIC_1_EFFECT,myData.Mic_1_Effect,TRUE);
+    //uart_cmd_parse(CMD_MIC_1_EFFECT,myData.Mic_1_Effect,TRUE);
     uart_cmd_parse(CMD_MIC_1_ECHO,myData.Mic_1_Echo,TRUE);
-    //uart_cmd_parse(CMD_MIC_1_DELAY,myData.Mic_1_Delay,TRUE);
-    uart_cmd_parse(CMD_MIC_1_REVERB,myData.Mic_1_Reverb,TRUE);
+    //uart_cmd_parse(CMD_MIC_1_REVERB,myData.Mic_1_Reverb,TRUE);
     uart_cmd_parse(CMD_MIC_1_REPEAT,myData.Mic_1_Repeat,TRUE);
     uart_cmd_parse(CMD_MIC_1_BASS,myData.Mic_1_Bass,TRUE);
     uart_cmd_parse(CMD_MIC_1_MID,myData.Mic_1_Mid,TRUE);
@@ -79,10 +80,9 @@ void SysVarInit(void)
     if(!myData.Mic_Control_link)
     {
         uart_cmd_parse(CMD_MIC_2_VOL,myData.Mic_2_Vol,TRUE);
-        uart_cmd_parse(CMD_MIC_2_EFFECT,myData.Mic_2_Effect,TRUE);
+        //uart_cmd_parse(CMD_MIC_2_EFFECT,myData.Mic_2_Effect,TRUE);
         uart_cmd_parse(CMD_MIC_2_ECHO,myData.Mic_2_Echo,TRUE);
-       // uart_cmd_parse(CMD_MIC_2_DELAY,myData.Mic_2_Delay,TRUE);
-        uart_cmd_parse(CMD_MIC_2_REVERB,myData.Mic_2_Reverb,TRUE);
+        //uart_cmd_parse(CMD_MIC_2_REVERB,myData.Mic_2_Reverb,TRUE);
         uart_cmd_parse(CMD_MIC_2_REPEAT,myData.Mic_2_Repeat,TRUE);
         uart_cmd_parse(CMD_MIC_2_BASS,myData.Mic_2_Bass,TRUE);
         uart_cmd_parse(CMD_MIC_2_MID,myData.Mic_2_Mid,TRUE);
@@ -209,7 +209,7 @@ FLOAT linearInterpolate(DWORD x, DWORD x0, DWORD x1, DWORD y0, DWORD y1) {
     //return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0);
 }
 // Hàm chuyển đổi value thành dB dựa trên 3 đoạn min-mid-max
-FLOAT convertInRange(DWORD value, DWORD min, DWORD mid, DWORD max, DWORD minDb, DWORD midDb, DWORD maxDb) {
+FLOAT convertInRange(WORD cmd,DWORD value, DWORD min, DWORD mid, DWORD max, DWORD minDb, DWORD midDb, DWORD maxDb) {
     // Nếu có 2 điểm:
     // x0,y0
     // x1,y1
@@ -221,11 +221,18 @@ FLOAT convertInRange(DWORD value, DWORD min, DWORD mid, DWORD max, DWORD minDb, 
     //TRACE("convertInRange value=%d",value);          
     // Giới hạn value trong [min, max]
     if (value <= min)
-    {
-        if(minDb==(DWORD)GAIN_MIN_START)
-            return _float(GAIN_MIN);
-        else 
-            return _float(minDb);        
+    {        
+        if(cmd==CMD_MIC_1_DELAY ||cmd==CMD_MIC_2_DELAY)
+             return _float(UI_MIC_DELAY_MIN);
+        else if(cmd==CMD_MIC_1_REPEAT ||cmd==CMD_MIC_2_REPEAT)
+             return _float(UI_MIC_REPEAT_MIN);
+        else
+        {     
+            if(minDb==(DWORD)GAIN_MIN_START || minDb==(DWORD)GAIN_OUT_VOLUME_MIN_START)
+                return _float(GAIN_MIN);
+            else 
+                return _float(minDb);   
+        }     
     } 
     if (value >= max) return _float(maxDb);
 
@@ -314,31 +321,31 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     //     value=UI_VALUE_MAX;    
     if(checkCMDGainEQ(cmd))
    	{
-        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)EQ_GAIN_MIN,(DWORD)EQ_GAIN_MID,(DWORD)EQ_GAIN_MAX);
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)EQ_GAIN_MIN,(DWORD)EQ_GAIN_MID,(DWORD)EQ_GAIN_MAX);
         valueToSAM=func_convertEQToSam(valueConvert);        
     }else if(cmd==CMD_MIC_1_ECHO||cmd==CMD_MIC_2_ECHO)
     {
-        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_ECHO_MIN,(DWORD)UI_MIC_ECHO_MID,(DWORD)UI_MIC_ECHO_MAX);
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_ECHO_MIN,(DWORD)UI_MIC_ECHO_MID,(DWORD)UI_MIC_ECHO_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
-    }else if(cmd==CMD_MIC_1_REVERB ||cmd==CMD_MIC_2_REVERB)
+     }else if(cmd==CMD_MIC_REVERB/*cmd==CMD_MIC_1_REVERB ||cmd==CMD_MIC_2_REVERB*/)
     {
-        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REVERB_MIN,(DWORD)UI_MIC_REVERB_MID,(DWORD)UI_MIC_REVERB_MAX);
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REVERB_MIN,(DWORD)UI_MIC_REVERB_MID,(DWORD)UI_MIC_REVERB_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
     }
     else if(cmd==CMD_MIC_1_DELAY ||cmd==CMD_MIC_2_DELAY)
     {
-        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_DELAY_MIN,(DWORD)UI_MIC_DELAY_MID,(DWORD)UI_MIC_DELAY_MAX);
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_DELAY_MIN_START,(DWORD)UI_MIC_DELAY_MID,(DWORD)UI_MIC_DELAY_MAX);
         valueToSAM=func_convertDelayToSam(valueConvert);
     }else if(cmd==CMD_MIC_1_REPEAT ||cmd==CMD_MIC_2_REPEAT)
     {
-        valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REPEAT_MIN,(DWORD)UI_MIC_REPEAT_MID,(DWORD)UI_MIC_REPEAT_MAX);
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REPEAT_MIN_START,(DWORD)UI_MIC_REPEAT_MID,(DWORD)UI_MIC_REPEAT_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
     }else
     {       
         if(cmd==CMD_VOL_OUT)
-            valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_OUT_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
-        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT)
-            valueConvert=convertInRange(value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
+            valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_OUT_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
+        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL /*||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT*/)
+            valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
         
          valueToSAM=func_calRangeLinearGainValue(valueConvert);
     } 
