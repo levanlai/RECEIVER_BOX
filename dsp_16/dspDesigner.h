@@ -57,9 +57,9 @@ extern const WORD nrpn3List[NUMBEROFCOMMAND3][2];
 extern WORD dsp3NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 
 WORD dsp4InitAndRoute(void);
-extern WORD dsp4pcs[12];
-#define	NUMBEROFPROCESS4	0x0009
-#define	NUMBEROFCOMMAND4	0x0023
+extern WORD dsp4pcs[8];
+#define	NUMBEROFPROCESS4	0x0007
+#define	NUMBEROFCOMMAND4	0x001F
 extern const WORD nrpn4List[NUMBEROFCOMMAND4][2];
 extern WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 

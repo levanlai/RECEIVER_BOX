@@ -3,7 +3,7 @@
 
 #define AUTO_POWER_ON 
 
-#define ENABLE_USB         1
+#define ENABLE_USB         1//1
 
 #define _USE_GLOBAL_PRESET 1
 
@@ -62,6 +62,10 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_MIC_VOLUME_MID      0  
 #define UI_MIC_VOLUME_MAX      120  
 
+//giá trị Freq từ 20->20k, truyền giá trị valueF<<12 xuống SAM. vd: 20=0x14-> SAM=00014000, 10k=0x2710 -> truyền SAM= 002710000
+#define UI_MIC_HPF_MIN         20
+#define UI_MIC_HPF_MAX         20000
+#define UI_MIC_HPF_DEFAULT     60
 /*
 //in range 0..0x7FFE = 0...100%
 ->linearValue=value/100*0x7FFF
@@ -84,7 +88,7 @@ log⁡(a)=b có nghĩa là 10^b=a
 *///EchoTime
 #define UI_MIC_DELAY_MIN        200
 #define UI_MIC_DELAY_MIN_START  1000
-#define UI_MIC_DELAY_MID        2000//2210//4420 
+#define UI_MIC_DELAY_MID        1900//2210//4420 
 #define UI_MIC_DELAY_MAX        2500//6500//2500//6500
 
 // #define UI_MIC_BASS_MIN       -120 
@@ -127,7 +131,9 @@ enum {
 
 enum {
     MOVE_UP,    
-    MOVE_DOWN,    
+    MOVE_DOWN, 
+    MOVE_UP_HOLD,    
+    MOVE_DOWN_HOLD,    
 };
 // bypass: 0=normal work, 1=bypass all notch filters
 enum {
@@ -192,26 +198,37 @@ enum {
     CMD_MIC_2_MID,
     CMD_MIC_2_TREBLE,    
 
-    CMD_VOL_OUT,
-    CMD_MIC_REVERB,
+    CMD_MUSIC_VOL, 
+    CMD_MUSIC_BASS, 
+    CMD_MUSIC_MID,
+    CMD_MUSIC_TREBLE,
+
+    CMD_MIC_REVERB_VOL,
+    CMD_MIC_REVERB_TIME,
+
+    CMD_VOL_OUT,    
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
+    CMD_MUSIC_BASSBOOST,
+    CMD_MUSIC_ENHANCER,
     CMD_CONTROL_LINK,
-    CMD_SAVE,
+
+    CMD_MIC_1_HPF,
+    CMD_MIC_2_HPF,   
+
+    CMD_SAVE=150,
     CMD_RESET,
     CMD_RESET_FORM_MIC,
 
-    CMD_POWER=50,   
+    CMD_POWER=200,   
     CMD_PANEL_SYNC,
     CMD_CHARGE_DET,
     CMD_BATTERY_VALUE,
     CMD_DEVICES_CONNECT,
+    CMD_BT_DISCONNET,
 
     CMD_MOVE,
     CMD_SELECT_CHANGE,
-    //CMD_HOT_CHANGE_MIC1,	
-    //CMD_HOT_CHANGE_MIC2,
-
     CMD_TOTAL,
 };
 
@@ -226,6 +243,7 @@ typedef struct MyData{
   WORD Mic_1_Bass;  
   WORD Mic_1_Mid;  
   WORD Mic_1_Treb;
+  WORD Mic_1_HPF;
   
   WORD Mic_2_Vol; 
   //WORD Mic_2_Effect; 
@@ -236,12 +254,22 @@ typedef struct MyData{
   WORD Mic_2_Bass;  
   WORD Mic_2_Mid;  
   WORD Mic_2_Treb;
+  WORD Mic_2_HPF;
 
-  WORD Mic_Vol_Out;
-  WORD Mic_Reverb;
+  WORD Mic_Reverb_Vol;
+  WORD Mic_Reverb_Time;
+
+  WORD Mic_Vol_Out;  
   WORD Mic_Effect;
   WORD Mic_FBC; 
   WORD Mic_Control_link;
+
+  WORD Music_Vol; 
+  WORD Music_Bass;  
+  WORD Music_Mid;  
+  WORD Music_Treb;
+  WORD Music_Bassboost; 
+  WORD Music_Enhancer; 
 }MyData_t;
 typedef struct format_data
 {

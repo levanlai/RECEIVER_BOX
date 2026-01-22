@@ -8,11 +8,12 @@
 #define ADC_10bit    0x44800000//1024
 #define V_ref        0x40533333//3.3f
 
-#define ADC_Threshold    50
+#define ADC_Threshold    40
 
 #define ADC_Btn1_press_value    250
-#define ADC_Btn2_press_value    420
-#define ADC_Btn3_press_value    620
+#define ADC_Btn2_press_value    430
+#define ADC_Btn3_press_value    630
+#define ADC_Btn4_press_value    165
 
 #define TIME_PRESS_KEEP         10
 #define TIME_PRESS_CONTINUE    4
@@ -20,7 +21,8 @@
 enum {
     Key1_press_value=1,   
     Key2_press_value, 
-    Key3_press_value, 
+    Key3_press_value,
+    Key4_press_value, 
 };
 
 void adc_init(void);

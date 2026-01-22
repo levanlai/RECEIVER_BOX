@@ -19,11 +19,11 @@ const globalBiquad4Preset global_biquad4_presets[GLOBAL_BIQUAD4_PRESET_NB] =
 	// GlobalPresetA_DSP01-PCS03
 	{ 1, 0, 14847, 7, 955, 1228800, 64, 1, 955, 6144000, 64, 6, 955, 20480000, 64, 2, 955, 245760, 64 }
 };
-// Biquad[3] preset list. Table ID: 0x8
-const globalBiquad3Preset global_biquad3_presets[GLOBAL_BIQUAD3_PRESET_NB] = 
+// Biquad[6] preset list. Table ID: 0x8
+const globalBiquad6Preset global_biquad6_presets[GLOBAL_BIQUAD6_PRESET_NB] = 
 {
 	// GlobalPresetA_DSP04-PCS02
-	{ 0, 0, 14847, 1, 955, 81920, 64, 1, 955, 81932, 64, 1, 955, 81944, 64 }
+	{ 0, 0, 14847, 1, 955, 81920, 64, 1, 955, 81932, 64, 1, 955, 81944, 64, 1, 955, 81956, 64, 1, 955, 81968, 64, 1, 955, 81980, 64 }
 };
 // LevelDetect preset list. Table ID: 0x3
 const globalLevelDetectPreset global_leveldetect_presets[GLOBAL_LEVELDETECT_PRESET_NB] = 
@@ -57,13 +57,7 @@ const globalMixN2Preset global_mixn2_presets[GLOBAL_MIXN2_PRESET_NB] =
 const globalMixN4Preset global_mixn4_presets[GLOBAL_MIXN4_PRESET_NB] = 
 {
 	// GlobalPresetA_DSP04-PCS05
-	{ 0, 0, 0, 0, 14847, 14847, 14847, 14463 }
-};
-// MixN[3] preset list. Table ID: 0xa
-const globalMixN3Preset global_mixn3_presets[GLOBAL_MIXN3_PRESET_NB] = 
-{
-	// GlobalPresetA_DSP04-PCS08
-	{ 0, 0, 0, 14847, 14847, 14847 }
+	{ 0, 0, 0, 0, 14847, 14847 }
 };
 // Feedback canceller preset list. Table ID: 0x7
 const globalFeedback_cancellerPreset global_feedback_canceller_presets[GLOBAL_FEEDBACK_CANCELLER_PRESET_NB] = 
@@ -75,8 +69,8 @@ const WORD_FAR_P global_preset_table_address[NUMBER_OF_PRESET_TABLE] =
 {
 	FARPTR((const WORD*)&global_gain_presets), 
 	FARPTR((const WORD*)&global_noisegate_presets), FARPTR((const WORD*)&global_biquad4_presets), FARPTR((const WORD*)&global_leveldetect_presets), FARPTR((const WORD*)&global_compressor_presets), 
-	FARPTR((const WORD*)&global_s_reverb_echo_presets), FARPTR((const WORD*)&global_mixn2_presets), FARPTR((const WORD*)&global_feedback_canceller_presets), FARPTR((const WORD*)&global_biquad3_presets), 
-	FARPTR((const WORD*)&global_mixn4_presets), FARPTR((const WORD*)&global_mixn3_presets)
+	FARPTR((const WORD*)&global_s_reverb_echo_presets), FARPTR((const WORD*)&global_mixn2_presets), FARPTR((const WORD*)&global_feedback_canceller_presets), FARPTR((const WORD*)&global_biquad6_presets), 
+	FARPTR((const WORD*)&global_mixn4_presets)
 };
 // Gain preset control list.
 const globalGainControl global_gain_controls = 
@@ -93,10 +87,10 @@ const globalBiquad4Control global_biquad4_controls =
 {
 	0x8013, 23, 0x0, 0x1, 0x4002, 0x3, 0x4022, 0x8041, 0x60, 0x4, 0x4023, 0x8042, 0x61, 0x5, 0x4024, 0x8043, 0x62, 0x6, 0x4025, 0x8044, 0x63
 };
-// Biquad[3] preset control list.
-const globalBiquad3Control global_biquad3_controls = 
+// Biquad[6] preset control list.
+const globalBiquad6Control global_biquad6_controls = 
 {
-	0x800f, 18, 0x0, 0x1, 0x4002, 0x3, 0x4022, 0x8041, 0x60, 0x4, 0x4023, 0x8042, 0x61, 0x5, 0x4024, 0x8043, 0x62
+	0x801b, 33, 0x0, 0x1, 0x4002, 0x3, 0x4022, 0x8041, 0x60, 0x4, 0x4023, 0x8042, 0x61, 0x5, 0x4024, 0x8043, 0x62, 0x6, 0x4025, 0x8044, 0x63, 0x7, 0x4026, 0x8045, 0x64, 0x8, 0x4027, 0x8046, 0x65
 };
 // LevelDetect preset control list.
 const globalLevelDetectControl global_leveldetect_controls = 
@@ -121,11 +115,6 @@ const globalMixN2Control global_mixn2_controls =
 // MixN[4] preset control list.
 const globalMixN4Control global_mixn4_controls = 
 {
-	8, 8, 0x0, 0x1, 0x2, 0x3, 0x401f, 0x4020, 0x4021, 0x4022
-};
-// MixN[3] preset control list.
-const globalMixN3Control global_mixn3_controls = 
-{
 	6, 6, 0x0, 0x1, 0x2, 0x401f, 0x4020, 0x4021
 };
 // Feedback canceller preset control list.
@@ -137,10 +126,10 @@ const WORD_FAR_P global_preset_control_table_address[NUMBER_OF_PRESET_TABLE] =
 {
 	FARPTR((const WORD*)&global_gain_controls), 
 	FARPTR((const WORD*)&global_noisegate_controls), FARPTR((const WORD*)&global_biquad4_controls), FARPTR((const WORD*)&global_leveldetect_controls), FARPTR((const WORD*)&global_compressor_controls), 
-	FARPTR((const WORD*)&global_s_reverb_echo_controls), FARPTR((const WORD*)&global_mixn2_controls), FARPTR((const WORD*)&global_feedback_canceller_controls), FARPTR((const WORD*)&global_biquad3_controls), 
-	FARPTR((const WORD*)&global_mixn4_controls), FARPTR((const WORD*)&global_mixn3_controls)
+	FARPTR((const WORD*)&global_s_reverb_echo_controls), FARPTR((const WORD*)&global_mixn2_controls), FARPTR((const WORD*)&global_feedback_canceller_controls), FARPTR((const WORD*)&global_biquad6_controls), 
+	FARPTR((const WORD*)&global_mixn4_controls)
 };
-const DWORD globalpreset[1][35] = 
+const DWORD globalpreset[1][33] = 
 {
 	// GlobalPresetA
 	{ 
@@ -151,7 +140,7 @@ const DWORD globalpreset[1][35] =
 	// DSP#3
 	0x30002, 0x700001, 0x2,
 	// DSP#4
-	0x40009, 0x600001, 0x800002, 0x500103, 0x600004, 0x900005, 0x600106, 0x600007, 0xb, 0xa00008 }
+	0x40007, 0x600001, 0x800002, 0x500103, 0x600004, 0x900005, 0x600106, 0x600007 }
 };
 #define GLOBAL_PROCESS_ID_NBIT 8
 #define GLOBAL_PRESET_ID_NBIT 12

@@ -106,7 +106,7 @@ void ADC_check()
 						adc_lastStatus_btn=Key1_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;	
-						Button_1_Press();		
+						Button_1_Press(MOVE_DOWN);		
 					}else
 					{
 						if(adc_lastStatus_btn==Key1_press_value)
@@ -118,7 +118,7 @@ void ADC_check()
 								TRACE("Key1_press long %d", adc_curr_val[adc_chn]);				
 								adc_last_Btn_time_press=0;	
 								adc_timePressKeep=TIME_PRESS_CONTINUE;
-								Button_1_Press();
+								Button_1_Press(MOVE_DOWN_HOLD);
 							}
 						}
 					}
@@ -131,7 +131,7 @@ void ADC_check()
 						adc_lastStatus_btn=Key2_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;	
-						Button_2_Press();					
+						Button_2_Press(MOVE_UP);					
 					}else
 					{
 						if(adc_lastStatus_btn==Key2_press_value)
@@ -143,7 +143,7 @@ void ADC_check()
 								TRACE("Key2_press long %d", adc_curr_val[adc_chn]);				
 								adc_last_Btn_time_press=0;	
 								adc_timePressKeep=TIME_PRESS_CONTINUE;
-								Button_2_Press();
+								Button_2_Press(MOVE_UP_HOLD);
 							}
 						}
 					}
@@ -172,6 +172,17 @@ void ADC_check()
 								Button_3_Press();								
 							}
 						}
+					}
+				}else if((adc_curr_val[adc_chn]>=(ADC_Btn4_press_value-ADC_Threshold))&&(adc_curr_val[adc_chn]<=(ADC_Btn4_press_value+ADC_Threshold)))
+				{
+					//TRACE("4 %d", adc_lastStatus_btn);
+					if(adc_lastStatus_btn==0)
+					{
+						TRACE("Key4_press %d", adc_curr_val[adc_chn]);//nhấn giữ 2 nút 1+2
+						adc_lastStatus_btn=Key4_press_value;
+						adc_last_Btn_time_press=0;	
+						adc_timePressKeep=TIME_PRESS_KEEP;
+						Button_4_Press();					
 					}
 				}else
 				{

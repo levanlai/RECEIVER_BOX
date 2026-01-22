@@ -14,7 +14,7 @@
 
 #define NUMBER_OF_BIQUAD_EXTRAFUNCTION 4
 
-#define	BIQUAD2BANDCOUNT	3
+#define	BIQUAD2BANDCOUNT	6
 
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
@@ -27,7 +27,7 @@ DWORD biquad4RawFrequency2[BIQUAD2BANDCOUNT];
 BiquadParameters biquad4ParamAddr2 = { biquad4Parameters2, biquad4Type2, biquad4XoverType2, biquad4RawFrequency2, BIQUAD2BANDCOUNT };
 #endif	// _SKIP_DDD_NRPN_CTRL
 
-WORD dsp4pcs[12];
+WORD dsp4pcs[8];
 
 WORD dsp4InitAndRoute(void)
 {
@@ -51,11 +51,6 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp4pcs[7], PCS_DSP_IN | 2 );
 	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[7], PCS_NODE | 7 );
 
-	// Process #8: MixN
-	dsp4pcs[8] = _LiveMic_MixN_Allocate( dspId, 3 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp4pcs[8], PCS_DSP_IN | 4 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[8], PCS_NODE | 8 );
-
 	// Process #3: (s)Reverb/Echo
 	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 6 );
 	_LiveMic_SetProcIN( dspId, LIVEMIC_ECHO_SAMPLE_IN, PCS_NODE | 6 );
@@ -63,11 +58,6 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTR, PCS_NODE | 3 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTL, PCS_NODE | 0 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTR, PCS_NODE | 1 );
-
-	// Process #11: Gain
-	dsp4pcs[11] = _LiveMic_Gain_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp4pcs[11], PCS_NODE | 8 );
-	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp4pcs[11], PCS_DSP_OUT | 1 );
 
 	// Process #6: MixN
 	dsp4pcs[6] = _LiveMic_MixN_Allocate( dspId, 2 );
@@ -82,11 +72,11 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	// Process #5: MixN
 	dsp4pcs[5] = _LiveMic_MixN_Allocate( dspId, 4 );
 	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp4pcs[5], PCS_NODE | 4 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 9 );
+	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 8 );
 
 	// Process #2: Biquad
 	dsp4pcs[2] = _LiveMic_Biquad_Allocate( dspId, BIQUAD2BANDCOUNT );
-	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp4pcs[2], PCS_NODE | 9 );
+	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp4pcs[2], PCS_NODE | 8 );
 	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp4pcs[2], PCS_DSP_OUT | 0 );
 
 #ifdef _customPostInitFunction4
@@ -131,11 +121,7 @@ const WORD nrpn4List[NUMBEROFCOMMAND4][2]=
 	{ 0x0600, 0x4036 }, // _LiveMic_MixN_GainPhase
 	{ 0x061F, 0x4037 }, // _LiveMic_MixN_GainValue
 	{ 0x0700, 0x4036 }, // _LiveMic_MixN_GainPhase
-	{ 0x071F, 0x4037 }, // _LiveMic_MixN_GainValue
-	{ 0x0800, 0x4036 }, // _LiveMic_MixN_GainPhase
-	{ 0x081F, 0x4037 }, // _LiveMic_MixN_GainValue
-	{ 0x0B00, 0x0030 }, // _LiveMic_Gain_Value
-	{ 0x0B01, 0x0031 } // _LiveMic_Gain_Phase
+	{ 0x071F, 0x4037 } // _LiveMic_MixN_GainValue
 
 };
 
@@ -256,9 +242,6 @@ WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x000F: _LiveMic_Effect_EchoOutputPhase( dspId, 0, val8bit ); return 1;
 			case 0x0010: _LiveMic_Effect_EchoOutputLevel( dspId, 1, value ); return 1;
 			case 0x0011: _LiveMic_Effect_EchoOutputPhase( dspId, 1, val8bit ); return 1;
-			//Gain
-			case 0x0030: _LiveMic_Gain_Value( dspId, processId, value ); return 1;
-			case 0x0031: _LiveMic_Gain_Phase( dspId, processId, val8bit ); return 1;
 		
 		}
 	

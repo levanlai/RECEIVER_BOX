@@ -38,7 +38,8 @@ WORD bProgramInDebugMode = 0;
 #define PACK_START_CODE1         0xA5
 #define PACK_START_CODE2         0x5A
 #define PACK_STOP_CODE          0x16
-#define PACK_USER_CODE          0xFC
+//#define PACK_USER_CODE          0xFC
+#define PACK_USER_CODE 			0xFA
 #define PACK_DATA_LEN           3
 
 WORD McFifo[0x100];		// FIFO for Micro-channel (must be power of two!)
@@ -68,14 +69,20 @@ void uart1_send_cmd(WORD cmd, WORD value)
 {
 	//TRACE("uart1_send_cmd=%x", cmd);
 	//TRACE("value=%x", value);
-	 //uart1_send_byte(PACK_START_CODE1 & 0xFF);
-	// uart1_send_byte(PACK_START_CODE2 & 0xFF);
-	// uart1_send_byte(PACK_USER_CODE & 0xFF);
-	uart1_send_byte((cmd >> 8) & 0xFF);
+	uart1_send_byte(PACK_START_CODE1 & 0xFF);
+	uart1_send_byte(PACK_START_CODE2 & 0xFF);
+	uart1_send_byte(PACK_USER_CODE & 0xFF);
+	uart1_send_byte(PACK_DATA_LEN & 0xFF); 
+	//uart1_send_byte((cmd >> 8) & 0xFF);
 	uart1_send_byte((cmd) & 0xFF);
 	uart1_send_byte((value >> 8) & 0xFF);
 	uart1_send_byte((value) & 0xFF);
-	//uart1_send_byte(PACK_STOP_CODE & 0xFF);	
+	uart1_send_byte(PACK_STOP_CODE & 0xFF);	
+
+	// uart1_send_byte((cmd >> 8) & 0xFF);
+	// uart1_send_byte((cmd) & 0xFF);
+	// uart1_send_byte((value >> 8) & 0xFF);
+	// uart1_send_byte((value) & 0xFF);
 }
 
 WORD HandleUart1Data(_SYS_CCB_USER_P dummy, WORD data)
@@ -186,8 +193,8 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 	//WORD tmp;
 	DWORD valueConvert;
 	
-	TRACE("uart_cmd_parse cmd=%d",cmd);	
-	TRACE("value=%d",value);		
+	//TRACE("uart_cmd_parse cmd=%d",cmd);	
+	//TRACE("value=%d",value);		
 		switch (cmd)
 		{		
 			case CMD_POWER:				
@@ -214,20 +221,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					cmd_execute(CMD_MIC_1_VOL,value,iInit,TRUE,valueConvert);
 				
 				break;	
-			// case CMD_MIC_1_EFFECT:	
-			// 	//TRACE("CMD_MIC_1_EFFECT %d",value);
-			// 	valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
-			// 	if(myData.Mic_Control_link)
-			// 		cmd_execute(CMD_MIC_2_EFFECT,value,iInit,TRUE,valueConvert);
-				
-			// 	break;
-			// case CMD_MIC_2_EFFECT:	
-			// 	//TRACE("CMD_MIC_2_EFFECT %d",value);
-			// 	valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
-			// 	if(myData.Mic_Control_link)
-			// 		cmd_execute(CMD_MIC_1_EFFECT,value,iInit,TRUE,valueConvert);
-				
-			// 	break;		
+			
 			case CMD_MIC_1_ECHO:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
@@ -252,18 +246,7 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					cmd_execute(CMD_MIC_1_DELAY,value,iInit,TRUE,valueConvert);
 				
 				break;						 
-			// case CMD_MIC_1_REVERB: 
-			// 	valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
-			// 	if(myData.Mic_Control_link)
-			// 		cmd_execute(CMD_MIC_2_REVERB,value,iInit,TRUE,valueConvert);
-				
-			// 	break;
-			// case CMD_MIC_2_REVERB: 
-			// 	valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
-			// 	if(myData.Mic_Control_link)
-			// 		cmd_execute(CMD_MIC_1_REVERB,value,iInit,TRUE,valueConvert);
-				
-			// 	break;
+			
 			case CMD_MIC_1_REPEAT: 
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
@@ -312,6 +295,17 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					cmd_execute(CMD_MIC_1_TREBLE,value,iInit,TRUE,valueConvert);
 				
 				break; 
+			case CMD_MIC_1_HPF:
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_2_HPF,value,iInit,TRUE,valueConvert);
+				
+				break;  
+			case CMD_MIC_2_HPF:
+				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
+				if(myData.Mic_Control_link)
+					cmd_execute(CMD_MIC_1_HPF,value,iInit,TRUE,valueConvert);
+				break; 		
 			case CMD_VOL_OUT: 
 				value=checkRangeValue(cmd,value);				
 				if(!iInit)
@@ -320,11 +314,15 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Mic_Vol_Out=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);
+				//_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);
+				_LiveMic_Gain_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[11],valueConvert);
 				break;	
-			case CMD_MIC_REVERB: 
+			case CMD_MIC_REVERB_VOL: 
 				cmd_execute(cmd,value,iInit,FALSE,0);				
 				break; 	
+			case CMD_MIC_REVERB_TIME: 
+				cmd_execute(cmd,value,iInit,FALSE,0);				
+				break; 		
 			case CMD_MIC_EFFECT: 
 				if(!iInit)
 				{
@@ -353,33 +351,49 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					_LiveMic_MixN_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[5],0, GAIN_0_SAM);
 					_LiveMic_MixN_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[5],1, GAIN_0_SAM);
 				}
-
-				// if(myData.Mic_Effect==TURN_OFF)
-				// {
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],0, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],1, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],0, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],1, 0);
-
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[5],0, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[5],1, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[6],0, 0);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[6],1, 0);
-				// }else
-				// {
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],0, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[6],1, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],0, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[7],1, GAIN_0_SAM);
-
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[5],0, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[5],1, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[6],0, GAIN_0_SAM);
-				// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[6],1, GAIN_0_SAM);
-				// }
-				//_LiveMic_Effect_LoadProgram(dsp[DSP1_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
-				//_LiveMic_Effect_LoadProgram(dsp[DSP2_LIVEMIC],  value==TURN_OFF ? EFFECT_OFF:EFFECT_MonoEcho_Reverb);
-				break;						
+				break;	
+			case CMD_MUSIC_VOL:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Vol=value;
+				}				
+			 	break;	
+			case CMD_MUSIC_BASS:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Bass=value;
+				}				
+			 	break;		
+			case CMD_MUSIC_MID:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Mid=value;
+				}				
+			 	break;		
+			case CMD_MUSIC_TREBLE:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Treb=value;
+				}				
+			 	break;		
+			case CMD_MUSIC_BASSBOOST:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Bassboost=value;
+				}				
+			 	break;		
+			case CMD_MUSIC_ENHANCER:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Music_Enhancer=value;
+				}				
+			 	break;												
 			case CMD_MIC_FBC:
 				if(!iInit)
 				{
@@ -445,34 +459,7 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 				//TRACE("CMD_MIC_1_VOL tmp=%x",tmp);	
 			_LiveMic_Gain_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[1], tmp);			
 			break;	
-		// case CMD_MIC_2_EFFECT:	
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;		
-		// 		myData.Mic_2_Effect=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[7],0, tmp);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[7],1, tmp);
-		// 	break;
-		// case CMD_MIC_1_EFFECT:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Effect=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[8],0, tmp);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[8],1, tmp);
-		// 	break;		
+		
 		case CMD_MIC_2_ECHO:
 			value=checkRangeValue(cmd,value);
 			if(!iInit)
@@ -510,7 +497,7 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 				tmp=valueSam;
 			else
 				tmp=ConvertValueToSAM((DWORD)value,cmd);
-				TRACE("CMD_MIC_2_DELAY tmp=%x",tmp);	
+				//TRACE("CMD_MIC_2_DELAY tmp=%x",tmp);	
 			_LiveMic_Effect_EchoTime(dsp[DSP1_LIVEMIC], tmp);
 				//TRACE("CMD_MIC_2_DELAY value=%d",value);
 			 //TRACE("delay=%x",arr_delay[value]);	
@@ -527,38 +514,13 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 				tmp=valueSam;
 			else
 				tmp=ConvertValueToSAM((DWORD)value,cmd);
-				TRACE("CMD_MIC_1_DELAY tmp=%x",tmp);	
+				//TRACE("CMD_MIC_1_DELAY tmp=%x",tmp);	
 			_LiveMic_Effect_EchoTime(dsp[DSP2_LIVEMIC], tmp);
 			// TRACE("CMD_MIC_1_DELAY value=%d",value);
 			//  	TRACE("delay=%x",arr_delay[value]);	
 			//  _LiveMic_Effect_EchoTime(dsp[DSP2_LIVEMIC], arr_delay[value]);
 			break;						 
-		// case CMD_MIC_2_REVERB: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Reverb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_RevLevel(dsp[DSP1_LIVEMIC], tmp);
-		// 	break;
-		// case CMD_MIC_1_REVERB: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Reverb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_RevLevel(dsp[DSP2_LIVEMIC], tmp);
-		// 	break;
+		
 		case CMD_MIC_2_REPEAT: 
 			value=checkRangeValue(cmd,value);
 			if(!iInit)
@@ -664,265 +626,52 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 			func_SendValueToSAM(DSP2_LIVEMIC,0x0362,tmp,FORMAT_14BIT_PRECISION);
 			break; 
 
-		case CMD_MIC_REVERB: 
+		case CMD_MIC_2_HPF:
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE; 
+				myData.Mic_2_HPF=value;
+			}
+			if(iLink)
+				tmp=valueSam;
+			else
+				tmp=ConvertValueToSAM((DWORD)value,cmd);
+			func_SendValueToSAM(DSP1_LIVEMIC,0x0344,tmp,FORMAT_28BIT_PRECISION);
+			break;  
+		case CMD_MIC_1_HPF:
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE; 
+				myData.Mic_1_HPF=value;
+			}
+			if(iLink)
+				tmp=valueSam;
+			else
+				tmp=ConvertValueToSAM((DWORD)value,cmd);
+			func_SendValueToSAM(DSP2_LIVEMIC,0x0344,tmp,FORMAT_28BIT_PRECISION);
+			break; 	
+		case CMD_MIC_REVERB_VOL: 
 			value=checkRangeValue(cmd,value);
 			if(!iInit)
 			{
 				iNeedSaveFlash=TRUE;
-				myData.Mic_Reverb=value;
+				myData.Mic_Reverb_Vol=value;
 			}
 			tmp=ConvertValueToSAM((DWORD)value,cmd);
 			_LiveMic_Effect_RevLevel(dsp[DSP4_LIVEMIC], tmp);
 			break;
-
-		// case CMD_MIC_2_VOL:	
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;		
-		// 		myData.Mic_2_Vol=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 		//TRACE("CMD_MIC_2_VOL tmp=%x",tmp);	
-		// 	_LiveMic_Gain_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[2], tmp);
-		// 	//_LiveMic_Gain_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[8], tmp);
-		// 	break;
-		// case CMD_MIC_1_VOL:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Vol=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 		//TRACE("CMD_MIC_1_VOL tmp=%x",tmp);	
-		// 	//_LiveMic_Gain_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[1], tmp);
-		// 	_LiveMic_Gain_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[4], tmp);
-		// 	break;	
-		// case CMD_MIC_2_EFFECT:	
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;		
-		// 		myData.Mic_2_Effect=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[7],0, tmp);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP1_LIVEMIC], dsp1pcs[7],1, tmp);
-		// 	break;
-		// case CMD_MIC_1_EFFECT:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Effect=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[8],0, tmp);
-		// 	_LiveMic_MixN_LinearGainValue(dsp[DSP2_LIVEMIC], dsp2pcs[8],1, tmp);
-		// 	break;		
-		// case CMD_MIC_2_ECHO:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Echo=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_EchoInputLevel(dsp[DSP1_LIVEMIC], tmp);
-		// 	break;	
-		// case CMD_MIC_1_ECHO:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Echo=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_EchoInputLevel(dsp[DSP2_LIVEMIC], tmp);
-		// 	break;							
-		// case CMD_MIC_2_DELAY:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Delay=value;
-		// 	}
-		// 	// if(iLink)
-		// 	// 	tmp=valueSam;
-		// 	// else
-		// 	// 	tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	// 	TRACE("CMD_MIC_2_DELAY tmp=%x",tmp);	
-		// 	// _LiveMic_Effect_EchoTime(dsp[DSP1_LIVEMIC], tmp);
-		// 		//TRACE("CMD_MIC_2_DELAY value=%d",value);
-		// 	 	TRACE("delay=%x",arr_delay[value]);	
-		// 	 _LiveMic_Effect_EchoTime(dsp[DSP1_LIVEMIC], arr_delay[value]);
-		// 	break;		
-		// case CMD_MIC_1_DELAY:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Delay=value;
-		// 	}
-		// 	// if(iLink)
-		// 	// 	tmp=valueSam;
-		// 	// else
-		// 	// 	tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	// 	TRACE("CMD_MIC_1_DELAY tmp=%x",tmp);	
-		// 	// _LiveMic_Effect_EchoTime(dsp[DSP2_LIVEMIC], tmp);
-		// 	TRACE("CMD_MIC_1_DELAY value=%d",value);
-		// 	 	TRACE("delay=%x",arr_delay[value]);	
-		// 	 _LiveMic_Effect_EchoTime(dsp[DSP2_LIVEMIC], arr_delay[value]);
-		// 	break;						 
-		// case CMD_MIC_2_REVERB: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Reverb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_RevLevel(dsp[DSP1_LIVEMIC], tmp);
-		// 	break;
-		// case CMD_MIC_1_REVERB: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Reverb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_RevLevel(dsp[DSP2_LIVEMIC], tmp);
-		// 	break;
-		// case CMD_MIC_2_REPEAT: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Repeat=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_EchoFeedback(dsp[DSP1_LIVEMIC], tmp);
-		// 	break;
-		// case CMD_MIC_1_REPEAT: 
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Repeat=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	_LiveMic_Effect_EchoFeedback(dsp[DSP2_LIVEMIC], tmp);
-		// 	break;	
-		// case CMD_MIC_2_BASS:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Bass=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0160,tmp,FORMAT_14BIT_PRECISION);
-		// 	break;	
-		// case CMD_MIC_1_BASS:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Bass=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0260,tmp,FORMAT_14BIT_PRECISION);
-		// 	break;	
-		// case CMD_MIC_2_MID:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_2_Mid=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0161,tmp,FORMAT_14BIT_PRECISION);
-		// 	break;	
-		// case CMD_MIC_1_MID:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE;
-		// 		myData.Mic_1_Mid=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0261,tmp,FORMAT_14BIT_PRECISION);
-		// 	break;						
-		// case CMD_MIC_2_TREBLE:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE; 
-		// 		myData.Mic_2_Treb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0162,tmp,FORMAT_14BIT_PRECISION);
-		// 	break;  
-		// case CMD_MIC_1_TREBLE:
-		// 	value=checkRangeValue(cmd,value);
-		// 	if(!iInit)
-		// 	{
-		// 		iNeedSaveFlash=TRUE; 
-		// 		myData.Mic_1_Treb=value;
-		// 	}
-		// 	if(iLink)
-		// 		tmp=valueSam;
-		// 	else
-		// 		tmp=ConvertValueToSAM((DWORD)value,cmd);
-		// 	func_SendValueToSAM(DSP4_MIXPAXT,0x0262,tmp,FORMAT_14BIT_PRECISION);
-		// 	break; 
+		case CMD_MIC_REVERB_TIME: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_Reverb_Time=value;
+			}
+			tmp=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_RevTime(dsp[DSP4_LIVEMIC], tmp);
+			break;	
 		
 		default:
 			break;
@@ -948,6 +697,7 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MIC_1_BASS, myData.Mic_1_Bass);
 	uart_send_cmd(CMD_MIC_1_MID, myData.Mic_1_Mid);
 	uart_send_cmd(CMD_MIC_1_TREBLE, myData.Mic_1_Treb);
+	uart_send_cmd(CMD_MIC_1_HPF, myData.Mic_1_HPF);
 	if(!myData.Mic_Control_link)
 	{
 		uart_send_cmd(CMD_MIC_2_VOL, myData.Mic_2_Vol);
@@ -959,12 +709,21 @@ void syncDataToPanel(void)
 		uart_send_cmd(CMD_MIC_2_BASS, myData.Mic_2_Bass);
 		uart_send_cmd(CMD_MIC_2_MID, myData.Mic_2_Mid);
 		uart_send_cmd(CMD_MIC_2_TREBLE, myData.Mic_2_Treb);
+		uart_send_cmd(CMD_MIC_2_HPF, myData.Mic_2_HPF);
 	}
 	uart_send_cmd(CMD_VOL_OUT, myData.Mic_Vol_Out);
-	uart_send_cmd(CMD_MIC_REVERB, myData.Mic_Reverb);
+	uart_send_cmd(CMD_MIC_REVERB_VOL, myData.Mic_Reverb_Vol);
+	uart_send_cmd(CMD_MIC_REVERB_TIME, myData.Mic_Reverb_Time);
 	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	
+	uart_send_cmd(CMD_MUSIC_VOL, myData.Music_Vol);
+	uart_send_cmd(CMD_MUSIC_BASS, myData.Music_Bass);
+	uart_send_cmd(CMD_MUSIC_MID, myData.Music_Mid);
+	uart_send_cmd(CMD_MUSIC_TREBLE, myData.Music_Treb);
+	uart_send_cmd(CMD_MUSIC_BASSBOOST, myData.Music_Bassboost);
+	uart_send_cmd(CMD_MUSIC_ENHANCER, myData.Music_Enhancer);
+
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	

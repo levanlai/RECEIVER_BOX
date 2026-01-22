@@ -111,6 +111,7 @@ void delayMsec(WORD ms)
 void main_loop(void)
 {
 	WORD timer_count=0;
+	WORD cnt=0;
 	BOOL tmp;
 	#if ENABLE_USB
     	DWORD midi_event;
@@ -169,13 +170,20 @@ void main_loop(void)
 				}
 			}	
 			
+			// timer_count++;					
+			// if( timer_count>=100)//2s
+			// {					
+			// 	timer_count=0;
+			// 	cnt++;
+			// 	uart_send_cmd(0, cnt);			
+			// }
 		}
 
 		if(powerState==TURN_ON)
 		{
 			FBC_BaseLevels( );
 			bk9532_callHander();
-		}			
+		}
     }
 }
 

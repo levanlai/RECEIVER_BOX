@@ -71,21 +71,26 @@ BOOL check_plugin_det(void)
     return (_rdio(SYS_PLUGIN_DET_PORT_VAL) >> SYS_PLUGIN_DET_PIN ) & 0x01;
 }
 
-void Button_1_Press()//Move UP
+void Button_1_Press(WORD value)//Move UP
 {
     TRACE("Button_1_Press powerState=%d",powerState);
-    uart_send_cmd(CMD_MOVE, MOVE_DOWN); 
+    uart_send_cmd(CMD_MOVE, value); 
 }
-void Button_2_Press()//Move UP
+void Button_2_Press(WORD value)//Move UP
 {
     TRACE("Button_2_Press powerState=%d",powerState); 
-     uart_send_cmd(CMD_MOVE, MOVE_UP);
+     uart_send_cmd(CMD_MOVE, value);
 }
 void Button_3_Press()
 {
     TRACE("Button_3_Press powerState=%d",powerState);
     uart_cmd_parse(CMD_RESET, 0,FALSE); 
    uart_send_cmd(CMD_RESET, 0);   
+}
+void Button_4_Press()
+{
+    TRACE("Button_4_Press powerState=%d",powerState);
+     uart_send_cmd(CMD_BT_DISCONNET, 0);   
 }
 void Button_Power_Press(WORD value)
 {

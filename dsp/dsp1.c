@@ -7,7 +7,7 @@
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "BiquadCtrl.h"
 #include "memorymap.h"
-
+#include <trace.h>
 // Biquad(s) - define, variable, ... 
 #define BIQUAD_ITEMCOUNT 1
 
@@ -27,7 +27,7 @@ DWORD biquad1RawFrequency3[BIQUAD3BANDCOUNT];
 BiquadParameters biquad1ParamAddr3 = { biquad1Parameters3, biquad1Type3, biquad1XoverType3, biquad1RawFrequency3, BIQUAD3BANDCOUNT };
 #endif	// _SKIP_DDD_NRPN_CTRL
 
-WORD dsp1pcs[10];
+WORD dsp1pcs[11];
 
 WORD dsp1InitAndRoute(void)
 {
@@ -44,48 +44,53 @@ customPreInitFunction1( dspId );// Do all your custom pre initialization code in
 	// Process #1: Gain
 	dsp1pcs[1] = _LiveMic_Gain_Allocate( dspId );
 	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[1], PCS_DSP_IN | 0 );
-	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 7 );
+	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 6 );
 
 	// Process #2: NoiseGate
 	dsp1pcs[2] = _LiveMic_NoiseGate_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, NOISEGATE_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 7 );
-	_LiveMic_SetProcOUT( dspId, NOISEGATE_SAMPLE_OUT|dsp1pcs[2], PCS_NODE | 8 );
+	_LiveMic_SetProcIN( dspId, NOISEGATE_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 6 );
+	_LiveMic_SetProcOUT( dspId, NOISEGATE_SAMPLE_OUT|dsp1pcs[2], PCS_NODE | 7 );
 
 	// Process #3: Biquad
 	dsp1pcs[3] = _LiveMic_Biquad_Allocate( dspId, BIQUAD3BANDCOUNT );
-	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp1pcs[3], PCS_NODE | 8 );
-	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp1pcs[3], PCS_NODE | 9 );
+	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp1pcs[3], PCS_NODE | 7 );
+	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp1pcs[3], PCS_NODE | 8 );
 
 	// Process #4: LevelDetect
 	dsp1pcs[4] = _LiveMic_LevelDetect_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp1pcs[4], PCS_NODE | 9 );
+	_LiveMic_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp1pcs[4], PCS_NODE | 8 );
 
 	// Process #5: Compressor
 	dsp1pcs[5] = _LiveMic_Compressor_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp1pcs[5], PCS_NODE | 9 );
-	_LiveMic_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp1pcs[5], PCS_NODE | 6 );
+	_LiveMic_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp1pcs[5], PCS_NODE | 8 );
+	_LiveMic_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp1pcs[5], PCS_NODE | 10 );
 	_LiveMic_Compressor_ConnectLevel( dspId, dsp1pcs[5], dsp1pcs[4] );
 
 	// Process #6: (s)Reverb/Echo
-	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 6 );
-	_LiveMic_SetProcIN( dspId, LIVEMIC_ECHO_SAMPLE_IN, PCS_NODE | 6 );
-	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTL, PCS_NODE | 0 );
-	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTR, PCS_NODE | 1 );
-	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTL, PCS_NODE | 2 );
-	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTR, PCS_NODE | 3 );
+	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 10 );
+	_LiveMic_SetProcIN( dspId, LIVEMIC_ECHO_SAMPLE_IN, PCS_NODE | 10 );
+	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTL, PCS_NODE | 2 );
+	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTR, PCS_NODE | 3 );
+	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTL, PCS_NODE | 0 );
+	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTR, PCS_NODE | 1 );
 
-	// Process #9: MixN
-	dsp1pcs[9] = _LiveMic_MixN_Allocate( dspId, 2 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[9], PCS_NODE | 0 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[9], PCS_NODE | 4 );
+	// Process #10: Gain
+	dsp1pcs[10] = _LiveMic_Gain_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[10], PCS_NODE | 10 );
+	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[10], PCS_DSP_OUT | 1 );
 
 	// Process #7: MixN
 	dsp1pcs[7] = _LiveMic_MixN_Allocate( dspId, 2 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[7], PCS_NODE | 2 );
+	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[7], PCS_NODE | 0 );
 	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[7], PCS_NODE | 5 );
 
+	// Process #9: MixN
+	dsp1pcs[9] = _LiveMic_MixN_Allocate( dspId, 2 );
+	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[9], PCS_NODE | 2 );
+	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[9], PCS_NODE | 4 );
+
 	// Process #8: MixN
-	dsp1pcs[8] = _LiveMic_MixN_Allocate( dspId, 3 );
+	dsp1pcs[8] = _LiveMic_MixN_Allocate( dspId, 2 );
 	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[8], PCS_NODE | 4 );
 	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[8], PCS_DSP_OUT | 0 );
 
@@ -143,7 +148,9 @@ const WORD nrpn1List[NUMBEROFCOMMAND1][2]=
 	{ 0x0800, 0x4036 }, // _LiveMic_MixN_GainPhase
 	{ 0x081F, 0x4037 }, // _LiveMic_MixN_GainValue
 	{ 0x0900, 0x4036 }, // _LiveMic_MixN_GainPhase
-	{ 0x091F, 0x4037 } // _LiveMic_MixN_GainValue
+	{ 0x091F, 0x4037 }, // _LiveMic_MixN_GainValue
+	{ 0x0A00, 0x0030 }, // _LiveMic_Gain_Value
+	{ 0x0A01, 0x0031 } // _LiveMic_Gain_Phase
 
 };
 
@@ -250,7 +257,11 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x0014: _LiveMic_Biquad_InGainValue( dspId, processId, value ); return 1;
 			case 0x4015: SetFilterType( &updateCoeffFunc, theBiquad, dspId, processId, index, val8bit ); return 1;
 			case 0x4016: SetFilterQ( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
-			case 0x4017: SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
+			case 0x4017: 
+			TRACE("processId %x",processId);
+			TRACE("index %x",index);
+			TRACE("Freq %x",dvalue);
+			SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
 			case 0x4018: SetFilterGain( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
 			//LevelDetect
 			case 0x0034: _LiveMic_LevelDetect_Attack( dspId, processId, value ); return 1;

@@ -127,8 +127,11 @@ void sys_io_gpio_init(void)
 void sys_io_audio_init(void)
 {
     //Register 0x0A – PRM2: Primary Function Select for P2
-    //(enable DAAD0/DABD0)    
-    _orio(PRM2PORT, (((1<<15)|(1<<0))));
+    //(enable DAAD0/DAAD1/DABD0)   
+    //  DAAD0 (P2.0): Mic BK
+    //  DAAD1 (P2.1): BT
+    //  DABD0 (P2.15): out 
+    _orio(PRM2PORT, (((1<<15)|(1 << 1)|(1<<0))));
     
     // i2s //
     // master mode //
@@ -176,10 +179,10 @@ void sys_timer0_init(void)
     //     _orio( CONTROLPORT, ENA_TIMER0 );	//enable Timer 0
     // #endif 
     //uart ko cần timer2
-    #if ENABLE_USB
+    //#if ENABLE_USB
         _wrio( TIMER2PORT, _Sys_CalcTimerReload(UART_BAUDRATE));	//init Timer 2 reload value
         _orio( CONTROLPORT, ENA_TIMER2 );	//enable Timer 2
-    #endif
+    //#endif
     _wrio(TIMER0PORT, TIMER0V);  //init timer 0  //Timer 0 reload value for ~10ms (base level timer)
 	_orio(CONTROLPORT, ENA_TIMER0);    
     
