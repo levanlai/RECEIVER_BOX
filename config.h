@@ -1,7 +1,7 @@
 //#define _TARGET_CLASS_5xxx
 #define _TARGET_IC      5504
 
-#define AUTO_POWER_ON 
+#define FW_VERSION      10
 
 #define ENABLE_USB         1//1
 
@@ -228,7 +228,8 @@ enum {
 
     CMD_SAVE=150,
     CMD_RESET,
-    
+    CMD_MOVE,
+    CMD_SELECT_CHANGE,
 
     CMD_POWER=200,   
     CMD_PANEL_SYNC,
@@ -236,9 +237,8 @@ enum {
     CMD_BATTERY_VALUE,
     CMD_DEVICES_CONNECT,
     CMD_BT_DISCONNET,
-
-    CMD_MOVE,
-    CMD_SELECT_CHANGE,
+    CMD_INFO,
+    
     CMD_TOTAL,
 };
 

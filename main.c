@@ -214,6 +214,10 @@ void main_sendCmdPower()
 	chargeState=check_charge_det();
 	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
 }
+void main_sendCmdInfo()
+{
+	uart_send_cmd(CMD_INFO, FW_VERSION);
+}
 void setPowerOff()
 {
 	powerState=TURN_OFF;
@@ -240,7 +244,8 @@ void main_power_btn_check(void)
 					sys_power_latch(1);
 					delayMsec(100);
 					SysVarInit();	
-					main_sendCmdPower();
+					main_sendCmdInfo();
+					main_sendCmdPower();					
 					bk9532_test();
 					set_Mute_value(FALSE);
 				}				
