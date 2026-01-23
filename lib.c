@@ -62,6 +62,7 @@ void SysVarInit(void)
         myData.Mic_FBC=FBC_OFF;        
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
+        myData.Auto_PowerOff=AUTO_30;
 
          myData.Mic_2_Vol=UI_VALUE_MID;
         //myData.Mic_2_Effect=UI_VALUE_MID;        
@@ -536,4 +537,33 @@ WORD checkCMD_HPF(WORD cmd)
   if(cmd==CMD_MIC_1_HPF || cmd==CMD_MIC_2_HPF)
    result=TRUE;
    return result;
+}
+
+WORD getTimeAutoPowerOff()
+{
+  WORD result=0;
+  WORD Dif=10;
+  switch(myData.Auto_PowerOff)
+  {
+    case AUTO_10:
+        result=600-Dif;
+    break;
+    case AUTO_15:
+        result=900-Dif;
+    break;
+    // case AUTO_30:
+    //     result=1800-Dif;
+    // break;
+    case AUTO_45:
+        result=2700-Dif;
+    break;
+    case AUTO_60:
+        result=3600-Dif;
+    break;
+    default://30p
+        result=1800-Dif;
+    break;
+  }
+
+  return result;
 }

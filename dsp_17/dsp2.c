@@ -19,52 +19,52 @@
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
 
-_FILTER_PARAM biquad1Parameters3[BIQUAD3BANDCOUNT];
-WORD biquad1Type3[BIQUAD3BANDCOUNT];
-WORD biquad1XoverType3[BIQUAD3BANDCOUNT];
-DWORD biquad1RawFrequency3[BIQUAD3BANDCOUNT];
+_FILTER_PARAM biquad2Parameters3[BIQUAD3BANDCOUNT];
+WORD biquad2Type3[BIQUAD3BANDCOUNT];
+WORD biquad2XoverType3[BIQUAD3BANDCOUNT];
+DWORD biquad2RawFrequency3[BIQUAD3BANDCOUNT];
 
-BiquadParameters biquad1ParamAddr3 = { biquad1Parameters3, biquad1Type3, biquad1XoverType3, biquad1RawFrequency3, BIQUAD3BANDCOUNT };
+BiquadParameters biquad2ParamAddr3 = { biquad2Parameters3, biquad2Type3, biquad2XoverType3, biquad2RawFrequency3, BIQUAD3BANDCOUNT };
 #endif	// _SKIP_DDD_NRPN_CTRL
 
-WORD dsp1pcs[11];
+WORD dsp2pcs[11];
 
-WORD dsp1InitAndRoute(void)
+WORD dsp2InitAndRoute(void)
 {
 	WORD dspId;
 
-	dspId = _LiveMic_Init( MEMADDR_DSPINIT01_PCS00PAR00 );
+	dspId = _LiveMic_Init( MEMADDR_DSPINIT02_PCS00PAR00 );
 
 	if ( dspId == -1 ) return 0;
 
-#ifdef _customPreInitFunction1
-customPreInitFunction1( dspId );// Do all your custom pre initialization code into this function
+#ifdef _customPreInitFunction2
+customPreInitFunction2( dspId );// Do all your custom pre initialization code into this function
 #endif
 
 	// Process #1: Gain
-	dsp1pcs[1] = _LiveMic_Gain_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[1], PCS_DSP_IN | 0 );
-	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 6 );
+	dsp2pcs[1] = _LiveMic_Gain_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp2pcs[1], PCS_DSP_IN | 0 );
+	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp2pcs[1], PCS_NODE | 6 );
 
 	// Process #2: NoiseGate
-	dsp1pcs[2] = _LiveMic_NoiseGate_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, NOISEGATE_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 6 );
-	_LiveMic_SetProcOUT( dspId, NOISEGATE_SAMPLE_OUT|dsp1pcs[2], PCS_NODE | 7 );
+	dsp2pcs[2] = _LiveMic_NoiseGate_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, NOISEGATE_SAMPLE_IN|dsp2pcs[2], PCS_NODE | 6 );
+	_LiveMic_SetProcOUT( dspId, NOISEGATE_SAMPLE_OUT|dsp2pcs[2], PCS_NODE | 7 );
 
 	// Process #3: Biquad
-	dsp1pcs[3] = _LiveMic_Biquad_Allocate( dspId, BIQUAD3BANDCOUNT );
-	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp1pcs[3], PCS_NODE | 7 );
-	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp1pcs[3], PCS_NODE | 8 );
+	dsp2pcs[3] = _LiveMic_Biquad_Allocate( dspId, BIQUAD3BANDCOUNT );
+	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp2pcs[3], PCS_NODE | 7 );
+	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp2pcs[3], PCS_NODE | 8 );
 
 	// Process #4: LevelDetect
-	dsp1pcs[4] = _LiveMic_LevelDetect_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp1pcs[4], PCS_NODE | 8 );
+	dsp2pcs[4] = _LiveMic_LevelDetect_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp2pcs[4], PCS_NODE | 8 );
 
 	// Process #5: Compressor
-	dsp1pcs[5] = _LiveMic_Compressor_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp1pcs[5], PCS_NODE | 8 );
-	_LiveMic_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp1pcs[5], PCS_NODE | 10 );
-	_LiveMic_Compressor_ConnectLevel( dspId, dsp1pcs[5], dsp1pcs[4] );
+	dsp2pcs[5] = _LiveMic_Compressor_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp2pcs[5], PCS_NODE | 8 );
+	_LiveMic_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp2pcs[5], PCS_NODE | 10 );
+	_LiveMic_Compressor_ConnectLevel( dspId, dsp2pcs[5], dsp2pcs[4] );
 
 	// Process #6: (s)Reverb/Echo
 	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 10 );
@@ -75,27 +75,27 @@ customPreInitFunction1( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTR, PCS_NODE | 1 );
 
 	// Process #10: Gain
-	dsp1pcs[10] = _LiveMic_Gain_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[10], PCS_NODE | 10 );
-	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[10], PCS_DSP_OUT | 1 );
+	dsp2pcs[10] = _LiveMic_Gain_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp2pcs[10], PCS_NODE | 10 );
+	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp2pcs[10], PCS_DSP_OUT | 1 );
 
 	// Process #7: MixN
-	dsp1pcs[7] = _LiveMic_MixN_Allocate( dspId, 2 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[7], PCS_NODE | 0 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[7], PCS_NODE | 5 );
+	dsp2pcs[7] = _LiveMic_MixN_Allocate( dspId, 2 );
+	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp2pcs[7], PCS_NODE | 0 );
+	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp2pcs[7], PCS_NODE | 5 );
 
 	// Process #9: MixN
-	dsp1pcs[9] = _LiveMic_MixN_Allocate( dspId, 2 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[9], PCS_NODE | 2 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[9], PCS_NODE | 4 );
+	dsp2pcs[9] = _LiveMic_MixN_Allocate( dspId, 2 );
+	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp2pcs[9], PCS_NODE | 2 );
+	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp2pcs[9], PCS_NODE | 4 );
 
 	// Process #8: MixN
-	dsp1pcs[8] = _LiveMic_MixN_Allocate( dspId, 2 );
-	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp1pcs[8], PCS_NODE | 4 );
-	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp1pcs[8], PCS_DSP_OUT | 0 );
+	dsp2pcs[8] = _LiveMic_MixN_Allocate( dspId, 2 );
+	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp2pcs[8], PCS_NODE | 4 );
+	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp2pcs[8], PCS_DSP_OUT | 0 );
 
-#ifdef _customPostInitFunction1
-customPostInitFunction1( dspId );// Do all your custom post initialization code into this function
+#ifdef _customPostInitFunction2
+customPostInitFunction2( dspId );// Do all your custom post initialization code into this function
 #endif
 
 	return( dspId );
@@ -104,7 +104,7 @@ customPostInitFunction1( dspId );// Do all your custom post initialization code 
 
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
-const WORD nrpn1List[NUMBEROFCOMMAND1][2]=
+const WORD nrpn2List[NUMBEROFCOMMAND2][2]=
 {
 	{ 0x0100, 0x0030 }, // _LiveMic_Gain_Value
 	{ 0x0101, 0x0031 }, // _LiveMic_Gain_Phase
@@ -155,15 +155,15 @@ const WORD nrpn1List[NUMBEROFCOMMAND1][2]=
 };
 
 #define NB_BIQUAD_COMMAND 4
-const BiquadParamsTable nrpn1BiquadTable[NB_BIQUAD_COMMAND] = 
+const BiquadParamsTable nrpn2BiquadTable[NB_BIQUAD_COMMAND] = 
 {
-	{ 0x0303, 0x4015, &biquad1ParamAddr3 },
-	{ 0x0322, 0x4016, &biquad1ParamAddr3 },
-	{ 0x0341, 0x4017, &biquad1ParamAddr3 },
-	{ 0x0360, 0x4018, &biquad1ParamAddr3 }
+	{ 0x0303, 0x4015, &biquad2ParamAddr3 },
+	{ 0x0322, 0x4016, &biquad2ParamAddr3 },
+	{ 0x0341, 0x4017, &biquad2ParamAddr3 },
+	{ 0x0360, 0x4018, &biquad2ParamAddr3 }
 };
 
-WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format )
+WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format )
 {
 	
 	WORD i, functionId, index = 0, val8bit;
@@ -171,8 +171,8 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 	BiquadParameters *theBiquad;
 	UpdateCoeffCallback updateCoeffFunc;
 	
-	#ifdef _customPreNrpnFunction1
-	if ( customPreNrpnFunction1( dspId, nrpn, &value, format ) )// Do all your custom pre NRPN code into this function
+	#ifdef _customPreNrpnFunction2
+	if ( customPreNrpnFunction2( dspId, nrpn, &value, format ) )// Do all your custom pre NRPN code into this function
 		return 1;
 	#endif
 	
@@ -182,31 +182,31 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 	else
 		dvalue=value;
 	
-	i = dichotomicSearch( _cptr32(nrpn1List), 2, 0, NUMBEROFCOMMAND1, nrpn );
+	i = dichotomicSearch( _cptr32(nrpn2List), 2, 0, NUMBEROFCOMMAND2, nrpn );
 	
 	if ((i&(1<<15)))
 	{
 		i &= 0x7FFF;
-		if ( i == NUMBEROFCOMMAND1 ) // higher bound test
+		if ( i == NUMBEROFCOMMAND2 ) // higher bound test
 			i--;
 		else
 		{
-			if ( nrpn < nrpn1List[i][0] )
+			if ( nrpn < nrpn2List[i][0] )
 				i--;		
 		}
-		if ( !(nrpn1List[i][1] & (1<<14)) )
+		if ( !(nrpn2List[i][1] & (1<<14)) )
 			i=-1;	
 	}
 	
 	if ( i != -1 )
 	{
-		index = nrpn - nrpn1List[i][0];
-		functionId = nrpn1List[i][1];
-		processId = dsp1pcs[processId];
+		index = nrpn - nrpn2List[i][0];
+		functionId = nrpn2List[i][1];
+		processId = dsp2pcs[processId];
 	}
 	else
 	{
-		i = dichotomicSearch( _cptr32(nrpn1BiquadTable), 3, 0, NB_BIQUAD_COMMAND, nrpn );
+		i = dichotomicSearch( _cptr32(nrpn2BiquadTable), 3, 0, NB_BIQUAD_COMMAND, nrpn );
 		if (i!=-1)
 		{
 			if ((i&(1<<15)))
@@ -216,19 +216,19 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 					i--;
 				else
 				{
-					if ( nrpn < nrpn1BiquadTable[i].nrpn )
+					if ( nrpn < nrpn2BiquadTable[i].nrpn )
 						i--;				
 				}
-				if ( !(nrpn1BiquadTable[i].functionId & (1<<14)) )
+				if ( !(nrpn2BiquadTable[i].functionId & (1<<14)) )
 					i=-1;			
 			}
 			
 			if ( i != -1 )
 			{
-				index = nrpn - nrpn1BiquadTable[i].nrpn;
-				functionId = nrpn1BiquadTable[i].functionId;
-				processId = dsp1pcs[processId];
-				theBiquad = (BiquadParameters *)nrpn1BiquadTable[i].parametersTable;
+				index = nrpn - nrpn2BiquadTable[i].nrpn;
+				functionId = nrpn2BiquadTable[i].functionId;
+				processId = dsp2pcs[processId];
+				theBiquad = (BiquadParameters *)nrpn2BiquadTable[i].parametersTable;
 				updateCoeffFunc.BIQUAD_UpdateCoeffFuncPtr = _cptr32( &_LiveMic_Biquad_UpdateCoeff );
 				updateCoeffFunc.BIQUAD_FlatFuncPtr = _cptr32( &_LiveMic_Biquad_Flat );
 			}
@@ -296,8 +296,8 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 	
 	}
 	
-	#ifdef _customPostNrpnFunction1
-	if ( customPostNrpnFunction1( dspId, nrpn, val8bit, value, dvalue ) )// Do all your custom post NRPN code into this function
+	#ifdef _customPostNrpnFunction2
+	if ( customPostNrpnFunction2( dspId, nrpn, val8bit, value, dvalue ) )// Do all your custom post NRPN code into this function
 		return 1;
 	#endif
 	return 0;

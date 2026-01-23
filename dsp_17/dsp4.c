@@ -14,7 +14,7 @@
 
 #define NUMBER_OF_BIQUAD_EXTRAFUNCTION 4
 
-#define	BIQUAD2BANDCOUNT	7
+#define	BIQUAD2BANDCOUNT	3
 
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
@@ -84,10 +84,6 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp4pcs[5], PCS_NODE | 4 );
 	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 9 );
 
-	// Process #9: PeakLevel
-	dsp4pcs[9] = _LiveMic_PeakLevel_Allocate( dspId );
-	_LiveMic_SetProcOUT( dspId, PEAKLEVEL_SAMPLE_IN|dsp4pcs[9], PCS_DSP_OUT | 1 );
-
 	// Process #2: Biquad
 	dsp4pcs[2] = _LiveMic_Biquad_Allocate( dspId, BIQUAD2BANDCOUNT );
 	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp4pcs[2], PCS_NODE | 9 );
@@ -138,7 +134,6 @@ const WORD nrpn4List[NUMBEROFCOMMAND4][2]=
 	{ 0x071F, 0x4037 }, // _LiveMic_MixN_GainValue
 	{ 0x0800, 0x4036 }, // _LiveMic_MixN_GainPhase
 	{ 0x081F, 0x4037 }, // _LiveMic_MixN_GainValue
-	{ 0x0900, 0x003E }, // _LiveMic_PeakLevel_GetPeak
 	{ 0x0B00, 0x0030 }, // _LiveMic_Gain_Value
 	{ 0x0B01, 0x0031 } // _LiveMic_Gain_Phase
 
@@ -264,8 +259,6 @@ WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			//Gain
 			case 0x0030: _LiveMic_Gain_Value( dspId, processId, value ); return 1;
 			case 0x0031: _LiveMic_Gain_Phase( dspId, processId, val8bit ); return 1;
-			//PeakLevel
-			case 0x003E:  sendSysExMessage( value, _LiveMic_PeakLevel_GetPeak( dspId, processId ) ); return 1;
 		
 		}
 	

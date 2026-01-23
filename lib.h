@@ -16,4 +16,5 @@ WORD CRC8_Array(DWORD data,WORD len);
 WORD checkRangeValue(WORD cmd,int value);
 WORD checkCMDGainEQ(WORD cmd);
 WORD checkCMD_HPF(WORD cmd);
+WORD getTimeAutoPowerOff();
 #endif

@@ -411,6 +411,13 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Mic_Control_link=value;
 				}
 				break;	
+			case CMD_AUTO_POWEROFF:
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Auto_PowerOff=value;
+				}
+				break;		
 			case CMD_SAVE:
 				SaveFlash();
 				break;	
@@ -726,6 +733,7 @@ void syncDataToPanel(void)
 
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
+	uart_send_cmd(CMD_AUTO_POWEROFF, myData.Auto_PowerOff);
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
 	//TRACE("syncDataToPanel %d",value);
 	

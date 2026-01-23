@@ -23,6 +23,7 @@
 extern void bk9532_TurnLED(WORD value);
 extern MyData_t  myData;
 extern WORD powerState;
+extern WORD cnt_SilenceDetect;
 void sys_power_latch(WORD onoff)
 {
     TRACE("sys_power_latch onoff=%d",onoff);
@@ -39,6 +40,8 @@ void sys_power_latch(WORD onoff)
         //_Sys_Reset();//reset trong debug không có tác dụng
         
     }
+    if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0;
 }
 
 BOOL sys_power_button(void)
@@ -74,27 +77,37 @@ BOOL check_plugin_det(void)
 void Button_1_Press(WORD value)//Move UP
 {
     TRACE("Button_1_Press powerState=%d",powerState);
-    uart_send_cmd(CMD_MOVE, value); 
+    uart_send_cmd(CMD_MOVE, value);
+    if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0; 
 }
 void Button_2_Press(WORD value)//Move UP
 {
     TRACE("Button_2_Press powerState=%d",powerState); 
      uart_send_cmd(CMD_MOVE, value);
+    if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0; 
 }
 void Button_3_Press()
 {
     TRACE("Button_3_Press powerState=%d",powerState);
     uart_cmd_parse(CMD_RESET, 0,FALSE); 
-   uart_send_cmd(CMD_RESET, 0);   
+   uart_send_cmd(CMD_RESET, 0);  
+   if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0; 
 }
 void Button_4_Press()
 {
     TRACE("Button_4_Press powerState=%d",powerState);
-     uart_send_cmd(CMD_BT_DISCONNET, 0);   
+     uart_send_cmd(CMD_BT_DISCONNET, 0); 
+    if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0;   
 }
 void Button_Power_Press(WORD value)
 {
     TRACE("Button_Power_Press value=%d",value); 
     uart_send_cmd(CMD_SELECT_CHANGE, value);
+    if(cnt_SilenceDetect!=0)
+        cnt_SilenceDetect=0;
 }
 

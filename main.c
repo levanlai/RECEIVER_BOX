@@ -20,6 +20,8 @@ WORD iFirstPowerPress=FALSE;
 WORD initPowerOn=0;
 WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 DWORD delay = 0;
+WORD cnt_SilenceDetect=0;
+extern MyData_t  myData;
 //WORD last_time_PressContinue=0;
 //WORD cntPressContinue=0;
 #if ENABLE_USB
@@ -111,7 +113,7 @@ void delayMsec(WORD ms)
 void main_loop(void)
 {
 	WORD timer_count=0;
-	WORD cnt=0;
+	WORD cnt=0;	
 	BOOL tmp;
 	#if ENABLE_USB
     	DWORD midi_event;
@@ -167,6 +169,26 @@ void main_loop(void)
 					}
 					//tmp=check_plugin_det();
 					//TRACE("plugin_det=%d",tmp);
+					if(myData.Auto_PowerOff!=AUTO_OFF)
+					{
+						cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
+						//TRACE("Peak=%x",cnt);
+						if(cnt==0)
+						{
+							cnt_SilenceDetect++;
+							TRACE("cnt_SilenceDetect=%d",cnt_SilenceDetect);
+							TRACE("auto=%d",myData.Auto_PowerOff);
+							if(cnt_SilenceDetect>(getTimeAutoPowerOff()/2))
+							{
+								cnt_SilenceDetect=0;
+								setPowerOff();
+							}
+						}else
+						{
+							if(cnt_SilenceDetect!=0)
+								cnt_SilenceDetect=0;
+						}
+					}
 				}
 			}	
 			
@@ -191,6 +213,15 @@ void main_sendCmdPower()
 {
 	chargeState=check_charge_det();
 	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
+}
+void setPowerOff()
+{
+	powerState=TURN_OFF;
+	TRACE("POWER_OFF here %d",powerState);
+	set_Mute_value(TRUE);
+	main_sendCmdPower();
+	bk9532_mic_reset_pair();
+	sys_power_latch(0);
 }
 void main_power_btn_check(void)
 {
@@ -228,15 +259,9 @@ void main_power_btn_check(void)
 					delay++;
 					//TRACE("main_power_off_check %d",delay);
 				 	if(delay >= 60)
-					{						
-						powerState=TURN_OFF;
-						TRACE("POWER_OFF here %d",powerState);
+					{			
 						delay=0;
-						//cntPressContinue=0;
-						set_Mute_value(TRUE);
-						main_sendCmdPower();
-						bk9532_mic_reset_pair();
-						sys_power_latch(0);
+						setPowerOff();	
 					}
 				}
 			}

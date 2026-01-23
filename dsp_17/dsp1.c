@@ -7,7 +7,7 @@
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "BiquadCtrl.h"
 #include "memorymap.h"
-
+#include <trace.h>
 // Biquad(s) - define, variable, ... 
 #define BIQUAD_ITEMCOUNT 1
 
@@ -257,7 +257,11 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x0014: _LiveMic_Biquad_InGainValue( dspId, processId, value ); return 1;
 			case 0x4015: SetFilterType( &updateCoeffFunc, theBiquad, dspId, processId, index, val8bit ); return 1;
 			case 0x4016: SetFilterQ( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
-			case 0x4017: SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
+			case 0x4017: 
+			TRACE("processId %x",processId);
+			TRACE("index %x",index);
+			TRACE("Freq %x",dvalue);
+			SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
 			case 0x4018: SetFilterGain( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
 			//LevelDetect
 			case 0x0034: _LiveMic_LevelDetect_Attack( dspId, processId, value ); return 1;

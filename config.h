@@ -149,6 +149,14 @@ enum {
     EFFECT_OFF,
     EFFECT_MonoEcho_Reverb=12,  
 };
+enum {        
+    AUTO_OFF, 
+    AUTO_10,   
+    AUTO_15,
+    AUTO_30,
+    AUTO_45,
+    AUTO_60,
+};
 // enum {    
 //     CMD_MIC_VOL,
 //     CMD_ECHO,
@@ -212,13 +220,15 @@ enum {
     CMD_MUSIC_BASSBOOST,
     CMD_MUSIC_ENHANCER,
     CMD_CONTROL_LINK,
+    CMD_AUTO_POWEROFF,
 
     CMD_MIC_1_HPF,
     CMD_MIC_2_HPF,   
+    CMD_AUDIO_MODE,
 
     CMD_SAVE=150,
     CMD_RESET,
-    CMD_RESET_FORM_MIC,
+    
 
     CMD_POWER=200,   
     CMD_PANEL_SYNC,
@@ -263,6 +273,7 @@ typedef struct MyData{
   WORD Mic_Effect;
   WORD Mic_FBC; 
   WORD Mic_Control_link;
+  WORD Auto_PowerOff;
 
   WORD Music_Vol; 
   WORD Music_Bass;  
