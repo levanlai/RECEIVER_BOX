@@ -202,6 +202,11 @@ WORD bk9532_reg_and_mask_or_flag(WORD bus, WORD reg, DWORD mask, DWORD flag)
     DWORD reg_val;
 
     state = bk9532_reg_read(bus, reg, &reg_val);
+    // if(reg==0x36)
+    // {
+    //     TRACE("read 0x36 state=%x",state);
+    //      TRACE("read 0x36 reg_val=%x",reg_val);
+    // }
     if(state != I2C_OK)
         return state;
     
@@ -209,5 +214,10 @@ WORD bk9532_reg_and_mask_or_flag(WORD bus, WORD reg, DWORD mask, DWORD flag)
     reg_val |= flag;
 
     state = bk9532_reg_write(bus, reg, reg_val);
+    // if(reg==0x36)
+    // {
+    //     TRACE("write 0x36 state=%x",state);
+    //      TRACE("write 0x36 reg_val=%x",reg_val);
+    // }
     return state;
 }

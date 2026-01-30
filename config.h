@@ -1,7 +1,7 @@
 //#define _TARGET_CLASS_5xxx
 #define _TARGET_IC      5504
 
-#define FW_VERSION      10
+#define FW_VERSION      11
 
 #define ENABLE_USB         1//1
 
@@ -223,13 +223,16 @@ enum {
     CMD_AUTO_POWEROFF,
 
     CMD_MIC_1_HPF,
-    CMD_MIC_2_HPF,   
+    CMD_MIC_2_HPF,  
+    CMD_BLUETOOTH, 
     CMD_AUDIO_MODE,
+      
 
     CMD_SAVE=150,
     CMD_RESET,
     CMD_MOVE,
     CMD_SELECT_CHANGE,
+    CMD_ROTARY,
 
     CMD_POWER=200,   
     CMD_PANEL_SYNC,
@@ -292,4 +295,10 @@ enum {
     ADC_BATERY,
     ADC_BTN,    
 };
+enum {
+    MIC_WAIT,
+    MIC_SLEEP, 
+    MIC_WAKEUP  , 
+};
+
 

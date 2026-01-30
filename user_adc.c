@@ -156,7 +156,8 @@ void ADC_check()
 						adc_lastStatus_btn=Key3_press_value;
 						adc_last_Btn_time_press=0;	
 						adc_timePressKeep=TIME_PRESS_KEEP;
-						adc_btn3_pressOK=FALSE;				
+						adc_btn3_pressOK=FALSE;	
+						//Button_3_Press(MOVE_UP);				
 					}else
 					{
 						if(adc_lastStatus_btn==Key3_press_value && !adc_btn3_pressOK)
@@ -169,7 +170,7 @@ void ADC_check()
 								adc_last_Btn_time_press=0;	
 								adc_timePressKeep=TIME_PRESS_CONTINUE;
 								adc_btn3_pressOK=TRUE;
-								Button_3_Press();								
+								Button_3_Press(MOVE_UP_HOLD);								
 							}
 						}
 					}
@@ -194,7 +195,10 @@ void ADC_check()
 						// else if(adc_lastStatus_btn==Key2_press_value)	
 						// 	Button_2_Press();
 						// else if(adc_lastStatus_btn==Key3_press_value)	
-						// 	Button_3_Press();	
+						// 	Button_3_Press();
+						
+						if(adc_lastStatus_btn==Key3_press_value && !adc_btn3_pressOK)
+							Button_3_Press(MOVE_UP);	
 						adc_lastStatus_btn=0;
 						adc_old_val[adc_chn]=0;
 					}  

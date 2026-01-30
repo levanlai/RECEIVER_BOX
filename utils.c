@@ -88,11 +88,16 @@ void Button_2_Press(WORD value)//Move UP
     if(cnt_SilenceDetect!=0)
         cnt_SilenceDetect=0; 
 }
-void Button_3_Press()
+void Button_3_Press(WORD value)
 {
     TRACE("Button_3_Press powerState=%d",powerState);
-    uart_cmd_parse(CMD_RESET, 0,FALSE); 
-   uart_send_cmd(CMD_RESET, 0);  
+    if(value==MOVE_UP)
+        uart_send_cmd(CMD_ROTARY, 0); 
+    else
+    {    
+        uart_cmd_parse(CMD_RESET, 0,FALSE); 
+        uart_send_cmd(CMD_RESET, 0);  
+    }
    if(cnt_SilenceDetect!=0)
         cnt_SilenceDetect=0; 
 }

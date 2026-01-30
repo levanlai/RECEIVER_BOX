@@ -735,6 +735,9 @@ void  bk9532_mic_reset_pair(void)
     state_machine[0] = 0;
     state_machine[1] = 0;
     bk9532_TurnLED(FALSE);
+
+    g_bk9532_rf_ctx[I2C_PORT_MIC1].iModeSleep=FALSE;
+    g_bk9532_rf_ctx[I2C_PORT_MIC2].iModeSleep=FALSE;
     //bk9532_rf_param_init(0);
     //bk9532_rf_param_init(1);    
 }
@@ -749,6 +752,10 @@ DWORD bk9532_get_ID_pair(WORD bus)
 WORD  bk9532_mic_is_connected(WORD bus)
 {
 	return g_bk9532_rf_ctx[bus].is_connected;
+} 
+WORD  bk9532_mic_iModeSleep(WORD bus)
+{
+	return g_bk9532_rf_ctx[bus].iModeSleep;
 } 
 static void bk9532_task_handler_channel_0(void)
 {
@@ -769,6 +776,7 @@ static WORD bk9532_rf_param_init(WORD bus)
     g_bk9532_rf_ctx[bus].rf_freq_min = BK9532_SCAN_FREQUENCY_MIN_MHZ + (BK9532_SCAN_FREQUENCY_MAX_MHZ - BK9532_SCAN_FREQUENCY_MIN_MHZ + 1)*bus;
     g_bk9532_rf_ctx[bus].rf_freq_max = BK9532_SCAN_FREQUENCY_MAX_MHZ + (BK9532_SCAN_FREQUENCY_MAX_MHZ - BK9532_SCAN_FREQUENCY_MIN_MHZ + 1)*bus;
     g_bk9532_rf_ctx[bus].rf_freq = g_bk9532_rf_ctx[bus].rf_freq_min;
+    g_bk9532_rf_ctx[bus].iModeSleep =FALSE;
     
     return 0;
 }
@@ -821,7 +829,7 @@ static WORD bk9532_rf_chip_init(WORD bus)
     // bk9532_set_audio_enable(bus, TRUE);
 #else
     bk9532_i2s_config(bus, 0); // 0: slave; 1: master
-    bk9532_set_audio_enable(bus, FALSE);
+   // bk9532_set_audio_enable(bus, FALSE);
 #endif
     return 0;
 }
@@ -935,4 +943,62 @@ int bk9532_flash_load_idcode(WORD bus, PDWORD idcode)
     }
 
     return rc;
+}
+
+
+// Hàm cho chip ngủ (Chỉ tắt chức năng, giữ nguồn)
+void BK9532_Enter_SoftSleep(WORD bus) {
+    WORD i;
+    TRACE("BK9532_Enter_SoftSleep bus=",bus);
+    // // 1. Tắt Audio Output trước để tránh tiếng bụp (Reg 0x36, Bit 13)
+    //bk9532_set_audio_enable(bus,FALSE);//ko mute được ?
+    bk9532_set_audio_volume(bus, 0);
+
+    /*====tắt các khối này thấy cũng không giảm dòng======= */
+    // // 2. Tắt khối nhận RF (Reg 0x3F, Bit 31) -> Chip sẽ nguội đi
+    bk9532_set_rf_baseband_enable(bus,FALSE);
+    // Tắt Reg 0x3E (AGC Enable - Bit 28)
+    // Đọc ra để giữ các cấu hình khác hoặc ghi 0 nếu không quan trọng (vì sẽ Init lại)
+    bk9532_reg_write(bus, 0x3E, 0x00000000);
+    // Tắt Reg 0x3D (PLC Enable - Bit 11)
+    bk9532_reg_write(bus, 0x3D, 0x00000000);
+    // Tắt Reg 0x34 (EQ): Set các bit [30:16] lên 1 để đóng 15 EQ
+    // 0x7FFF0000 (Bits 30-16 are 1)
+    bk9532_reg_write(bus, 0x34, 0x7FFF0000);
+    /*=============================== */
+    
+    // 3. QUAN TRỌNG NHẤT: Tắt khối Analog (Reg 0x00 - 0x0B)
+    // Các thanh ghi này quyết định dòng tiêu thụ của RF. 
+    // Ghi 0 = Cắt dòng Bias = Chip mát
+    // Lưu ý: Reg 0x00 đến 0x0B tương ứng với 12 phần tử đầu tiên trong g_bk9532_rom
+    
+    for (i = 0; i <= 0x0B; i++)
+    {
+        bk9532_reg_write(bus, i, 0x00000000);
+    }
+    g_bk9532_rf_ctx[bus].iModeSleep = TRUE;
+}
+
+// Hàm đánh thức chip (Bật lại chức năng)
+void BK9532_Exit_SoftSleep(WORD bus) {
+    // // 1. Bật lại khối nhận RF (Reg 0x3F, Bit 31)
+      // bk9532_set_audio_enable(bus,TRUE);
+    // // Cần delay nhỏ để mạch RF ổn định (PLL Lock)
+   // // delay_ms(5); 
+
+    // // 2. Bật lại Audio Output (Reg 0x36, Bit 13)
+    //bk9532_set_rf_baseband_enable(bus,TRUE);  
+
+    // 1. Lưu lại thông tin tần số & ID hiện tại (vì Init sẽ reset về mặc định)
+   // DWORD saved_freq = g_bk9532_rf_ctx[bus].rf_freq;
+   // DWORD saved_id = g_bk9532_rf_ctx[bus].rf_idc;
+    TRACE("BK9532_Exit_SoftSleep bus=",bus);
+    // 2. Gọi hàm Init có sẵn để nạp lại toàn bộ g_bk9532_rom (bao gồm cả Analog & Digital)
+    // Hàm này sẽ khôi phục Reg 0x00-0x0B về giá trị chuẩn của Beken
+    bk9532_rf_chip_init(bus);
+
+    // 3. Khôi phục lại ID và Tần số để kết nối lại
+  //  bk9532_rf_idcode_freq_set(bus, saved_id, saved_freq);
+
+     g_bk9532_rf_ctx[bus].iModeSleep = FALSE;
 }

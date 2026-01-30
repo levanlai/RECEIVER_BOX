@@ -1214,10 +1214,11 @@ void bk9532_test(void)
     bk9532_test_pairing(I2C_PORT_MIC2);
     bk9532_TurnLED(TRUE);
 }
-void bk9532_callHander(void)
+void bk9532_callHander(WORD bus)
 {
-    bk9532_task_handler(I2C_PORT_MIC1);
-    bk9532_task_handler(I2C_PORT_MIC2);
+    bk9532_task_handler(bus);
+    //bk9532_task_handler(I2C_PORT_MIC1);
+    //bk9532_task_handler(I2C_PORT_MIC2);
 }
 void bk9532_TurnLED(WORD value)
 {

@@ -76,8 +76,9 @@ typedef struct bk9532_rf_context
     WORD rf_freq_max;
     WORD rf_freq_min;
     DWORD rf_idc;
-
     WORD is_connected;
+   
+    WORD iModeSleep;
 } bk9532_rf_context_t;
 
 typedef struct bk9532_reg_val
@@ -150,5 +151,7 @@ void bk9532_task_handler(WORD bus);
 WORD bk9532_mic_is_connected(WORD bus);
 WORD bk9532_rf_indicate_onoff(WORD bus, WORD onoff);
 void  bk9532_mic_reset_pair(void);
-
+void BK9532_Enter_SoftSleep(WORD bus) ;
+void BK9532_Exit_SoftSleep(WORD bus);
+WORD  bk9532_mic_iModeSleep(WORD bus);
 #endif //__BK9532_H__

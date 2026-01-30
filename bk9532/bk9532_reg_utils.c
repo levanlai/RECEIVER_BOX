@@ -141,6 +141,10 @@ WORD bk9532_set_rf_baseband_reset(WORD bus)
     }
     return state;
 }
+WORD bk9532_set_rf_baseband_enable(WORD bus, WORD enable)
+{
+    return bk9532_reg_and_mask_or_flag(bus, BK9532_REG_RF_BASEBAND, ~((DWORD)1 << BK9532_REG_RF_BASEBAND_SHIFT), (((DWORD)enable&0x01) << BK9532_REG_RF_BASEBAND_SHIFT));
+}
 
 #define BK9532_REG_RF_CHIP 0x3F
 #define BK9532_REG_RF_CHIP_SHIFT 5
@@ -300,7 +304,10 @@ WORD bk9532_set_audio_volume(WORD bus, WORD vol)
 #define BK9532_REG_VOL_MUTE 0x36
 WORD bk9532_set_audio_enable(WORD bus, WORD enable)
 {
-    return bk9532_reg_and_mask_or_flag(bus, BK9532_REG_VOL_MUTE, ~((DWORD)1 << 13), (((DWORD)enable&0x01) << 13));
+    //TRACE("set_audio_enable bus=",bus);
+    // TRACE("enable=",enable);
+   // return bk9532_reg_and_mask_or_flag(bus, BK9532_REG_VOL_MUTE, ~((DWORD)1 << 13), (((DWORD)enable&0x01) << 13));
+    return bk9532_reg_and_mask_or_flag(bus, BK9532_REG_VOL_MUTE, ~((DWORD)1 << 13), (DWORD)enable);
 }
 
 #define BK9532_REG_GPIO_CFG_R1 0x30

@@ -2,6 +2,7 @@
 #include <trace.h>
 #include <sys5000.h>
 #include "sys/sys_io.h"
+#include "sys/sys_i2c.h"
 #include <libusb.h>
 #include "config.h"
 #include "dsp/dspDesigner.h"
@@ -21,6 +22,11 @@ WORD initPowerOn=0;
 WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 DWORD delay = 0;
 WORD cnt_SilenceDetect=0;
+//power on mic chạy bt trong 3p, sau 3p thì check slepp chu kỳ 5s (5s slepp, 5s scan, nếu kết nối thì ko sleep)-> giảm được 50mA (bt tốn 95mA, sleep còn 45mA)
+WORD cnt_checkSleepMic=0;
+WORD iCheckSleepMic=MIC_WAIT;
+WORD iHasTurnModeSleep=FALSE;
+
 extern MyData_t  myData;
 //WORD last_time_PressContinue=0;
 //WORD cntPressContinue=0;
@@ -88,7 +94,7 @@ void InitUSB( void )
 
 
 extern void bk9532_test(void);
-extern void bk9532_callHander(void);
+extern void bk9532_callHander(WORD bus);
 extern void bk9532_TurnLED(WORD value);
 //extern void test_Schedule(void);
 //extern void csm8s_test(void);
@@ -146,6 +152,29 @@ void main_loop(void)
 			//main_power_off_check();
 			if(powerState==TURN_ON)
 			{
+				cnt_checkSleepMic++;
+				if(iCheckSleepMic==MIC_WAIT)
+				{
+					if(cnt_checkSleepMic>14000)//3p
+					//if(cnt_checkSleepMic>5000)//1p
+					{
+						TRACE("MIC_WAIT finish ",cnt_checkSleepMic);
+						iCheckSleepMic=MIC_SLEEP;
+						iHasTurnModeSleep=FALSE;
+						cnt_checkSleepMic=0;
+					}
+				}else
+				{
+					if(cnt_checkSleepMic>450)//5s
+					//if(cnt_checkSleepMic>2000)//20s
+					{
+						iCheckSleepMic=(iCheckSleepMic!=MIC_SLEEP) ? MIC_SLEEP : MIC_WAKEUP;
+						iHasTurnModeSleep=FALSE;
+						cnt_checkSleepMic=0;
+						TRACE("MIC_status ",iCheckSleepMic);
+					}
+				}
+				
 				// last_time_PressContinue++;
 				// if(cntPressContinue>0 && last_time_PressContinue>=5)
 				// {
@@ -176,8 +205,8 @@ void main_loop(void)
 						if(cnt==0)
 						{
 							cnt_SilenceDetect++;
-							TRACE("cnt_SilenceDetect=%d",cnt_SilenceDetect);
-							TRACE("auto=%d",myData.Auto_PowerOff);
+							//TRACE("cnt_SilenceDetect=%d",cnt_SilenceDetect);
+							//TRACE("auto=%d",myData.Auto_PowerOff);
 							if(cnt_SilenceDetect>(getTimeAutoPowerOff()/2))
 							{
 								cnt_SilenceDetect=0;
@@ -204,7 +233,54 @@ void main_loop(void)
 		if(powerState==TURN_ON)
 		{
 			FBC_BaseLevels( );
-			bk9532_callHander();
+			if(iCheckSleepMic==MIC_SLEEP)	
+			{
+				if(!iHasTurnModeSleep)
+				{
+					// tmp=bk9532_mic_is_connected(I2C_PORT_MIC1);
+					// TRACE("MIC_SLEEP check mic1=%d",tmp);
+					// tmp=bk9532_mic_is_connected(I2C_PORT_MIC2);
+					// TRACE("mic2=%x",tmp);
+
+					iHasTurnModeSleep=TRUE;
+					if(!bk9532_mic_is_connected(I2C_PORT_MIC1))
+						BK9532_Enter_SoftSleep(I2C_PORT_MIC1);
+					
+					if(!bk9532_mic_is_connected(I2C_PORT_MIC2))
+						BK9532_Enter_SoftSleep(I2C_PORT_MIC2);
+				}else
+				{
+					if(!bk9532_mic_iModeSleep(I2C_PORT_MIC1))
+						bk9532_callHander(I2C_PORT_MIC1);				
+					
+					if(!bk9532_mic_iModeSleep(I2C_PORT_MIC2))
+						bk9532_callHander(I2C_PORT_MIC2);
+				}	
+			}else if(iCheckSleepMic==MIC_WAKEUP)	
+			{
+				if(!iHasTurnModeSleep)
+				{
+					// tmp=bk9532_mic_is_connected(I2C_PORT_MIC1);
+					// TRACE("MIC_WAKEUP check mic1=%d",tmp);
+					// tmp=bk9532_mic_is_connected(I2C_PORT_MIC2);
+					// TRACE("mic2=%x",tmp);
+
+					iHasTurnModeSleep=TRUE;
+					if(bk9532_mic_iModeSleep(I2C_PORT_MIC1))
+						BK9532_Exit_SoftSleep(I2C_PORT_MIC1);
+					
+					if(bk9532_mic_iModeSleep(I2C_PORT_MIC2))
+						BK9532_Exit_SoftSleep(I2C_PORT_MIC2);	
+				}else
+				{
+					bk9532_callHander(I2C_PORT_MIC1);
+					bk9532_callHander(I2C_PORT_MIC2);
+				}				
+			}else
+			{	
+				bk9532_callHander(I2C_PORT_MIC1);
+				bk9532_callHander(I2C_PORT_MIC2);
+			}
 		}
     }
 }
@@ -225,6 +301,9 @@ void setPowerOff()
 	set_Mute_value(TRUE);
 	main_sendCmdPower();
 	bk9532_mic_reset_pair();
+	cnt_checkSleepMic=0;
+	iCheckSleepMic=MIC_WAIT;
+	iHasTurnModeSleep=FALSE;
 	sys_power_latch(0);
 }
 void main_power_btn_check(void)
