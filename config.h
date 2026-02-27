@@ -3,7 +3,7 @@
 
 #define FW_VERSION      11
 
-#define ENABLE_USB         1//1
+#define ENABLE_USB         0//1 //tắt để tránh lỗi plugin/plugout usb
 
 #define _USE_GLOBAL_PRESET 1
 
@@ -154,7 +154,6 @@ enum {
     AUTO_10,   
     AUTO_15,
     AUTO_30,
-    AUTO_45,
     AUTO_60,
 };
 // enum {    
@@ -226,7 +225,14 @@ enum {
     CMD_MIC_2_HPF,  
     CMD_BLUETOOTH, 
     CMD_AUDIO_MODE,
-      
+
+    CMD_MIC_MASTER,
+    CMD_MIC_ECHO,     
+    CMD_MIC_DELAY,
+    CMD_MIC_REPEAT,         
+    CMD_MIC_BASS, 
+    CMD_MIC_MID,
+    CMD_MIC_TREBLE,
 
     CMD_SAVE=150,
     CMD_RESET,

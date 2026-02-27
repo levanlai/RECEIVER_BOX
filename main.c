@@ -322,9 +322,8 @@ void main_power_btn_check(void)
 					initPowerOn=1;
 					sys_power_latch(1);
 					delayMsec(100);
-					SysVarInit();	
-					main_sendCmdInfo();
-					main_sendCmdPower();					
+					SysVarInit();						
+					main_sendCmdPower();	
 					bk9532_test();
 					set_Mute_value(FALSE);
 				}				

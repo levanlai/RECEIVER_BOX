@@ -59,7 +59,7 @@ void SysVarInit(void)
         myData.Mic_Vol_Out=UI_VALUE_MID;
         myData.Mic_Reverb_Vol=UI_VALUE_MID;
         myData.Mic_Reverb_Time=UI_VALUE_MID;
-        myData.Mic_FBC=FBC_OFF;        
+        myData.Mic_FBC=TURN_OFF;        
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
         myData.Auto_PowerOff=AUTO_30;
@@ -550,13 +550,7 @@ WORD getTimeAutoPowerOff()
     break;
     case AUTO_15:
         result=900-Dif;
-    break;
-    // case AUTO_30:
-    //     result=1800-Dif;
-    // break;
-    case AUTO_45:
-        result=2700-Dif;
-    break;
+    break;    
     case AUTO_60:
         result=3600-Dif;
     break;

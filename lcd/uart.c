@@ -1,5 +1,3 @@
-
-  
 #include <system.h>
 #include <sys5000.h>
 #include <libFX5000.h>
@@ -401,7 +399,8 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Mic_FBC=value;
 				}
 				TRACE("CMD_MIC_FBC %x",value);
-				_FBCancel_Bypass( dsp[DSP3_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
+				//_FBCancel_Bypass( dsp[DSP3_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
+				_FBCancel_Bypass( dsp[DSP3_FBC], value==TURN_OFF?FBC_OFF:FBC_ON );	// bypass: 0=normal work, 1=bypass all notch filters
 				//_FBCancel_SetMode( dsp[DSP3_FBC], value==0?FBC_OFF:FBC_ON);
 			 	break;
 			case CMD_CONTROL_LINK:
@@ -694,6 +693,7 @@ void TurnFBC(WORD value,WORD iInit)
 
 void syncDataToPanel(void)
 {	
+	main_sendCmdInfo();			
 	uart_send_cmd(CMD_CONTROL_LINK, myData.Mic_Control_link);
 	uart_send_cmd(CMD_MIC_1_VOL, myData.Mic_1_Vol);
 	//uart_send_cmd(CMD_MIC_1_EFFECT, myData.Mic_1_Effect);
