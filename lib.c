@@ -59,11 +59,11 @@ void SysVarInit(void)
         myData.Mic_Vol_Out=UI_VALUE_MID;
         myData.Mic_Reverb_Vol=UI_VALUE_MID;
         myData.Mic_Reverb_Time=UI_VALUE_MID;
+        myData.Mic_Reverb_Damping=UI_VALUE_MID;
         myData.Mic_FBC=TURN_OFF;        
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
-        myData.Auto_PowerOff=AUTO_30;
-
+        myData.Auto_PowerOff=TURN_ON;  
          myData.Mic_2_Vol=UI_VALUE_MID;
         //myData.Mic_2_Effect=UI_VALUE_MID;        
         myData.Mic_2_Bass=UI_VALUE_MID;  
@@ -80,11 +80,14 @@ void SysVarInit(void)
         myData.Mic_1_HPF=UI_MIC_HPF_DEFAULT;
         myData.Mic_2_HPF=UI_MIC_HPF_DEFAULT;
 
+        myData.Mic_Master=UI_VALUE_MID;
+
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
     uart_cmd_parse(CMD_VOL_OUT,myData.Mic_Vol_Out,TRUE); 
     uart_cmd_parse(CMD_MIC_REVERB_VOL,myData.Mic_Reverb_Vol,TRUE);
     uart_cmd_parse(CMD_MIC_REVERB_TIME,myData.Mic_Reverb_Time,TRUE);
+    uart_cmd_parse(CMD_MIC_REVERB_DAMPING,myData.Mic_Reverb_Damping,TRUE);
     uart_cmd_parse(CMD_MIC_EFFECT,myData.Mic_Effect,TRUE);
     uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
 
@@ -98,6 +101,7 @@ void SysVarInit(void)
     uart_cmd_parse(CMD_MIC_1_TREBLE,myData.Mic_1_Treb,TRUE);
     uart_cmd_parse(CMD_MIC_1_DELAY,myData.Mic_1_Delay,TRUE);
     uart_cmd_parse(CMD_MIC_1_HPF,myData.Mic_1_HPF,TRUE);
+    
     if(!myData.Mic_Control_link)
     {
         uart_cmd_parse(CMD_MIC_2_VOL,myData.Mic_2_Vol,TRUE);
@@ -111,12 +115,8 @@ void SysVarInit(void)
         uart_cmd_parse(CMD_MIC_2_DELAY,myData.Mic_2_Delay,TRUE);
         uart_cmd_parse(CMD_MIC_2_HPF,myData.Mic_2_HPF,TRUE);
     }
-    uart_cmd_parse(CMD_MUSIC_VOL,myData.Music_Vol,TRUE);
-    uart_cmd_parse(CMD_MUSIC_BASS,myData.Music_Bass,TRUE);
-    uart_cmd_parse(CMD_MUSIC_MID,myData.Music_Mid,TRUE);
-    uart_cmd_parse(CMD_MUSIC_TREBLE,myData.Music_Treb,TRUE);
-    uart_cmd_parse(CMD_MUSIC_BASSBOOST,myData.Music_Bassboost,TRUE);
-    uart_cmd_parse(CMD_MUSIC_ENHANCER,myData.Music_Enhancer,TRUE);
+   
+    uart_cmd_parse(CMD_MIC_MASTER,myData.Mic_Master,TRUE);
 }
 
 void checkSaveFlash(void)
@@ -357,9 +357,14 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     {
         valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_ECHO_MIN,(DWORD)UI_MIC_ECHO_MID,(DWORD)UI_MIC_ECHO_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
-     }else if(cmd==CMD_MIC_REVERB_VOL||cmd==CMD_MIC_REVERB_TIME/*cmd==CMD_MIC_1_REVERB ||cmd==CMD_MIC_2_REVERB*/)
+    }else if(cmd==CMD_MIC_REVERB_VOL||cmd==CMD_MIC_REVERB_TIME/*cmd==CMD_MIC_1_REVERB ||cmd==CMD_MIC_2_REVERB*/)
     {
         valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REVERB_MIN,(DWORD)UI_MIC_REVERB_MID,(DWORD)UI_MIC_REVERB_MAX);
+        valueToSAM=func_convertEchoToSam(valueConvert);
+    }
+    else if(cmd==CMD_MIC_REVERB_DAMPING)
+    {
+        valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_RevHDamp_MIN,(DWORD)UI_MIC_RevHDamp_MID,(DWORD)UI_MIC_RevHDamp_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
     }
     else if(cmd==CMD_MIC_1_DELAY ||cmd==CMD_MIC_2_DELAY)
@@ -374,7 +379,7 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     {       
         if(cmd==CMD_VOL_OUT)
             valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_OUT_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
-        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL /*||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT*/)
+        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_MASTER/*||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT*/)
             valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
         
          valueToSAM=func_calRangeLinearGainValue(valueConvert);
@@ -541,23 +546,23 @@ WORD checkCMD_HPF(WORD cmd)
 
 WORD getTimeAutoPowerOff()
 {
-  WORD result=0;
-  WORD Dif=10;
-  switch(myData.Auto_PowerOff)
-  {
-    case AUTO_10:
-        result=600-Dif;
-    break;
-    case AUTO_15:
-        result=900-Dif;
-    break;    
-    case AUTO_60:
-        result=3600-Dif;
-    break;
-    default://30p
-        result=1800-Dif;
-    break;
-  }
+//   WORD result=0;  
+//   switch(myData.Auto_PowerOff)
+//   {
+//     case AUTO_10:
+//         result=600;
+//     break;
+//     case AUTO_15:
+//         result=900;
+//     break;    
+//     case AUTO_60:
+//         result=3600;
+//     break;
+//     default://30p
+//         result=1800;
+//     break;
+//   }
 
-  return result;
+//   return result;
+    return 900;//15p
 }

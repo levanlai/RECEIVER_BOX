@@ -315,12 +315,25 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				//_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);
 				_LiveMic_Gain_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[11],valueConvert);
 				break;	
+			case CMD_MIC_MASTER: 
+				value=checkRangeValue(cmd,value);				
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					myData.Mic_Master=value;
+				}
+				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
+				_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);				
+				break;		
 			case CMD_MIC_REVERB_VOL: 
 				cmd_execute(cmd,value,iInit,FALSE,0);				
 				break; 	
 			case CMD_MIC_REVERB_TIME: 
 				cmd_execute(cmd,value,iInit,FALSE,0);				
-				break; 		
+				break; 	
+			case CMD_MIC_REVERB_DAMPING: 
+				cmd_execute(cmd,value,iInit,FALSE,0);				
+				break; 			
 			case CMD_MIC_EFFECT: 
 				if(!iInit)
 				{
@@ -416,7 +429,8 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					iNeedSaveFlash=TRUE;
 					myData.Auto_PowerOff=value;
 				}
-				break;		
+				break;
+			
 			case CMD_SAVE:
 				SaveFlash();
 				break;	
@@ -678,7 +692,16 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 			tmp=ConvertValueToSAM((DWORD)value,cmd);
 			_LiveMic_Effect_RevTime(dsp[DSP4_LIVEMIC], tmp);
 			break;	
-		
+		case CMD_MIC_REVERB_DAMPING: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_Reverb_Damping=value;
+			}
+			tmp=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_RevHDamp(dsp[DSP4_LIVEMIC], tmp);
+			break;	
 		default:
 			break;
 	}	
@@ -721,6 +744,7 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_VOL_OUT, myData.Mic_Vol_Out);
 	uart_send_cmd(CMD_MIC_REVERB_VOL, myData.Mic_Reverb_Vol);
 	uart_send_cmd(CMD_MIC_REVERB_TIME, myData.Mic_Reverb_Time);
+	uart_send_cmd(CMD_MIC_REVERB_DAMPING, myData.Mic_Reverb_Damping);
 	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	
@@ -731,9 +755,11 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MUSIC_BASSBOOST, myData.Music_Bassboost);
 	uart_send_cmd(CMD_MUSIC_ENHANCER, myData.Music_Enhancer);
 
+	uart_send_cmd(CMD_MIC_MASTER, myData.Mic_Master);
+
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
-	uart_send_cmd(CMD_AUTO_POWEROFF, myData.Auto_PowerOff);
+	uart_send_cmd(CMD_AUTO_POWEROFF, myData.Auto_PowerOff);	
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
 	//TRACE("syncDataToPanel %d",value);
 	

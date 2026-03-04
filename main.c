@@ -186,7 +186,7 @@ void main_loop(void)
 				// }
 
 				timer_count++;					
-				if( timer_count>=100)//2s
+				if( timer_count>=120)//2s
 				{					
 					timer_count=0;
 					tmp=check_charge_det();
@@ -198,7 +198,7 @@ void main_loop(void)
 					}
 					//tmp=check_plugin_det();
 					//TRACE("plugin_det=%d",tmp);
-					if(myData.Auto_PowerOff!=AUTO_OFF)
+					if(myData.Auto_PowerOff!=TURN_OFF)
 					{
 						cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
 						//TRACE("Peak=%x",cnt);

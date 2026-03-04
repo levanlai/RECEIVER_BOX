@@ -77,6 +77,10 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_MIC_REVERB_MIN       0   
 #define UI_MIC_REVERB_MID       500
 #define UI_MIC_REVERB_MAX       1000
+//RevHDamp
+#define UI_MIC_RevHDamp_MIN       0   
+#define UI_MIC_RevHDamp_MID       153
+#define UI_MIC_RevHDamp_MAX       500
 //EchoFeedback
 #define UI_MIC_REPEAT_MIN       0  
 #define UI_MIC_REPEAT_MIN_START 400 
@@ -149,13 +153,14 @@ enum {
     EFFECT_OFF,
     EFFECT_MonoEcho_Reverb=12,  
 };
-enum {        
-    AUTO_OFF, 
-    AUTO_10,   
-    AUTO_15,
-    AUTO_30,
-    AUTO_60,
-};
+// enum {        
+//     AUTO_OFF, 
+//     AUTO_ON,
+//     // AUTO_10,   
+//     // AUTO_15,
+//     // AUTO_30,
+//     // AUTO_60,
+// };
 // enum {    
 //     CMD_MIC_VOL,
 //     CMD_ECHO,
@@ -212,8 +217,10 @@ enum {
 
     CMD_MIC_REVERB_VOL,
     CMD_MIC_REVERB_TIME,
+    CMD_MIC_REVERB_DAMPING,
 
-    CMD_VOL_OUT,    
+    CMD_VOL_OUT,  
+    CMD_MIC_MASTER,  
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
     CMD_MUSIC_BASSBOOST,
@@ -225,15 +232,7 @@ enum {
     CMD_MIC_2_HPF,  
     CMD_BLUETOOTH, 
     CMD_AUDIO_MODE,
-
-    CMD_MIC_MASTER,
-    CMD_MIC_ECHO,     
-    CMD_MIC_DELAY,
-    CMD_MIC_REPEAT,         
-    CMD_MIC_BASS, 
-    CMD_MIC_MID,
-    CMD_MIC_TREBLE,
-
+    
     CMD_SAVE=150,
     CMD_RESET,
     CMD_MOVE,
@@ -277,6 +276,7 @@ typedef struct MyData{
 
   WORD Mic_Reverb_Vol;
   WORD Mic_Reverb_Time;
+  WORD Mic_Reverb_Damping;
 
   WORD Mic_Vol_Out;  
   WORD Mic_Effect;
@@ -290,6 +290,8 @@ typedef struct MyData{
   WORD Music_Treb;
   WORD Music_Bassboost; 
   WORD Music_Enhancer; 
+
+  WORD Mic_Master; 
 }MyData_t;
 typedef struct format_data
 {
