@@ -86,6 +86,14 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define UI_MIC_REPEAT_MIN_START 400 
 #define UI_MIC_REPEAT_MID       700
 #define UI_MIC_REPEAT_MAX       1000
+// //EchoLDamp
+// #define UI_MIC_EchoLDamp_MIN       0   
+// #define UI_MIC_EchoLDamp_MID       500
+// #define UI_MIC_EchoLDamp_MAX       1000
+// //EchoHDamp
+// #define UI_MIC_EchoHDamp_MIN       0   
+// #define UI_MIC_EchoHDamp_MID       500
+// #define UI_MIC_EchoHDamp_MAX       1000
 /*
 //in range 0..0x7FFE = 20ms...650ms
 -> linearValue=(value-20)*0x7FFE/(650-20);
@@ -218,6 +226,8 @@ enum {
     CMD_MIC_REVERB_VOL,
     CMD_MIC_REVERB_TIME,
     CMD_MIC_REVERB_DAMPING,
+    CMD_MIC_ECHO_LDAMP,
+    CMD_MIC_ECHO_HDAMP,
 
     CMD_VOL_OUT,  
     CMD_MIC_MASTER,  
@@ -277,6 +287,8 @@ typedef struct MyData{
   WORD Mic_Reverb_Vol;
   WORD Mic_Reverb_Time;
   WORD Mic_Reverb_Damping;
+  WORD Mic_ECho_LDamping;
+  WORD Mic_ECho_HDamping;
 
   WORD Mic_Vol_Out;  
   WORD Mic_Effect;

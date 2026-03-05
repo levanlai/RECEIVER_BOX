@@ -223,81 +223,68 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 			case CMD_MIC_1_ECHO:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_ECHO,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_ECHO,value,iInit,TRUE,valueConvert);				
 				break;	
 			case CMD_MIC_2_ECHO:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_ECHO,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_ECHO,value,iInit,TRUE,valueConvert);				
 				break;							
 			case CMD_MIC_1_DELAY:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_DELAY,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_DELAY,value,iInit,TRUE,valueConvert);				
 				break;	
 			case CMD_MIC_2_DELAY:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_DELAY,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_DELAY,value,iInit,TRUE,valueConvert);				
 				break;						 
 			
 			case CMD_MIC_1_REPEAT: 
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_REPEAT,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_REPEAT,value,iInit,TRUE,valueConvert);				
 				break;
 			case CMD_MIC_2_REPEAT: 
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_REPEAT,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_REPEAT,value,iInit,TRUE,valueConvert);				
 				break;	
 			case CMD_MIC_1_BASS:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_BASS,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_BASS,value,iInit,TRUE,valueConvert);				
 				break;	
 			case CMD_MIC_2_BASS:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_BASS,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_BASS,value,iInit,TRUE,valueConvert);				
 				break;
 			case CMD_MIC_1_MID:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_MID,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_MID,value,iInit,TRUE,valueConvert);				
 				break;	
 			case CMD_MIC_2_MID:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_MID,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_MID,value,iInit,TRUE,valueConvert);				
 				break;						
 			case CMD_MIC_1_TREBLE:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_TREBLE,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_TREBLE,value,iInit,TRUE,valueConvert);				
 				break;  
 			case CMD_MIC_2_TREBLE:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_1_TREBLE,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_1_TREBLE,value,iInit,TRUE,valueConvert);				
 				break; 
 			case CMD_MIC_1_HPF:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
 				if(myData.Mic_Control_link)
-					cmd_execute(CMD_MIC_2_HPF,value,iInit,TRUE,valueConvert);
-				
+					cmd_execute(CMD_MIC_2_HPF,value,iInit,TRUE,valueConvert);				
 				break;  
 			case CMD_MIC_2_HPF:
 				valueConvert=cmd_execute(cmd,value,iInit,FALSE,0);
@@ -325,13 +312,11 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
 				_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);				
 				break;		
-			case CMD_MIC_REVERB_VOL: 
-				cmd_execute(cmd,value,iInit,FALSE,0);				
-				break; 	
-			case CMD_MIC_REVERB_TIME: 
-				cmd_execute(cmd,value,iInit,FALSE,0);				
-				break; 	
+			case CMD_MIC_REVERB_VOL: 				
+			case CMD_MIC_REVERB_TIME: 				 	
 			case CMD_MIC_REVERB_DAMPING: 
+			case CMD_MIC_ECHO_LDAMP: 
+			case CMD_MIC_ECHO_HDAMP: 
 				cmd_execute(cmd,value,iInit,FALSE,0);				
 				break; 			
 			case CMD_MIC_EFFECT: 
@@ -702,6 +687,28 @@ DWORD cmd_execute(WORD cmd, WORD value,WORD iInit,WORD iLink,DWORD valueSam)
 			tmp=ConvertValueToSAM((DWORD)value,cmd);
 			_LiveMic_Effect_RevHDamp(dsp[DSP4_LIVEMIC], tmp);
 			break;	
+		case CMD_MIC_ECHO_LDAMP: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_ECho_LDamping=value;
+			}
+			tmp=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_EchoLDamp(dsp[DSP1_LIVEMIC], tmp);
+			_LiveMic_Effect_EchoLDamp(dsp[DSP2_LIVEMIC], tmp);
+			break;	
+		case CMD_MIC_ECHO_HDAMP: 
+			value=checkRangeValue(cmd,value);
+			if(!iInit)
+			{
+				iNeedSaveFlash=TRUE;
+				myData.Mic_ECho_HDamping=value;
+			}
+			tmp=ConvertValueToSAM((DWORD)value,cmd);
+			_LiveMic_Effect_EchoHDamp(dsp[DSP1_LIVEMIC], tmp);
+			_LiveMic_Effect_EchoHDamp(dsp[DSP2_LIVEMIC], tmp);
+			break;		
 		default:
 			break;
 	}	
@@ -744,7 +751,6 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_VOL_OUT, myData.Mic_Vol_Out);
 	uart_send_cmd(CMD_MIC_REVERB_VOL, myData.Mic_Reverb_Vol);
 	uart_send_cmd(CMD_MIC_REVERB_TIME, myData.Mic_Reverb_Time);
-	uart_send_cmd(CMD_MIC_REVERB_DAMPING, myData.Mic_Reverb_Damping);
 	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
 	
@@ -755,7 +761,10 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MUSIC_BASSBOOST, myData.Music_Bassboost);
 	uart_send_cmd(CMD_MUSIC_ENHANCER, myData.Music_Enhancer);
 
-	uart_send_cmd(CMD_MIC_MASTER, myData.Mic_Master);
+	uart_send_cmd(CMD_MIC_MASTER, myData.Mic_Master);	
+	uart_send_cmd(CMD_MIC_REVERB_DAMPING, myData.Mic_Reverb_Damping);
+	uart_send_cmd(CMD_MIC_ECHO_LDAMP, myData.Mic_ECho_LDamping);
+	uart_send_cmd(CMD_MIC_ECHO_HDAMP, myData.Mic_ECho_HDamping);
 
 	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());

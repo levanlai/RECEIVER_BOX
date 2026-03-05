@@ -60,6 +60,8 @@ void SysVarInit(void)
         myData.Mic_Reverb_Vol=UI_VALUE_MID;
         myData.Mic_Reverb_Time=UI_VALUE_MID;
         myData.Mic_Reverb_Damping=UI_VALUE_MID;
+        myData.Mic_ECho_LDamping=UI_VALUE_MID;
+        myData.Mic_ECho_HDamping=UI_VALUE_MID;
         myData.Mic_FBC=TURN_OFF;        
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
@@ -88,6 +90,8 @@ void SysVarInit(void)
     uart_cmd_parse(CMD_MIC_REVERB_VOL,myData.Mic_Reverb_Vol,TRUE);
     uart_cmd_parse(CMD_MIC_REVERB_TIME,myData.Mic_Reverb_Time,TRUE);
     uart_cmd_parse(CMD_MIC_REVERB_DAMPING,myData.Mic_Reverb_Damping,TRUE);
+    uart_cmd_parse(CMD_MIC_ECHO_LDAMP,myData.Mic_ECho_LDamping,TRUE);
+    uart_cmd_parse(CMD_MIC_ECHO_HDAMP,myData.Mic_ECho_HDamping,TRUE);
     uart_cmd_parse(CMD_MIC_EFFECT,myData.Mic_Effect,TRUE);
     uart_cmd_parse(CMD_MIC_FBC,myData.Mic_FBC,TRUE);
 
@@ -357,7 +361,7 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
     {
         valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_ECHO_MIN,(DWORD)UI_MIC_ECHO_MID,(DWORD)UI_MIC_ECHO_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
-    }else if(cmd==CMD_MIC_REVERB_VOL||cmd==CMD_MIC_REVERB_TIME/*cmd==CMD_MIC_1_REVERB ||cmd==CMD_MIC_2_REVERB*/)
+    }else if(cmd==CMD_MIC_REVERB_VOL||cmd==CMD_MIC_REVERB_TIME || cmd==CMD_MIC_ECHO_LDAMP ||cmd==CMD_MIC_ECHO_HDAMP)
     {
         valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_REVERB_MIN,(DWORD)UI_MIC_REVERB_MID,(DWORD)UI_MIC_REVERB_MAX);
         valueToSAM=func_convertEchoToSam(valueConvert);
