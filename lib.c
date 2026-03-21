@@ -9,7 +9,7 @@
 #include "dsp/midictrl.h"
 #include "nvs/pms.h"
 #include "lcd/uart.h"
-
+#include "dsp/dspDesigner.h"
 MyData_t  myData;
 WORD devices_connect=0;
 WORD devices_connect_tmp=0;
@@ -31,7 +31,7 @@ extern void delayMsec(WORD ms);
 
 void SysVarInit(void)
 {
-    int rc ;
+    int rc,i ;
     rc=pms_get_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(myData)/sizeof(WORD));
     TRACE("SysVarInit rc=%d",rc);
     if(rc==-1)
@@ -84,6 +84,7 @@ void SysVarInit(void)
 
         myData.Mic_Master=UI_VALUE_MID;
 
+        biquad_init();
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
     uart_cmd_parse(CMD_VOL_OUT,myData.Mic_Vol_Out,TRUE); 
@@ -121,6 +122,21 @@ void SysVarInit(void)
     }
    
     uart_cmd_parse(CMD_MIC_MASTER,myData.Mic_Master,TRUE);
+
+    //lai
+//    _LiveMic_Biquad_OnOff( dsp[DSP4_LIVEMIC], dsp4pcs[2], TURN_ON ); 
+	for(i = 0; i < PEQ_BANDS_MAX_MIKE; i++)
+	{
+    //    rc= biquad_cmd_EQ(CMD_MIKE_T_0+i,myData.filterParamsMike[i].biqType);
+    //    TRACE("result biqType=%x",rc);
+        rc= biquad_cmd_EQ(CMD_MIKE_G_0+i,myData.filterParamsMike[i].dBGain);
+        TRACE("result dBGain=%x",rc);
+    //    rc= biquad_cmd_EQ(CMD_MIKE_F_0+i,myData.filterParamsMike[i].f0);
+    //    TRACE("result f0=%x",rc);
+    //    rc= biquad_cmd_EQ(CMD_MIKE_Q_0+i,myData.filterParamsMike[i].Q);
+    //    TRACE("result Q=%x",rc);
+    }
+
 }
 
 void checkSaveFlash(void)
@@ -568,5 +584,5 @@ WORD getTimeAutoPowerOff()
 //   }
 
 //   return result;
-    return 900;//15p
+    return 1800;//30p
 }

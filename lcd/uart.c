@@ -8,6 +8,7 @@
 #include "../dsp/midictrl.h"
 #include "../dsp/dspDesigner.h"
 #include "../lib.h"
+#include "../biquad.h"
 #include "../config.h"
 #include "../bk9532/bk9532.h"
 
@@ -40,7 +41,7 @@ WORD bProgramInDebugMode = 0;
 #define PACK_USER_CODE 			0xFA
 #define PACK_DATA_LEN           3
 
-WORD McFifo[0x100];		// FIFO for Micro-channel (must be power of two!)
+WORD McFifo[0x400];		// FIFO for Micro-channel (must be power of two!)
 _SYS_CCBWRAPPER Uart1Callback;
 
 //data sending to MIDI-OUT1:
@@ -191,8 +192,8 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 	//WORD tmp;
 	DWORD valueConvert;
 	
-	//TRACE("uart_cmd_parse cmd=%d",cmd);	
-	//TRACE("value=%d",value);		
+	//TRACE("uart_cmd_parse cmd=%x",cmd);	
+	//TRACE("value=%x",value);		
 		switch (cmd)
 		{		
 			case CMD_POWER:				
@@ -423,6 +424,10 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				resetFactory();
 				break;
 			default:
+			{//lai
+				WORD result=biquad_cmd_EQ(cmd,value);
+				TRACE("biquad_cmd_EQ result= %d",result);
+			}
 				break;
 		}	
 }
@@ -720,16 +725,16 @@ void TurnFBC(WORD value,WORD iInit)
 	//TRACE("TurnFBC %x",value);
 	uart_cmd_parse(CMD_MIC_FBC,value,iInit);	
 }
-
+WORD timeSendDelay=2;
 void syncDataToPanel(void)
 {	
-	main_sendCmdInfo();			
+	int i;
+	main_sendCmdInfo();	
+	check_mics_connect(TRUE);	
 	uart_send_cmd(CMD_CONTROL_LINK, myData.Mic_Control_link);
 	uart_send_cmd(CMD_MIC_1_VOL, myData.Mic_1_Vol);
-	//uart_send_cmd(CMD_MIC_1_EFFECT, myData.Mic_1_Effect);
 	uart_send_cmd(CMD_MIC_1_ECHO, myData.Mic_1_Echo);
 	uart_send_cmd(CMD_MIC_1_DELAY, myData.Mic_1_Delay);
-	//uart_send_cmd(CMD_MIC_1_REVERB, myData.Mic_1_Reverb);
 	uart_send_cmd(CMD_MIC_1_REPEAT, myData.Mic_1_Repeat);
 	uart_send_cmd(CMD_MIC_1_BASS, myData.Mic_1_Bass);
 	uart_send_cmd(CMD_MIC_1_MID, myData.Mic_1_Mid);
@@ -738,10 +743,8 @@ void syncDataToPanel(void)
 	if(!myData.Mic_Control_link)
 	{
 		uart_send_cmd(CMD_MIC_2_VOL, myData.Mic_2_Vol);
-		//uart_send_cmd(CMD_MIC_2_EFFECT, myData.Mic_2_Effect);
 		uart_send_cmd(CMD_MIC_2_ECHO, myData.Mic_2_Echo);
 		uart_send_cmd(CMD_MIC_2_DELAY, myData.Mic_2_Delay);
-		//uart_send_cmd(CMD_MIC_2_REVERB, myData.Mic_2_Reverb);
 		uart_send_cmd(CMD_MIC_2_REPEAT, myData.Mic_2_Repeat);
 		uart_send_cmd(CMD_MIC_2_BASS, myData.Mic_2_Bass);
 		uart_send_cmd(CMD_MIC_2_MID, myData.Mic_2_Mid);
@@ -753,25 +756,31 @@ void syncDataToPanel(void)
 	uart_send_cmd(CMD_MIC_REVERB_TIME, myData.Mic_Reverb_Time);
 	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
 	uart_send_cmd(CMD_MIC_FBC, myData.Mic_FBC);
-	
 	uart_send_cmd(CMD_MUSIC_VOL, myData.Music_Vol);
 	uart_send_cmd(CMD_MUSIC_BASS, myData.Music_Bass);
 	uart_send_cmd(CMD_MUSIC_MID, myData.Music_Mid);
 	uart_send_cmd(CMD_MUSIC_TREBLE, myData.Music_Treb);
 	uart_send_cmd(CMD_MUSIC_BASSBOOST, myData.Music_Bassboost);
 	uart_send_cmd(CMD_MUSIC_ENHANCER, myData.Music_Enhancer);
-
 	uart_send_cmd(CMD_MIC_MASTER, myData.Mic_Master);	
 	uart_send_cmd(CMD_MIC_REVERB_DAMPING, myData.Mic_Reverb_Damping);
 	uart_send_cmd(CMD_MIC_ECHO_LDAMP, myData.Mic_ECho_LDamping);
 	uart_send_cmd(CMD_MIC_ECHO_HDAMP, myData.Mic_ECho_HDamping);
+	for(i = 0; i < PEQ_BANDS_MAX_MIKE; i++)
+	{
+		// uart_send_cmd(BIQUAD_CMD_MIKE1_T+i, myData.filterParamsMike[i].biqType);
+		// uart_send_cmd(BIQUAD_CMD_MIKE1_G+i,myData.filterParamsMike[i].dBGain);
+		// uart_send_cmd(BIQUAD_CMD_MIKE1_F+i,myData.filterParamsMike[i].f0);
+		// uart_send_cmd(BIQUAD_CMD_MIKE1_Q+i,myData.filterParamsMike[i].Q);
+       	uart_send_cmd(CMD_MIKE_T_0+i, myData.filterParamsMike[i].biqType);
+		 uart_send_cmd(CMD_MIKE_G_0+i,myData.filterParamsMike[i].dBGain);
+		 uart_send_cmd(CMD_MIKE_F_0+i,myData.filterParamsMike[i].f0);
+		 uart_send_cmd(CMD_MIKE_Q_0+i,myData.filterParamsMike[i].Q);
+    }
 
-	check_mics_connect(TRUE);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
 	uart_send_cmd(CMD_AUTO_POWEROFF, myData.Auto_PowerOff);	
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	
-	//TRACE("syncDataToPanel %d",value);
-	
 }
 
 

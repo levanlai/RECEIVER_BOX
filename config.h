@@ -1,9 +1,11 @@
+#ifndef _CONFIG_H  
+#define _CONFIG_H
 //#define _TARGET_CLASS_5xxx
 #define _TARGET_IC      5504
 
 #define FW_VERSION      11
 
-#define ENABLE_USB         0//1 //tắt để tránh lỗi plugin/plugout usb
+#define ENABLE_USB         1//1 //tắt để tránh lỗi plugin/plugout usb
 
 #define _USE_GLOBAL_PRESET 1
 
@@ -13,7 +15,6 @@
 #define UART_ALL				(0x02)	
 //Timer0 reload value for 9,87ms, used for GM2Synth (env & lfo), do not change!
 #define TIMER0V		(0x10000-(0.00987*UART_BAUDRATE*16))
-
 /**************************************
 Vol : Gain (-116(->-20db)-> 12dB)
 EQ Bass,Treble:  Biquad (-24 -> 15 dB)
@@ -134,11 +135,16 @@ enum {
     //DSP4_MIXPAXT,
     DSP4_LIVEMIC
 };
-
+// ko cắm:
+// charge_det=1, plugin_det=0
+// cắm vào
+// charge_det=0, plugin_det=1
+// đầy
+// charge_det=1, plugin_det=1
 enum {
-    CHARGE_PLUS,    
     CHARGE_UN_PLUS,
-    CHARGE_DONE,   
+    CHARGE_PLUS,  
+    CHARGE_DONE,    
 };
 
 enum {
@@ -239,7 +245,40 @@ enum {
     CMD_AUTO_POWEROFF,
 
     CMD_MIC_1_HPF,
-    CMD_MIC_2_HPF,  
+    CMD_MIC_2_HPF, 
+    
+    CMD_MIKE_T_0,
+    CMD_MIKE_T_1,
+    CMD_MIKE_T_2,
+    CMD_MIKE_T_3,
+    CMD_MIKE_T_4,
+    // CMD_MIKE_T_5,
+    // CMD_MIKE_T_6,
+
+    CMD_MIKE_G_0,
+    CMD_MIKE_G_1,
+    CMD_MIKE_G_2,
+    CMD_MIKE_G_3,
+    CMD_MIKE_G_4,
+    // CMD_MIKE_G_5,
+    // CMD_MIKE_G_6,
+
+    CMD_MIKE_F_0,
+    CMD_MIKE_F_1,
+    CMD_MIKE_F_2,
+    CMD_MIKE_F_3,
+    CMD_MIKE_F_4,
+    // CMD_MIKE_F_5,
+    // CMD_MIKE_F_6,
+
+    CMD_MIKE_Q_0,
+    CMD_MIKE_Q_1,
+    CMD_MIKE_Q_2,
+    CMD_MIKE_Q_3,
+    CMD_MIKE_Q_4,
+    // CMD_MIKE_Q_5,
+    // CMD_MIKE_Q_6,
+
     CMD_BLUETOOTH, 
     CMD_AUDIO_MODE,
     
@@ -259,6 +298,57 @@ enum {
     
     CMD_TOTAL,
 };
+//===============================================================================
+#define MAX16B                      (0xFFFF)
+typedef struct _tagFILTER_PEQ {                                  
+    WORD    f0;     // Filter Corner frequency (0 < f0 < fs*5/12)
+    WORD    Q;      // Filter Q in range 0.03..100               
+    WORD    dBGain; // Passband Gain (0=unity)                   
+    WORD    biqType;                                             
+} _FILTER_PEQ;      
+
+typedef enum
+{
+	BIQ_PEAK,
+	BIQ_LOWSHELF,
+    BIQ_HIGHSHELF,
+	BIQ_LOWPASS,
+    BIQ_HIGHPASS,
+    BIQ_BANDPASS,
+	BIQ_NOTCH,
+} BIQUAQ_TYPE;
+typedef enum
+{
+	DSP_MIXPA,
+	DSP_LIVEMIC,
+	DSP_FBC,
+	DSP_SPDIF
+} DSP_TYPE;
+
+typedef enum {
+	PEQ_BANDS_MAX_MIKE = 5,//7,
+}PEQ_BANDS;
+typedef enum {
+	PEQ_BLOCK_MIKE,
+	PEQ_BLOCK_MAX
+} PEQ_BLOCK;
+// typedef enum
+// {
+// 	BIQUAD_CMD_SIZE = 0x40,
+
+// 	BIQUAD_CMD_MIKE1_T = 0x3003,
+// 	BIQUAD_CMD_MIKE1_G = 0x3003 + BIQUAD_CMD_SIZE,
+// 	BIQUAD_CMD_MIKE1_F = 0x3103,
+// 	BIQUAD_CMD_MIKE1_Q = 0x3103 + BIQUAD_CMD_SIZE,
+// }NRPN_SLIDER;
+//Set result of Set EQ
+typedef enum 
+{
+	CMD_NOT_EXISTED,
+	CMD_ERROR_CODE,
+	CMD_BYPASSED,
+	CMD_DONE
+} CMD_RESULT;
 
 typedef struct MyData{
   //WORD init;
@@ -304,6 +394,7 @@ typedef struct MyData{
   WORD Music_Enhancer; 
 
   WORD Mic_Master; 
+  _FILTER_PEQ filterParamsMike[PEQ_BANDS_MAX_MIKE];
 }MyData_t;
 typedef struct format_data
 {
@@ -321,4 +412,4 @@ enum {
     MIC_WAKEUP  , 
 };
 
-
+#endif

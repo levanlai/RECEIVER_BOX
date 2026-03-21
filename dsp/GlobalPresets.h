@@ -6,7 +6,6 @@
 
 /* Global preset header file */
 
-
 void dspDesigner_LoadGlobalPreset( PTR32 global_preset_table );
 
 // Gain preset structure.
@@ -51,7 +50,7 @@ typedef struct
 	WORD parameter19; // Gain4
 } globalBiquad4Preset;
 
-// Biquad[7] preset structure.
+// Biquad[5] preset structure.
 typedef struct 
 {
 	WORD parameter1; // ON/OFF
@@ -77,15 +76,7 @@ typedef struct
 	WORD parameter21; // Q5
 	DWORD parameter22; // Freq5
 	WORD parameter23; // Gain5
-	WORD parameter24; // Type6
-	WORD parameter25; // Q6
-	DWORD parameter26; // Freq6
-	WORD parameter27; // Gain6
-	WORD parameter28; // Type7
-	WORD parameter29; // Q7
-	DWORD parameter30; // Freq7
-	WORD parameter31; // Gain7
-} globalBiquad7Preset;
+} globalBiquad5Preset;
 
 // LevelDetect preset structure.
 typedef struct 
@@ -193,13 +184,13 @@ typedef struct
 	WORD control[19]; // controls array
 } globalBiquad4Control;
 
-// Biquad[7] preset control structure.
+// Biquad[5] preset control structure.
 typedef struct 
 {
 	WORD numberOfControls; // number of controls
 	WORD sizeOfStruct; // size of this Structure
-	WORD control[31]; // controls array
-} globalBiquad7Control;
+	WORD control[23]; // controls array
+} globalBiquad5Control;
 
 // LevelDetect preset control structure.
 typedef struct 
@@ -257,14 +248,14 @@ typedef struct
 	WORD control[3]; // controls array
 } globalFeedback_cancellerControl;
 
-#define	GLOBAL_GAIN_PRESET_NB	1
+#define	GLOBAL_GAIN_PRESET_NB	2
 extern const globalGainPreset global_gain_presets[GLOBAL_GAIN_PRESET_NB];
 #define	GLOBAL_NOISEGATE_PRESET_NB	1
 extern const globalNoiseGatePreset global_noisegate_presets[GLOBAL_NOISEGATE_PRESET_NB];
 #define	GLOBAL_BIQUAD4_PRESET_NB	1
 extern const globalBiquad4Preset global_biquad4_presets[GLOBAL_BIQUAD4_PRESET_NB];
-#define	GLOBAL_BIQUAD7_PRESET_NB	1
-extern const globalBiquad7Preset global_biquad7_presets[GLOBAL_BIQUAD7_PRESET_NB];
+#define	GLOBAL_BIQUAD5_PRESET_NB	1
+extern const globalBiquad5Preset global_biquad5_presets[GLOBAL_BIQUAD5_PRESET_NB];
 #define	GLOBAL_LEVELDETECT_PRESET_NB	1
 extern const globalLevelDetectPreset global_leveldetect_presets[GLOBAL_LEVELDETECT_PRESET_NB];
 #define	GLOBAL_COMPRESSOR_PRESET_NB	1
@@ -284,7 +275,7 @@ extern const WORD_FAR_P global_preset_table_address[NUMBER_OF_PRESET_TABLE];
 extern const globalGainControl global_gain_controls;
 extern const globalNoiseGateControl global_noisegate_controls;
 extern const globalBiquad4Control global_biquad4_controls;
-extern const globalBiquad7Control global_biquad7_controls;
+extern const globalBiquad5Control global_biquad5_controls;
 extern const globalLevelDetectControl global_leveldetect_controls;
 extern const globalCompressorControl global_compressor_controls;
 extern const globalS_Reverb_EchoControl global_s_reverb_echo_controls;

@@ -7,14 +7,14 @@
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "BiquadCtrl.h"
 #include "memorymap.h"
-
+#include <trace.h>
 // Biquad(s) - define, variable, ... 
 #define BIQUAD_ITEMCOUNT 1
 
 
 #define NUMBER_OF_BIQUAD_EXTRAFUNCTION 4
 
-#define	BIQUAD2BANDCOUNT	3
+#define	BIQUAD2BANDCOUNT	7
 
 #ifndef	_SKIP_DDD_NRPN_CTRL
 
@@ -84,6 +84,10 @@ customPreInitFunction4( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcIN( dspId, MIXN_SAMPLE_IN|dsp4pcs[5], PCS_NODE | 4 );
 	_LiveMic_SetProcOUT( dspId, MIXN_SAMPLE_OUT|dsp4pcs[5], PCS_NODE | 9 );
 
+	// Process #9: PeakLevel
+	dsp4pcs[9] = _LiveMic_PeakLevel_Allocate( dspId );
+	_LiveMic_SetProcOUT( dspId, PEAKLEVEL_SAMPLE_IN|dsp4pcs[9], PCS_DSP_OUT | 1 );
+
 	// Process #2: Biquad
 	dsp4pcs[2] = _LiveMic_Biquad_Allocate( dspId, BIQUAD2BANDCOUNT );
 	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp4pcs[2], PCS_NODE | 9 );
@@ -134,6 +138,7 @@ const WORD nrpn4List[NUMBEROFCOMMAND4][2]=
 	{ 0x071F, 0x4037 }, // _LiveMic_MixN_GainValue
 	{ 0x0800, 0x4036 }, // _LiveMic_MixN_GainPhase
 	{ 0x081F, 0x4037 }, // _LiveMic_MixN_GainValue
+	{ 0x0900, 0x003E }, // _LiveMic_PeakLevel_GetPeak
 	{ 0x0B00, 0x0030 }, // _LiveMic_Gain_Value
 	{ 0x0B01, 0x0031 } // _LiveMic_Gain_Phase
 
@@ -230,35 +235,87 @@ WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x4036: _LiveMic_MixN_GainPhase( dspId, processId, index, val8bit ); return 1;
 			case 0x4037: _LiveMic_MixN_GainValue( dspId, processId, index, value ); return 1;
 			//Biquad
-			case 0x0012: _LiveMic_Biquad_OnOff( dspId, processId, val8bit ); return 1;
-			case 0x0013: _LiveMic_Biquad_InGainPhase( dspId, processId, val8bit ); return 1;
-			case 0x0014: _LiveMic_Biquad_InGainValue( dspId, processId, value ); return 1;
-			case 0x4015: SetFilterType( &updateCoeffFunc, theBiquad, dspId, processId, index, val8bit ); return 1;
-			case 0x4016: SetFilterQ( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
-			case 0x4017: SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
-			case 0x4018: SetFilterGain( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
+			case 0x0012: 
+			TRACE("_LiveMic_Biquad_OnOff=%x", val8bit);
+			_LiveMic_Biquad_OnOff( dspId, processId, val8bit ); return 1;
+			case 0x0013: 
+			//TRACE("_LiveMic_Biquad_InGainPhase=%x", val8bit);
+			_LiveMic_Biquad_InGainPhase( dspId, processId, val8bit ); return 1;
+			case 0x0014: 
+			TRACE("_LiveMic_Biquad_InGainValue=%x", value);
+			_LiveMic_Biquad_InGainValue( dspId, processId, value ); return 1;
+			case 0x4015: 
+			TRACE("SetFilterType=%x", val8bit);
+			SetFilterType( &updateCoeffFunc, theBiquad, dspId, processId, index, val8bit ); return 1;
+			case 0x4016:
+			TRACE("SetFilterQ=%x", value);
+			 SetFilterQ( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
+			case 0x4017:
+			TRACE("SetFilterFreq=%x", dvalue);
+			 SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
+			case 0x4018: 
+			TRACE("SetFilterGain=%x", value);
+			SetFilterGain( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
 			//(s)Reverb/Echo
-			case 0x0000: _LiveMic_Effect_LoadProgram( dspId, val8bit ); return 1;
-			case 0x0001: _LiveMic_Effect_RevInputLevel( dspId, value ); return 1;
-			case 0x0002: _LiveMic_Effect_RevLevel( dspId, value ); return 1;
-			case 0x0003: _LiveMic_Effect_RevPreHP( dspId, value ); return 1;
-			case 0x0004: _LiveMic_Effect_RevHDamp( dspId, value ); return 1;
-			case 0x0005: _LiveMic_Effect_RevTime( dspId, value ); return 1;
-			case 0x0006: _LiveMic_Effect_RevToneGain( dspId, value ); return 1;
-			case 0x0007: _LiveMic_Effect_RevToneFreq( dspId, value ); return 1;
-			case 0x0008: _LiveMic_Effect_EchoInputLevel( dspId, value ); return 1;
-			case 0x0009: _LiveMic_Effect_EchoTime( dspId, value ); return 1;
-			case 0x000A: _LiveMic_Effect_LongEchoMode( dspId, val8bit ); return 1;
-			case 0x000B: _LiveMic_Effect_EchoLDamp( dspId, value ); return 1;
-			case 0x000C: _LiveMic_Effect_EchoHDamp( dspId, value ); return 1;
-			case 0x000D: _LiveMic_Effect_EchoFeedback( dspId, value ); return 1;
-			case 0x000E: _LiveMic_Effect_EchoOutputLevel( dspId, 0, value ); return 1;
-			case 0x000F: _LiveMic_Effect_EchoOutputPhase( dspId, 0, val8bit ); return 1;
-			case 0x0010: _LiveMic_Effect_EchoOutputLevel( dspId, 1, value ); return 1;
-			case 0x0011: _LiveMic_Effect_EchoOutputPhase( dspId, 1, val8bit ); return 1;
+			case 0x0000: 
+			//TRACE("_LiveMic_Effect_LoadProgram=%x", val8bit);
+			_LiveMic_Effect_LoadProgram( dspId, val8bit ); return 1;
+			case 0x0001: 
+			//TRACE("_LiveMic_Effect_RevInputLevel=%x", value);
+			_LiveMic_Effect_RevInputLevel( dspId, value ); return 1;
+			case 0x0002: 
+			//TRACE("_LiveMic_Effect_RevLevel=%x", value);
+			_LiveMic_Effect_RevLevel( dspId, value ); return 1;
+			case 0x0003: 
+			//TRACE("_LiveMic_Effect_RevPreHP=%x", value);
+			_LiveMic_Effect_RevPreHP( dspId, value ); return 1;
+			case 0x0004: 
+			//TRACE("_LiveMic_Effect_RevHDamp=%x", value);
+			_LiveMic_Effect_RevHDamp( dspId, value ); return 1;
+			case 0x0005: 
+			//TRACE("_LiveMic_Effect_RevTime=%x", value);
+			_LiveMic_Effect_RevTime( dspId, value ); return 1;
+			case 0x0006: 
+			//TRACE("_LiveMic_Effect_RevToneGain=%x", value);
+			_LiveMic_Effect_RevToneGain( dspId, value ); return 1;
+			case 0x0007: 
+			//TRACE("_LiveMic_Effect_RevToneFreq=%x", value);
+			_LiveMic_Effect_RevToneFreq( dspId, value ); return 1;
+			case 0x0008: 
+			//TRACE("_LiveMic_Effect_EchoInputLevel=%x", value);
+			_LiveMic_Effect_EchoInputLevel( dspId, value ); return 1;
+			case 0x0009: 
+			//TRACE("_LiveMic_Effect_EchoTime=%x", value);
+			_LiveMic_Effect_EchoTime( dspId, value ); return 1;
+			case 0x000A: 
+			//TRACE("_LiveMic_Effect_LongEchoMode=%x", val8bit);
+			_LiveMic_Effect_LongEchoMode( dspId, val8bit ); return 1;
+			case 0x000B: 
+			//TRACE("_LiveMic_Effect_EchoLDamp=%x", value);
+			_LiveMic_Effect_EchoLDamp( dspId, value ); return 1;
+			case 0x000C: 
+			//TRACE("_LiveMic_Effect_EchoHDamp=%x", value);
+			_LiveMic_Effect_EchoHDamp( dspId, value ); return 1;
+			case 0x000D:
+			//TRACE("_LiveMic_Effect_EchoFeedback=%x", value);
+			 _LiveMic_Effect_EchoFeedback( dspId, value ); return 1;
+			case 0x000E: 
+			//TRACE("_LiveMic_Effect_EchoOutputLevel=%x", value);
+			_LiveMic_Effect_EchoOutputLevel( dspId, 0, value ); return 1;
+			case 0x000F: 
+			//TRACE("_LiveMic_Effect_EchoOutputPhase=%x", val8bit);
+			_LiveMic_Effect_EchoOutputPhase( dspId, 0, val8bit ); return 1;
+			case 0x0010: 
+			//TRACE("_LiveMic_Effect_EchoOutputLevel=%x", value);
+			_LiveMic_Effect_EchoOutputLevel( dspId, 1, value ); return 1;
+			case 0x0011: 
+			//TRACE("_LiveMic_Effect_EchoOutputPhase=%x", value);
+			_LiveMic_Effect_EchoOutputPhase( dspId, 1, val8bit ); return 1;
 			//Gain
 			case 0x0030: _LiveMic_Gain_Value( dspId, processId, value ); return 1;
 			case 0x0031: _LiveMic_Gain_Phase( dspId, processId, val8bit ); return 1;
+			//PeakLevel
+			case 0x003E:  sendSysExMessage( value, _LiveMic_PeakLevel_GetPeak( dspId, processId ) ); return 1;
 		
 		}
 	

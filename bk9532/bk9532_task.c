@@ -949,7 +949,7 @@ int bk9532_flash_load_idcode(WORD bus, PDWORD idcode)
 // Hàm cho chip ngủ (Chỉ tắt chức năng, giữ nguồn)
 void BK9532_Enter_SoftSleep(WORD bus) {
     WORD i;
-    TRACE("BK9532_Enter_SoftSleep bus=",bus);
+    //TRACE("BK9532_Enter_SoftSleep bus=",bus);
     // // 1. Tắt Audio Output trước để tránh tiếng bụp (Reg 0x36, Bit 13)
     //bk9532_set_audio_enable(bus,FALSE);//ko mute được ?
     bk9532_set_audio_volume(bus, 0);
@@ -992,7 +992,7 @@ void BK9532_Exit_SoftSleep(WORD bus) {
     // 1. Lưu lại thông tin tần số & ID hiện tại (vì Init sẽ reset về mặc định)
    // DWORD saved_freq = g_bk9532_rf_ctx[bus].rf_freq;
    // DWORD saved_id = g_bk9532_rf_ctx[bus].rf_idc;
-    TRACE("BK9532_Exit_SoftSleep bus=",bus);
+    //TRACE("BK9532_Exit_SoftSleep bus=",bus);
     // 2. Gọi hàm Init có sẵn để nạp lại toàn bộ g_bk9532_rom (bao gồm cả Analog & Digital)
     // Hàm này sẽ khôi phục Reg 0x00-0x0B về giá trị chuẩn của Beken
     bk9532_rf_chip_init(bus);

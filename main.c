@@ -120,7 +120,7 @@ void main_loop(void)
 {
 	WORD timer_count=0;
 	WORD cnt=0;	
-	BOOL tmp;
+	WORD tmp;
 	#if ENABLE_USB
     	DWORD midi_event;
 	#endif	
@@ -158,7 +158,7 @@ void main_loop(void)
 					if(cnt_checkSleepMic>14000)//3p
 					//if(cnt_checkSleepMic>5000)//1p
 					{
-						TRACE("MIC_WAIT finish ",cnt_checkSleepMic);
+						//TRACE("MIC_WAIT finish ",cnt_checkSleepMic);
 						iCheckSleepMic=MIC_SLEEP;
 						iHasTurnModeSleep=FALSE;
 						cnt_checkSleepMic=0;
@@ -171,7 +171,7 @@ void main_loop(void)
 						iCheckSleepMic=(iCheckSleepMic!=MIC_SLEEP) ? MIC_SLEEP : MIC_WAKEUP;
 						iHasTurnModeSleep=FALSE;
 						cnt_checkSleepMic=0;
-						TRACE("MIC_status ",iCheckSleepMic);
+						//TRACE("MIC_status ",iCheckSleepMic);
 					}
 				}
 				
@@ -189,15 +189,14 @@ void main_loop(void)
 				if( timer_count>=120)//2s
 				{					
 					timer_count=0;
-					tmp=check_charge_det();
-					//TRACE("charge_det=%d",tmp);
+					tmp=checkPluginDet();
 					if(chargeState!=tmp)
-					{
+					{						
 						chargeState=tmp;
 						uart_send_cmd(CMD_CHARGE_DET, chargeState);
+						TRACE("send CMD_CHARGE_DET=%d",chargeState);
 					}
-					//tmp=check_plugin_det();
-					//TRACE("plugin_det=%d",tmp);
+					
 					if(myData.Auto_PowerOff!=TURN_OFF)
 					{
 						cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
@@ -284,10 +283,25 @@ void main_loop(void)
 		}
     }
 }
-
+WORD checkPluginDet()
+{
+	WORD tmp;
+	tmp=check_plugin_det();
+	//TRACE("plugin_det=%d",tmp);
+	if(tmp==CHARGE_PLUS)
+	{
+		tmp=check_charge_det();
+		//TRACE("charge_det=%d",tmp);
+		if(tmp==CHARGE_PLUS)
+			tmp=CHARGE_DONE;
+		else	
+			tmp=CHARGE_PLUS;
+	}
+	return tmp;
+}
 void main_sendCmdPower()
 {
-	chargeState=check_charge_det();
+	chargeState=checkPluginDet();
 	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
 }
 void main_sendCmdInfo()
@@ -312,7 +326,7 @@ void main_power_btn_check(void)
 	{
 		if(powerState==TURN_OFF)
 		{
-			TRACE("main_power_on_check %d",power_button_last_state);
+			//TRACE("main_power_on_check %d",power_button_last_state);
 			if(power_button_last_state!=SYS_POWER_BUTTON_ACTIVED)
 			{
 				power_button_last_state=SYS_POWER_BUTTON_ACTIVED;				
