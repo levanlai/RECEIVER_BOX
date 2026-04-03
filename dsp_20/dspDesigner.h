@@ -37,15 +37,15 @@ extern WORD dsp[NBDSPINITIALIZED];
 
 WORD dsp1InitAndRoute(void);
 extern WORD dsp1pcs[11];
-#define	NUMBEROFPROCESS1	0x0008
-#define	NUMBEROFCOMMAND1	0x0025
+#define	NUMBEROFPROCESS1	0x000A
+#define	NUMBEROFCOMMAND1	0x002D
 extern const WORD nrpn1List[NUMBEROFCOMMAND1][2];
 extern WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 
 WORD dsp2InitAndRoute(void);
 extern WORD dsp2pcs[11];
-#define	NUMBEROFPROCESS2	0x0008
-#define	NUMBEROFCOMMAND2	0x0025
+#define	NUMBEROFPROCESS2	0x000A
+#define	NUMBEROFCOMMAND2	0x002D
 extern const WORD nrpn2List[NUMBEROFCOMMAND2][2];
 extern WORD dsp2NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD format );
 

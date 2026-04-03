@@ -12,7 +12,6 @@
 #include "dsp/dspDesigner.h"
 MyData_t  myData;
 WORD devices_connect=0;
-WORD devices_connect_tmp=0;
 WORD iNeedSaveFlash=FALSE;
 extern void delayMsec(WORD ms);
 //https://resource.heltec.cn/utils/hf
@@ -320,29 +319,15 @@ WORD getBitValueAtOffset(WORD num, WORD offset) {
     return (num >> offset) & 1;
 }
 
-// void check_devices_connect(void)
-// {
-//     WORD check_bit=bk9532_mic_is_connected(0)|bk9532_mic_is_connected(1);
-//     devices_connect_tmp=setValueAtOffset(devices_connect_tmp,mic_status_offset,check_bit);  
-//     //TRACE("check_devices_connect tmp=%x",devices_connect_tmp);
-//     //TRACE("devices_connect=%x",devices_connect); 
-//     if(devices_connect_tmp!=devices_connect)
-//     {
-//         TRACE("check_devices_connect# =%x",devices_connect_tmp);
-//         devices_connect=devices_connect_tmp;
-//         uart_send_cmd(UART1,CMD_DEVICES_CONNECT, devices_connect);
-//     }    
-// }
-
 void check_mics_connect(WORD iSend)
 {
-    devices_connect_tmp=(bk9532_mic_is_connected(1)<<1)|bk9532_mic_is_connected(0);
-    //TRACE("check_devices_connect tmp=%x",devices_connect_tmp);
+    WORD icheck=(bk9532_mic_is_connected(1)<<1)|bk9532_mic_is_connected(0);
+    //TRACE("check=%x",icheck);
     //TRACE("devices_connect=%x",devices_connect); 
-    if(devices_connect_tmp!=devices_connect || iSend)
+    if(icheck!=devices_connect || iSend)
     {
-        TRACE("check_mics_connect# =%x",devices_connect_tmp);
-        devices_connect=devices_connect_tmp;
+        TRACE("check_mics_connect# =%x",icheck);
+        devices_connect=icheck;
         uart_send_cmd(CMD_DEVICES_CONNECT, devices_connect);
     }    
 }

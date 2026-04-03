@@ -15,6 +15,17 @@ typedef struct
 	WORD parameter2; // 180deg
 } globalGainPreset;
 
+// NoiseGate preset structure.
+typedef struct 
+{
+	WORD parameter1; // ON/OFF
+	WORD parameter2; // Threshold
+	WORD parameter3; // Attack
+	WORD parameter4; // Release
+	WORD parameter5; // Gain
+	WORD parameter6; // 180deg
+} globalNoiseGatePreset;
+
 // Biquad[4] preset structure.
 typedef struct 
 {
@@ -66,6 +77,23 @@ typedef struct
 	DWORD parameter22; // Freq5
 	WORD parameter23; // Gain5
 } globalBiquad5Preset;
+
+// LevelDetect preset structure.
+typedef struct 
+{
+	WORD parameter1; // Attack
+	WORD parameter2; // Release
+} globalLevelDetectPreset;
+
+// Compressor preset structure.
+typedef struct 
+{
+	WORD parameter1; // ON/OFF
+	WORD parameter2; // Threshold
+	WORD parameter3; // Ratio
+	WORD parameter4; // Boost
+	WORD parameter5; // 180deg
+} globalCompressorPreset;
 
 // (s)Reverb/Echo preset structure.
 typedef struct 
@@ -123,17 +151,6 @@ typedef struct
 	WORD parameter6; // Gain3
 } globalMixN3Preset;
 
-// FreqShifter preset structure.
-typedef struct 
-{
-	WORD parameter1; // ON/OFF
-	WORD parameter2; // PostHP
-	WORD parameter3; // Shift
-	WORD parameter4; // MaxScale
-	WORD parameter5; // Gain
-	WORD parameter6; // 180deg
-} globalFreqShifterPreset;
-
 // Feedback canceller preset structure.
 typedef struct 
 {
@@ -151,6 +168,14 @@ typedef struct
 	WORD control[2]; // controls array
 } globalGainControl;
 
+// NoiseGate preset control structure.
+typedef struct 
+{
+	WORD numberOfControls; // number of controls
+	WORD sizeOfStruct; // size of this Structure
+	WORD control[6]; // controls array
+} globalNoiseGateControl;
+
 // Biquad[4] preset control structure.
 typedef struct 
 {
@@ -166,6 +191,22 @@ typedef struct
 	WORD sizeOfStruct; // size of this Structure
 	WORD control[23]; // controls array
 } globalBiquad5Control;
+
+// LevelDetect preset control structure.
+typedef struct 
+{
+	WORD numberOfControls; // number of controls
+	WORD sizeOfStruct; // size of this Structure
+	WORD control[2]; // controls array
+} globalLevelDetectControl;
+
+// Compressor preset control structure.
+typedef struct 
+{
+	WORD numberOfControls; // number of controls
+	WORD sizeOfStruct; // size of this Structure
+	WORD control[5]; // controls array
+} globalCompressorControl;
 
 // (s)Reverb/Echo preset control structure.
 typedef struct 
@@ -199,14 +240,6 @@ typedef struct
 	WORD control[6]; // controls array
 } globalMixN3Control;
 
-// FreqShifter preset control structure.
-typedef struct 
-{
-	WORD numberOfControls; // number of controls
-	WORD sizeOfStruct; // size of this Structure
-	WORD control[6]; // controls array
-} globalFreqShifterControl;
-
 // Feedback canceller preset control structure.
 typedef struct 
 {
@@ -215,12 +248,18 @@ typedef struct
 	WORD control[3]; // controls array
 } globalFeedback_cancellerControl;
 
-#define	GLOBAL_GAIN_PRESET_NB	1
+#define	GLOBAL_GAIN_PRESET_NB	2
 extern const globalGainPreset global_gain_presets[GLOBAL_GAIN_PRESET_NB];
+#define	GLOBAL_NOISEGATE_PRESET_NB	1
+extern const globalNoiseGatePreset global_noisegate_presets[GLOBAL_NOISEGATE_PRESET_NB];
 #define	GLOBAL_BIQUAD4_PRESET_NB	1
 extern const globalBiquad4Preset global_biquad4_presets[GLOBAL_BIQUAD4_PRESET_NB];
 #define	GLOBAL_BIQUAD5_PRESET_NB	1
 extern const globalBiquad5Preset global_biquad5_presets[GLOBAL_BIQUAD5_PRESET_NB];
+#define	GLOBAL_LEVELDETECT_PRESET_NB	1
+extern const globalLevelDetectPreset global_leveldetect_presets[GLOBAL_LEVELDETECT_PRESET_NB];
+#define	GLOBAL_COMPRESSOR_PRESET_NB	1
+extern const globalCompressorPreset global_compressor_presets[GLOBAL_COMPRESSOR_PRESET_NB];
 #define	GLOBAL_S_REVERB_ECHO_PRESET_NB	2
 extern const globalS_Reverb_EchoPreset global_s_reverb_echo_presets[GLOBAL_S_REVERB_ECHO_PRESET_NB];
 #define	GLOBAL_MIXN2_PRESET_NB	2
@@ -229,23 +268,23 @@ extern const globalMixN2Preset global_mixn2_presets[GLOBAL_MIXN2_PRESET_NB];
 extern const globalMixN4Preset global_mixn4_presets[GLOBAL_MIXN4_PRESET_NB];
 #define	GLOBAL_MIXN3_PRESET_NB	1
 extern const globalMixN3Preset global_mixn3_presets[GLOBAL_MIXN3_PRESET_NB];
-#define	GLOBAL_FREQSHIFTER_PRESET_NB	1
-extern const globalFreqShifterPreset global_freqshifter_presets[GLOBAL_FREQSHIFTER_PRESET_NB];
 #define	GLOBAL_FEEDBACK_CANCELLER_PRESET_NB	1
 extern const globalFeedback_cancellerPreset global_feedback_canceller_presets[GLOBAL_FEEDBACK_CANCELLER_PRESET_NB];
-#define	NUMBER_OF_PRESET_TABLE	9
+#define	NUMBER_OF_PRESET_TABLE	11
 extern const WORD_FAR_P global_preset_table_address[NUMBER_OF_PRESET_TABLE];
 extern const globalGainControl global_gain_controls;
+extern const globalNoiseGateControl global_noisegate_controls;
 extern const globalBiquad4Control global_biquad4_controls;
 extern const globalBiquad5Control global_biquad5_controls;
+extern const globalLevelDetectControl global_leveldetect_controls;
+extern const globalCompressorControl global_compressor_controls;
 extern const globalS_Reverb_EchoControl global_s_reverb_echo_controls;
 extern const globalMixN2Control global_mixn2_controls;
 extern const globalMixN4Control global_mixn4_controls;
 extern const globalMixN3Control global_mixn3_controls;
-extern const globalFreqShifterControl global_freqshifter_controls;
 extern const globalFeedback_cancellerControl global_feedback_canceller_controls;
 extern const WORD_FAR_P global_preset_control_table_address[NUMBER_OF_PRESET_TABLE];
 #define	GLOBAL_NUMBER_OF_DSP	4
-extern const DWORD globalpreset[1][31];
+extern const DWORD globalpreset[1][35];
 
 #endif //__GLOBALPRESETS_H__

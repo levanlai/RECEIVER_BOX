@@ -163,10 +163,10 @@ enum {
     TURN_ON,
     TURN_NONE,   
 };
-enum {        
-    EFFECT_OFF,
-    EFFECT_MonoEcho_Reverb=12,  
-};
+// enum {        
+//     EFFECT_OFF,
+//     EFFECT_MonoEcho_Reverb=12,  
+// };
 // enum {        
 //     AUTO_OFF, 
 //     AUTO_ON,
@@ -295,6 +295,7 @@ enum {
     CMD_DEVICES_CONNECT,
     CMD_BT_DISCONNET,
     CMD_INFO,
+    CMD_SET_OFF,
     
     CMD_TOTAL,
 };

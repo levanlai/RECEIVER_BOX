@@ -46,28 +46,38 @@ customPreInitFunction1( dspId );// Do all your custom pre initialization code in
 	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[1], PCS_DSP_IN | 0 );
 	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[1], PCS_NODE | 6 );
 
-	// Process #2: FreqShifter
-	dsp1pcs[2] = _LiveMic_FreqShifter_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, FREQSHIFTER_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 6 );
-	_LiveMic_SetProcOUT( dspId, FREQSHIFTER_SAMPLE_OUT|dsp1pcs[2], PCS_NODE | 7 );
+	// Process #2: NoiseGate
+	dsp1pcs[2] = _LiveMic_NoiseGate_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, NOISEGATE_SAMPLE_IN|dsp1pcs[2], PCS_NODE | 6 );
+	_LiveMic_SetProcOUT( dspId, NOISEGATE_SAMPLE_OUT|dsp1pcs[2], PCS_NODE | 7 );
 
 	// Process #3: Biquad
 	dsp1pcs[3] = _LiveMic_Biquad_Allocate( dspId, BIQUAD3BANDCOUNT );
 	_LiveMic_SetProcIN( dspId, BIQUAD_SAMPLE_IN|dsp1pcs[3], PCS_NODE | 7 );
 	_LiveMic_SetProcOUT( dspId, BIQUAD_SAMPLE_OUT|dsp1pcs[3], PCS_NODE | 8 );
 
-	// Process #10: Gain
-	dsp1pcs[10] = _LiveMic_Gain_Allocate( dspId );
-	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[10], PCS_NODE | 8 );
-	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[10], PCS_DSP_OUT | 1 );
+	// Process #4: LevelDetect
+	dsp1pcs[4] = _LiveMic_LevelDetect_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, LEVELDETECT_SAMPLE_IN|dsp1pcs[4], PCS_NODE | 8 );
+
+	// Process #5: Compressor
+	dsp1pcs[5] = _LiveMic_Compressor_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, COMPRESSOR_SAMPLE_IN|dsp1pcs[5], PCS_NODE | 8 );
+	_LiveMic_SetProcOUT( dspId, COMPRESSOR_SAMPLE_OUT|dsp1pcs[5], PCS_NODE | 10 );
+	_LiveMic_Compressor_ConnectLevel( dspId, dsp1pcs[5], dsp1pcs[4] );
 
 	// Process #6: (s)Reverb/Echo
-	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 8 );
-	_LiveMic_SetProcIN( dspId, LIVEMIC_ECHO_SAMPLE_IN, PCS_NODE | 8 );
+	_LiveMic_SetProcIN( dspId, LIVEMIC_REVERB_SAMPLE_IN, PCS_NODE | 10 );
+	_LiveMic_SetProcIN( dspId, LIVEMIC_ECHO_SAMPLE_IN, PCS_NODE | 10 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTL, PCS_NODE | 2 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_REVERB_SAMPLE_OUTR, PCS_NODE | 3 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTL, PCS_NODE | 0 );
 	_LiveMic_SetProcOUT( dspId, LIVEMIC_ECHO_SAMPLE_OUTR, PCS_NODE | 1 );
+
+	// Process #10: Gain
+	dsp1pcs[10] = _LiveMic_Gain_Allocate( dspId );
+	_LiveMic_SetProcIN( dspId, GAIN_SAMPLE_IN|dsp1pcs[10], PCS_NODE | 10 );
+	_LiveMic_SetProcOUT( dspId, GAIN_SAMPLE_OUT|dsp1pcs[10], PCS_DSP_OUT | 1 );
 
 	// Process #7: MixN
 	dsp1pcs[7] = _LiveMic_MixN_Allocate( dspId, 2 );
@@ -98,15 +108,23 @@ const WORD nrpn1List[NUMBEROFCOMMAND1][2]=
 {
 	{ 0x0100, 0x0030 }, // _LiveMic_Gain_Value
 	{ 0x0101, 0x0031 }, // _LiveMic_Gain_Phase
-	{ 0x0200, 0x002A }, // _LiveMic_FreqShifter_OnOff
-	{ 0x0201, 0x002B }, // _LiveMic_FreqShifter_PostHP
-	{ 0x0202, 0x002C }, // _LiveMic_FreqShifter_Amount
-	{ 0x0203, 0x002D }, // _LiveMic_FreqShifter_SetMaxScale
-	{ 0x0204, 0x002E }, // _LiveMic_FreqShifter_InGainValue
-	{ 0x0205, 0x002F }, // _LiveMic_FreqShifter_InGainPhase
+	{ 0x0200, 0x0038 }, // _LiveMic_NoiseGate_OnOff
+	{ 0x0201, 0x0039 }, // _LiveMic_NoiseGate_Threshold
+	{ 0x0202, 0x003A }, // _LiveMic_NoiseGate_Attack
+	{ 0x0203, 0x003B }, // _LiveMic_NoiseGate_Release
+	{ 0x0204, 0x003C }, // _LiveMic_NoiseGate_InGainValue
+	{ 0x0205, 0x003D }, // _LiveMic_NoiseGate_InGainPhase
 	{ 0x0300, 0x0012 }, // _LiveMic_Biquad_OnOff
 	{ 0x0301, 0x0013 }, // _LiveMic_Biquad_InGainPhase
 	{ 0x0302, 0x0014 }, // _LiveMic_Biquad_InGainValue
+	{ 0x0400, 0x0034 }, // _LiveMic_LevelDetect_Attack
+	{ 0x0401, 0x0035 }, // _LiveMic_LevelDetect_Release
+	{ 0x0500, 0x001F }, // _LiveMic_Compressor_GetGainReduction
+	{ 0x0501, 0x0020 }, // _LiveMic_Compressor_OnOff
+	{ 0x0502, 0x0021 }, // _LiveMic_Compressor_Threshold
+	{ 0x0503, 0x0022 }, // _LiveMic_Compressor_Ratio
+	{ 0x0504, 0x0023 }, // _LiveMic_Compressor_Boost
+	{ 0x0505, 0x0024 }, // _LiveMic_Compressor_BoostPhase
 	{ 0x0600, 0x0000 }, // _LiveMic_Effect_LoadProgram
 	{ 0x0601, 0x0001 }, // _LiveMic_Effect_RevInputLevel
 	{ 0x0602, 0x0002 }, // _LiveMic_Effect_RevLevel
@@ -226,6 +244,13 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			//Gain
 			case 0x0030: _LiveMic_Gain_Value( dspId, processId, value ); return 1;
 			case 0x0031: _LiveMic_Gain_Phase( dspId, processId, val8bit ); return 1;
+			//NoiseGate
+			case 0x0038: _LiveMic_NoiseGate_OnOff( dspId, processId, val8bit ); return 1;
+			case 0x0039: _LiveMic_NoiseGate_Threshold( dspId, processId, value ); return 1;
+			case 0x003A: _LiveMic_NoiseGate_Attack( dspId, processId, value ); return 1;
+			case 0x003B: _LiveMic_NoiseGate_Release( dspId, processId, value ); return 1;
+			case 0x003C: _LiveMic_NoiseGate_InGainValue( dspId, processId, value ); return 1;
+			case 0x003D: _LiveMic_NoiseGate_InGainPhase( dspId, processId, val8bit ); return 1;
 			//Biquad
 			case 0x0012: _LiveMic_Biquad_OnOff( dspId, processId, val8bit ); return 1;
 			case 0x0013: _LiveMic_Biquad_InGainPhase( dspId, processId, val8bit ); return 1;
@@ -234,6 +259,16 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x4016: SetFilterQ( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
 			case 0x4017: SetFilterFreq( &updateCoeffFunc, theBiquad, dspId, processId, index, dvalue ); return 1;
 			case 0x4018: SetFilterGain( &updateCoeffFunc, theBiquad, dspId, processId, index, value ); return 1;
+			//LevelDetect
+			case 0x0034: _LiveMic_LevelDetect_Attack( dspId, processId, value ); return 1;
+			case 0x0035: _LiveMic_LevelDetect_Release( dspId, processId, value ); return 1;
+			//Compressor
+			case 0x001F:  sendSysExMessage( value, _LiveMic_Compressor_GetGainReduction( dspId, processId ) ); return 1;
+			case 0x0020: _LiveMic_Compressor_OnOff( dspId, processId, val8bit ); return 1;
+			case 0x0021: _LiveMic_Compressor_Threshold( dspId, processId, value ); return 1;
+			case 0x0022: _LiveMic_Compressor_Ratio( dspId, processId, value ); return 1;
+			case 0x0023: _LiveMic_Compressor_Boost( dspId, processId, value ); return 1;
+			case 0x0024: _LiveMic_Compressor_BoostPhase( dspId, processId, val8bit ); return 1;
 			//(s)Reverb/Echo
 			case 0x0000: _LiveMic_Effect_LoadProgram( dspId, val8bit ); return 1;
 			case 0x0001: _LiveMic_Effect_RevInputLevel( dspId, value ); return 1;
@@ -256,13 +291,6 @@ WORD dsp1NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			//MixN
 			case 0x4036: _LiveMic_MixN_GainPhase( dspId, processId, index, val8bit ); return 1;
 			case 0x4037: _LiveMic_MixN_GainValue( dspId, processId, index, value ); return 1;
-			//FreqShifter
-			case 0x002A: _LiveMic_FreqShifter_OnOff( dspId, processId, val8bit ); return 1;
-			case 0x002B: _LiveMic_FreqShifter_PostHP( dspId, processId, val8bit ); return 1;
-			case 0x002C: _LiveMic_FreqShifter_Amount( dspId, processId, value ); return 1;
-			case 0x002D: _LiveMic_FreqShifter_SetMaxScale( dspId, processId, value ); return 1;
-			case 0x002E: _LiveMic_FreqShifter_InGainValue( dspId, processId, value ); return 1;
-			case 0x002F: _LiveMic_FreqShifter_InGainPhase( dspId, processId, val8bit ); return 1;
 		
 		}
 	

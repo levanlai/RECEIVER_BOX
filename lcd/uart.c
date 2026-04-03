@@ -17,9 +17,9 @@
 
 
 extern MyData_t  myData;
-extern WORD devices_connect;
 extern WORD	iNeedSaveFlash;
 extern void main_sendCmdPower();
+extern void setPowerOff();
 extern WORD getValueBatery();
 void delayMsec(WORD ms);
 void uart_init(void)
@@ -198,6 +198,10 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 		{		
 			case CMD_POWER:				
 				main_sendCmdPower();	
+				break;
+			case CMD_SET_OFF:
+				TRACE("CMD_SET_OFF =%x",value);	
+				setPowerOff();	
 				break;
 			case CMD_BATTERY_VALUE:
 				uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
@@ -399,8 +403,20 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				}
 				TRACE("CMD_MIC_FBC %x",value);
 				//_FBCancel_Bypass( dsp[DSP3_FBC], value );	// bypass: 0=normal work, 1=bypass all notch filters
-				_FBCancel_Bypass( dsp[DSP3_FBC], value==TURN_OFF?FBC_OFF:FBC_ON );	// bypass: 0=normal work, 1=bypass all notch filters
+				//_FBCancel_Bypass( dsp[DSP3_FBC], value==TURN_OFF?FBC_OFF:FBC_ON );	// bypass: 0=normal work, 1=bypass all notch filters
 				//_FBCancel_SetMode( dsp[DSP3_FBC], value==0?FBC_OFF:FBC_ON);
+				if(value==TURN_ON)
+				{
+					_FBCancel_Bypass( dsp[DSP3_FBC], FBC_ON);	// bypass: 0=normal work, 1=bypass all notch filters
+					_FBCancel_SetMode( dsp[DSP3_FBC], 1);// Mode: 0=fast detect, 1=default mode, 2=slowest detect
+					_MixPA_FreqShifter_OnOff(dsp[DSP1_LIVEMIC], dsp1pcs[2], TURN_ON); // value (0=OFF else ON)
+					_MixPA_FreqShifter_OnOff(dsp[DSP2_LIVEMIC], dsp2pcs[2], TURN_ON); // value (0=OFF else ON)
+				}else
+				{
+					_FBCancel_Bypass( dsp[DSP3_FBC], FBC_OFF);	// bypass: 0=normal work, 1=bypass all notch filters
+					_MixPA_FreqShifter_OnOff(dsp[DSP1_LIVEMIC], dsp1pcs[2], TURN_OFF); // value (0=OFF else ON)
+					_MixPA_FreqShifter_OnOff(dsp[DSP2_LIVEMIC], dsp2pcs[2], TURN_OFF); // value (0=OFF else ON)
+				}
 			 	break;
 			case CMD_CONTROL_LINK:
 				if(!iInit)
