@@ -83,7 +83,7 @@ void ADC_check()
 	WORD adc_arrval=_rdxtmem( SCIFPG, BRVAL_ADC );	//read ADC, value inrange 0..0x7FC0
 	//TRACE("ADC_check adc_val=%d", adc_arrval);
 	//while( adc_arrval[cntSample]&0x8000 );	//EOC/=1? -> wait
-	if(adc_chn==ADC_BTN && powerState==TURN_ON)
+	if(adc_chn==ADC_BTN /*&& powerState==TURN_ON*/)
 	{
 		adc_curr_val[adc_chn]=adc_arrval;
 		if(adc_curr_val[adc_chn]!=adc_old_val[adc_chn])
@@ -250,9 +250,9 @@ void ADC_check()
 	}
 
 	
-	if(powerState==TURN_OFF)
-		adc_chn=ADC_BATERY;
-	else
+	// if(powerState==TURN_OFF)
+	// 	adc_chn=ADC_BATERY;
+	// else
 	{
 		if( ++adc_chn==ADC_CHANNELS ) adc_chn=ADC_BATERY;	//select next adc channel
 	}			
