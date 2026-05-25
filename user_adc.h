@@ -16,14 +16,15 @@
 #define ADC_Btn3_press_value    630
 #define ADC_Btn4_press_value    165
 
-#define TIME_PRESS_KEEP         10
-#define TIME_PRESS_CONTINUE    4
-
+#define TIME_PRESS_KEEP         15//8//10
+#define TIME_PRESS_CONTINUE    8//4
+#define ADC_CHECK_COUNT       3
 enum {
-    Key1_press_value=1,   
+    Key1_press_value,   
     Key2_press_value, 
     Key3_press_value,
     Key4_press_value, 
+    KEY_INDEX_INVALID =0xFF,
 };
 
 void adc_init(void);

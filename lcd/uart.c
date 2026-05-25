@@ -411,11 +411,15 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					_FBCancel_SetMode( dsp[DSP3_FBC], 1);// Mode: 0=fast detect, 1=default mode, 2=slowest detect
 					_MixPA_FreqShifter_OnOff(dsp[DSP1_LIVEMIC], dsp1pcs[2], TURN_ON); // value (0=OFF else ON)
 					_MixPA_FreqShifter_OnOff(dsp[DSP2_LIVEMIC], dsp2pcs[2], TURN_ON); // value (0=OFF else ON)
+
+					//set_Mute_value(TRUE);
 				}else
 				{
 					_FBCancel_Bypass( dsp[DSP3_FBC], FBC_OFF);	// bypass: 0=normal work, 1=bypass all notch filters
 					_MixPA_FreqShifter_OnOff(dsp[DSP1_LIVEMIC], dsp1pcs[2], TURN_OFF); // value (0=OFF else ON)
 					_MixPA_FreqShifter_OnOff(dsp[DSP2_LIVEMIC], dsp2pcs[2], TURN_OFF); // value (0=OFF else ON)
+
+					//set_Mute_value(FALSE);
 				}
 			 	break;
 			case CMD_CONTROL_LINK:

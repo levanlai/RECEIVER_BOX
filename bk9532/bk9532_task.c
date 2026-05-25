@@ -513,7 +513,12 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
     }
     if(g_bk9532_rf_ctx[bus].pair_ok)
     {
-        g_bk9532_rf_ctx[bus].pair_ok_cnt++;
+        g_bk9532_rf_ctx[bus].pair_ok_cnt++;        
+        // if(g_bk9532_rf_ctx[bus].pair_ok_cnt>2000 && g_bk9532_rf_ctx[bus].isendPaired)
+        // {
+        //     uart_send_cmd(CMD_MIC_PAIR, bus);
+        //     g_bk9532_rf_ctx[bus].isendPaired=FALSE;        
+        // }
         if(g_bk9532_rf_ctx[bus].pair_ok_cnt>4000)//check timeout 40s after pair ok
         {
            TRACE("clear time pair ok, bus=%d", bus);
@@ -661,7 +666,7 @@ static WORD bk9532_rf_scan_frequency_handle(WORD bus)
     return ret;
 }
 
-
+WORD last_time_freq_change;
  void bk9532_task_handler(WORD bus)
 {
     //static state_machine[BK9532_MAX_CHANNELS] = {0, 0};
@@ -694,7 +699,9 @@ int state;
                 check_mics_connect(FALSE);
                 g_bk9532_rf_ctx[bus].pair_ok=TRUE;
                 g_bk9532_rf_ctx[bus].pair_ok_cnt=0;
-                state_pair[bus] = 1;
+                //g_bk9532_rf_ctx[bus].isendPaired=TRUE;          
+                state_pair[bus] = 1;      
+                
             }
             else
             {
@@ -712,7 +719,7 @@ int state;
             //state_pair[bus] = 1;
         }
         break;
-    case 1: // scan frequency //
+    case 1: // scan frequency //        
         bk9532_rf_scan_frequency_handle(bus);
         break;
     case 2:

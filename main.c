@@ -19,6 +19,7 @@ WORD powerState=TURN_OFF;
 WORD chargeState=CHARGE_UN_PLUS;
 WORD iFirstPowerPress=FALSE;
 WORD initPowerOn=0;
+WORD iFirstPowerOn=FALSE;
 WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 DWORD delay = 0;
 WORD cnt_SilenceDetect=0;
@@ -175,20 +176,16 @@ void main_loop(void)
 					}
 				}
 				
-				// last_time_PressContinue++;
-				// if(cntPressContinue>0 && last_time_PressContinue>=5)
-				// {
-				// 	if(cntPressContinue==1)
-				// 		Button_Power_Press(0);
-				// 	else
-				// 		Button_Power_Press(1);
-				// 	cntPressContinue=0;
-				// }
-
-				timer_count++;					
+				timer_count++;						
 				if( timer_count>=120)//2s
 				{					
 					timer_count=0;
+					if(iFirstPowerOn)//2s sau unmute
+					{
+						iFirstPowerOn=FALSE;
+						set_Mute_value(FALSE);
+					}	
+
 					tmp=checkPluginDet();
 					if(chargeState!=tmp)
 					{						
@@ -280,6 +277,8 @@ void main_loop(void)
 				bk9532_callHander(I2C_PORT_MIC1);
 				bk9532_callHander(I2C_PORT_MIC2);
 			}
+			 	//bk9532_callHander(I2C_PORT_MIC1);
+			 	//bk9532_callHander(I2C_PORT_MIC2);
 		}
     }
 }
@@ -301,6 +300,7 @@ WORD checkPluginDet()
 }
 void main_sendCmdPower()
 {
+	TRACE("main_sendCmdPower %d",powerState);
 	chargeState=checkPluginDet();
 	uart_send_cmd(CMD_POWER, powerState|(chargeState<<8));
 }
@@ -318,6 +318,7 @@ void setPowerOff()
 	cnt_checkSleepMic=0;
 	iCheckSleepMic=MIC_WAIT;
 	iHasTurnModeSleep=FALSE;
+	iFirstPowerOn=FALSE;
 	sys_power_latch(0);
 }
 void main_power_btn_check(void)
@@ -336,10 +337,12 @@ void main_power_btn_check(void)
 					initPowerOn=1;
 					sys_power_latch(1);
 					delayMsec(100);
-					SysVarInit();						
+					//delayMsec(2000);
+					SysVarInit();											
 					main_sendCmdPower();	
-					bk9532_test();
-					set_Mute_value(FALSE);
+					bk9532_test();	
+					iFirstPowerOn=TRUE;				
+					//set_Mute_value(FALSE);
 				}				
 			}
 		}else
