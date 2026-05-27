@@ -292,9 +292,9 @@ WORD bk9532_set_audio_volume(WORD bus, WORD vol)
 	vol_eq =  ((DWORD)18  & 0x1F) << 5);;//18:-6dB;24:0dB
 #else  
 	vol_duf = ((DWORD)vol & 0x1F) << 0;
-	//vol_eq =  ((DWORD)24  & 0x1F) << 5;//18:-6dB;24:0dB
-    vol_eq =  ((DWORD)18  & 0x1F) << 5;//18:-6dB;24:0dB
-   //vol_eq =  ((DWORD)12  & 0x1F) << 5;//18:-6dB;24:0dB
+	vol_eq =  ((DWORD)24  & 0x1F) << 5;//18:-6dB;24:0dB
+    //vol_eq =  ((DWORD)18  & 0x1F) << 5;//18:-6dB;24:0dB
+   
 #endif
     vol_all = vol_duf | vol_eq;
 

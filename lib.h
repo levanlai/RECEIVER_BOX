@@ -17,4 +17,7 @@ WORD checkRangeValue(WORD cmd,int value);
 WORD checkCMDGainEQ(WORD cmd);
 WORD checkCMD_HPF(WORD cmd);
 WORD getTimeAutoPowerOff();
+void setGainOutput(void);
+int flash_save_Output(WORD value);
+int flash_load_Output(PWORD output);
 #endif

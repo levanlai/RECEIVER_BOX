@@ -7,7 +7,7 @@
 #endif	// _SKIP_DDD_NRPN_CTRL
 #include "BiquadCtrl.h"
 #include "memorymap.h"
-
+#include <trace.h>
 // Biquad(s) - define, variable, ... 
 #define BIQUAD_ITEMCOUNT 1
 
@@ -262,7 +262,9 @@ WORD dsp4NrpnHandler( WORD nrpn, WORD dspId, WORD processId, DWORD value, WORD f
 			case 0x0010: _LiveMic_Effect_EchoOutputLevel( dspId, 1, value ); return 1;
 			case 0x0011: _LiveMic_Effect_EchoOutputPhase( dspId, 1, val8bit ); return 1;
 			//Gain
-			case 0x0030: _LiveMic_Gain_Value( dspId, processId, value ); return 1;
+			case 0x0030: 
+			//TRACE("MASTER Gain =%x",value);
+			_LiveMic_Gain_Value( dspId, processId, value ); return 1;
 			case 0x0031: _LiveMic_Gain_Phase( dspId, processId, val8bit ); return 1;
 			//PeakLevel
 			case 0x003E:  sendSysExMessage( value, _LiveMic_PeakLevel_GetPeak( dspId, processId ) ); return 1;

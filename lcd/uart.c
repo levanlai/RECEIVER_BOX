@@ -17,6 +17,7 @@
 
 
 extern MyData_t  myData;
+extern WORD	output_mode;
 extern WORD	iNeedSaveFlash;
 extern void main_sendCmdPower();
 extern void setPowerOff();
@@ -296,15 +297,15 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 				if(myData.Mic_Control_link)
 					cmd_execute(CMD_MIC_1_HPF,value,iInit,TRUE,valueConvert);
 				break; 		
-			case CMD_VOL_OUT: 
+			case CMD_MASTER_VOL: 
 				value=checkRangeValue(cmd,value);				
 				if(!iInit)
 				{
 					iNeedSaveFlash=TRUE;
-					myData.Mic_Vol_Out=value;
+					myData.Master_vol=value;
 				}
 				valueConvert=ConvertValueToSAM((DWORD)value,cmd);
-				//_FBCancel_Gain_LinearGainValue(dsp[DSP3_FBC], dsp3pcs[2], valueConvert);
+				TRACE("CMD_MASTER_VOL =%x",valueConvert);
 				_LiveMic_Gain_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[11],valueConvert);
 				break;	
 			case CMD_MIC_MASTER: 
@@ -436,7 +437,16 @@ void uart_cmd_parse(WORD cmd, WORD value,WORD iInit)
 					myData.Auto_PowerOff=value;
 				}
 				break;
-			
+			case CMD_OUTPUT:
+				TRACE("CMD_OUTPUT value= %d",value);
+				if(!iInit)
+				{
+					iNeedSaveFlash=TRUE;
+					output_mode=value;
+					flash_save_Output(value);
+				}		
+				setGainOutput();		
+			 	break;	
 			case CMD_SAVE:
 				SaveFlash();
 				break;	
@@ -771,7 +781,7 @@ void syncDataToPanel(void)
 		uart_send_cmd(CMD_MIC_2_TREBLE, myData.Mic_2_Treb);
 		uart_send_cmd(CMD_MIC_2_HPF, myData.Mic_2_HPF);
 	}
-	uart_send_cmd(CMD_VOL_OUT, myData.Mic_Vol_Out);
+	uart_send_cmd(CMD_MASTER_VOL, myData.Master_vol);
 	uart_send_cmd(CMD_MIC_REVERB_VOL, myData.Mic_Reverb_Vol);
 	uart_send_cmd(CMD_MIC_REVERB_TIME, myData.Mic_Reverb_Time);
 	uart_send_cmd(CMD_MIC_EFFECT, myData.Mic_Effect);
@@ -797,7 +807,7 @@ void syncDataToPanel(void)
 		 uart_send_cmd(CMD_MIKE_F_0+i,myData.filterParamsMike[i].f0);
 		 uart_send_cmd(CMD_MIKE_Q_0+i,myData.filterParamsMike[i].Q);
     }
-
+	uart_send_cmd(CMD_OUTPUT, output_mode);
 	uart_send_cmd(CMD_BATTERY_VALUE, getValueBatery());
 	uart_send_cmd(CMD_AUTO_POWEROFF, myData.Auto_PowerOff);	
 	uart_send_cmd(CMD_PANEL_SYNC, 0);	

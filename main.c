@@ -23,11 +23,12 @@ WORD iFirstPowerOn=FALSE;
 WORD power_button_last_state = !SYS_POWER_BUTTON_ACTIVED;
 DWORD delay = 0;
 WORD cnt_SilenceDetect=0;
+WORD cnt_AutoPowerOff=0;
 //power on mic chạy bt trong 3p, sau 3p thì check slepp chu kỳ 5s (5s slepp, 5s scan, nếu kết nối thì ko sleep)-> giảm được 50mA (bt tốn 95mA, sleep còn 45mA)
 WORD cnt_checkSleepMic=0;
 WORD iCheckSleepMic=MIC_WAIT;
 WORD iHasTurnModeSleep=FALSE;
-
+WORD iMuteState=FALSE;
 extern MyData_t  myData;
 //WORD last_time_PressContinue=0;
 //WORD cntPressContinue=0;
@@ -175,7 +176,25 @@ void main_loop(void)
 						//TRACE("MIC_status ",iCheckSleepMic);
 					}
 				}
-				
+
+				if(!iFirstPowerOn)
+				{
+					cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
+					//TRACE("Peak=%x",cnt);
+					if(cnt==0)
+					{
+						cnt_SilenceDetect++;
+						if(cnt_SilenceDetect>120)
+							set_Mute_value(TRUE);
+					}else
+					{
+						if(cnt_SilenceDetect!=0)
+							cnt_SilenceDetect=0;
+						if(iMuteState)
+							set_Mute_value(FALSE);
+					}
+				}
+
 				timer_count++;						
 				if( timer_count>=120)//2s
 				{					
@@ -196,22 +215,23 @@ void main_loop(void)
 					
 					if(myData.Auto_PowerOff!=TURN_OFF)
 					{
-						cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
+						//cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
 						//TRACE("Peak=%x",cnt);
-						if(cnt==0)
+						//if(cnt==0)
+						if(iMuteState)
 						{
-							cnt_SilenceDetect++;
-							//TRACE("cnt_SilenceDetect=%d",cnt_SilenceDetect);
+							cnt_AutoPowerOff++;
+							//TRACE("cnt_AutoPowerOff=%d",cnt_AutoPowerOff);
 							//TRACE("auto=%d",myData.Auto_PowerOff);
-							if(cnt_SilenceDetect>(getTimeAutoPowerOff()/2))
+							if(cnt_AutoPowerOff>(getTimeAutoPowerOff()/2))
 							{
-								cnt_SilenceDetect=0;
+								cnt_AutoPowerOff=0;
 								setPowerOff();
 							}
 						}else
 						{
-							if(cnt_SilenceDetect!=0)
-								cnt_SilenceDetect=0;
+							if(cnt_AutoPowerOff!=0)
+								cnt_AutoPowerOff=0;
 						}
 					}
 				}

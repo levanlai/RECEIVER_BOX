@@ -11,6 +11,7 @@
 #include "lcd/uart.h"
 #include "dsp/dspDesigner.h"
 MyData_t  myData;
+WORD output_mode=OUTPUT_MIC;
 WORD devices_connect=0;
 WORD iNeedSaveFlash=FALSE;
 extern void delayMsec(WORD ms);
@@ -27,7 +28,7 @@ extern void delayMsec(WORD ms);
 #define FLOAT_0x7FFF    0x46fffe00
 
 #define MYDATA_FLASH_ID  0xF005
-
+#define FLASH_ID_OUTPUT  0xF003
 void SysVarInit(void)
 {
     int rc,i ;
@@ -55,7 +56,7 @@ void SysVarInit(void)
         //myData.Mic_2_Reverb=UI_VALUE_MID;
         myData.Mic_2_Repeat=UI_VALUE_MID;
 
-        myData.Mic_Vol_Out=UI_VALUE_MID;
+        myData.Master_vol=UI_VALUE_MID;
         myData.Mic_Reverb_Vol=UI_VALUE_MID;
         myData.Mic_Reverb_Time=UI_VALUE_MID;
         myData.Mic_Reverb_Damping=UI_VALUE_MID;
@@ -65,7 +66,8 @@ void SysVarInit(void)
         myData.Mic_Effect=TURN_ON;
         myData.Mic_Control_link=TURN_ON;
         myData.Auto_PowerOff=TURN_ON;  
-         myData.Mic_2_Vol=UI_VALUE_MID;
+        //myData.Output=OUTPUT_MIC;  
+        myData.Mic_2_Vol=UI_VALUE_MID;
         //myData.Mic_2_Effect=UI_VALUE_MID;        
         myData.Mic_2_Bass=UI_VALUE_MID;  
         myData.Mic_2_Mid=UI_VALUE_MID;             
@@ -86,7 +88,8 @@ void SysVarInit(void)
         biquad_init();
         pms_set_bufs(MYDATA_FLASH_ID,(WORD *)&myData,sizeof(struct MyData));
     }      
-    uart_cmd_parse(CMD_VOL_OUT,myData.Mic_Vol_Out,TRUE); 
+    flash_load_Output(&output_mode);
+    uart_cmd_parse(CMD_MASTER_VOL,myData.Master_vol,TRUE); 
     uart_cmd_parse(CMD_MIC_REVERB_VOL,myData.Mic_Reverb_Vol,TRUE);
     uart_cmd_parse(CMD_MIC_REVERB_TIME,myData.Mic_Reverb_Time,TRUE);
     uart_cmd_parse(CMD_MIC_REVERB_DAMPING,myData.Mic_Reverb_Damping,TRUE);
@@ -135,7 +138,7 @@ void SysVarInit(void)
     //    rc= biquad_cmd_EQ(CMD_MIKE_Q_0+i,myData.filterParamsMike[i].Q);
     //    TRACE("result Q=%x",rc);
     }
-
+    uart_cmd_parse(CMD_OUTPUT,output_mode,TRUE);
 }
 
 void checkSaveFlash(void)
@@ -157,8 +160,18 @@ void resetFactory(void)
     int rc ;
     rc=pms_delete_bufs(MYDATA_FLASH_ID);
     TRACE("resetFactory rc=%d",rc);
+    rc=pms_delete_bufs(FLASH_ID_OUTPUT);
+    TRACE("delete output rc=%d",rc);
     delayMsec(100);
     SysVarInit();
+}
+
+void setGainOutput(void)
+{
+    DWORD valueConvert;
+   valueConvert=ConvertValueToSAM((DWORD)myData.Master_vol,CMD_MASTER_VOL);
+   TRACE("setGainOutput =%x",valueConvert);
+	_LiveMic_Gain_LinearGainValue(dsp[DSP4_LIVEMIC], dsp4pcs[11],valueConvert);
 }
 
 void setBit(WORD Reg, WORD bitPosition)
@@ -271,9 +284,12 @@ FLOAT convertInRange(WORD cmd,DWORD value, DWORD min, DWORD mid, DWORD max, DWOR
              return _float(UI_MIC_DELAY_MIN);
         else if(cmd==CMD_MIC_1_REPEAT ||cmd==CMD_MIC_2_REPEAT)
              return _float(UI_MIC_REPEAT_MIN);
-        else
+        else if(cmd==CMD_MASTER_VOL)
+        {
+            return _float(GAIN_MIN);
+        }else
         {     
-            if(minDb==(DWORD)GAIN_MIN_START || minDb==(DWORD)GAIN_OUT_VOLUME_MIN_START)
+            if(minDb==(DWORD)GAIN_MIN_START)
                 return _float(GAIN_MIN);
             else 
                 return _float(minDb);   
@@ -382,9 +398,17 @@ DWORD ConvertValueToSAM(DWORD value,WORD cmd)
         valueToSAM=func_convertEchoToSam(valueConvert);
     }else
     {       
-        if(cmd==CMD_VOL_OUT)
-            valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_OUT_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
-        else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_MASTER/*||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT*/)
+        if(cmd==CMD_MASTER_VOL)
+        {   
+            // DWORD diff=0;
+            // if(myData.Output==OUTPUT_LINEIN)
+            //     diff=UI_MASTER_VOLUME_DIFF;
+            // valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MASTER_VOLUME_MIN+diff,(DWORD)UI_MASTER_VOLUME_MID+diff,(DWORD)UI_MASTER_VOLUME_MAX+diff);
+            if(output_mode==OUTPUT_LINEIN)
+                valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MASTER_VOLUME_MIN_LINE,(DWORD)UI_MASTER_VOLUME_MID_LINE,(DWORD)UI_MASTER_VOLUME_MAX_LINE);
+            else    
+                valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MASTER_VOLUME_MIN_MIC,(DWORD)UI_MASTER_VOLUME_MID_MIC,(DWORD)UI_MASTER_VOLUME_MAX_MIC);
+        }else if(cmd==CMD_MIC_1_VOL ||cmd==CMD_MIC_2_VOL ||cmd==CMD_MIC_MASTER/*||cmd==CMD_MIC_1_EFFECT ||cmd==CMD_MIC_2_EFFECT*/)
             valueConvert=convertInRange(cmd,value,(DWORD)UI_VALUE_MIN,(DWORD)UI_VALUE_MID,(DWORD)UI_VALUE_MAX,(DWORD)UI_MIC_VOLUME_MIN,(DWORD)UI_MIC_VOLUME_MID,(DWORD)UI_MIC_VOLUME_MAX);
         
          valueToSAM=func_calRangeLinearGainValue(valueConvert);
@@ -570,4 +594,29 @@ WORD getTimeAutoPowerOff()
 
 //   return result;
     return 1800;//30p
+}
+
+int flash_save_Output(WORD value)
+{
+    int rc ;
+    WORD tmp = 0;
+    rc = pms_get_word(FLASH_ID_OUTPUT, &tmp);
+    
+    if (rc == sizeof(WORD) && value == tmp)
+        return rc;
+
+    return pms_set_word(FLASH_ID_OUTPUT, value);    
+}
+
+int flash_load_Output(PWORD output)
+{
+    int rc ;
+    rc = pms_get_word(FLASH_ID_OUTPUT, output);
+    
+    if(rc != sizeof(WORD))
+    {
+        *output = OUTPUT_MIC;       
+    }
+
+    return rc;
 }

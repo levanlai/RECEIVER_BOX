@@ -817,9 +817,9 @@ static WORD bk9532_rf_chip_init(WORD bus)
     //     TRACE("bk9532 reg val %x", reg_val);
     // }
     bk9532_rf_indicate_init(bus);
-    //bk9532_set_audio_volume(bus, 24);
-    bk9532_set_audio_volume(bus, 18);//note
-	//bk9532_set_audio_volume(bus, 12);//note
+    
+   // bk9532_set_audio_volume(bus, 18);//note
+    bk9532_set_audio_volume(bus, 24);//note
     
 #if 0   // test i2s //
 
@@ -848,57 +848,57 @@ void bk9532_register_task(WORD bus)
     //_Sys_SchedRegister(&bk9532_task[bus], bk9532_task_handler_channel[bus], BK9532_STEP_MS);
 }
 
-int bk9532_flash_save_freq(WORD bus, WORD frequency)
-{
-    int rc ;
-    WORD ffrequency = 0;
+// int bk9532_flash_save_freq(WORD bus, WORD frequency)
+// {
+//     int rc ;
+//     WORD ffrequency = 0;
 
-    if(bus == 0)
-    {
-        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, &ffrequency);
-    }
-    else
-    {
-        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, &ffrequency);
-    }
+//     if(bus == 0)
+//     {
+//         rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, &ffrequency);
+//     }
+//     else
+//     {
+//         rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, &ffrequency);
+//     }
 
-    if (rc == sizeof(WORD) && frequency == ffrequency)
-        return rc;
+//     if (rc == sizeof(WORD) && frequency == ffrequency)
+//         return rc;
 
-    if(bus == 0)
-    {
-        return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
-    }
-    else
-    {
-        return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
-    }
-}
+//     if(bus == 0)
+//     {
+//         return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
+//     }
+//     else
+//     {
+//         return pms_set_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
+//     }
+// }
 
-int bk9532_flash_load_freq(WORD bus, PWORD frequency)
-{
-    int rc ;
+// int bk9532_flash_load_freq(WORD bus, PWORD frequency)
+// {
+//     int rc ;
 
-    if(bus == 0)
-    {
-        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
-    }
-    else {
-        rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
-    }
+//     if(bus == 0)
+//     {
+//         rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHA, frequency);
+//     }
+//     else {
+//         rc = pms_get_word(BK9532_FLASH_ID_FREQUENCY_CHB, frequency);
+//     }
 
-    if(rc != sizeof(WORD))
-    {
-        if(bus == 0)
-        {
-            *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHA;
-        }else {
-            *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHB;
-        }
-    }
+//     if(rc != sizeof(WORD))
+//     {
+//         if(bus == 0)
+//         {
+//             *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHA;
+//         }else {
+//             *frequency = BK9532_FLASH_FREQUENCY_DEFUALT_CHB;
+//         }
+//     }
 
-    return rc;
-}
+//     return rc;
+// }
 
 int bk9532_flash_save_idcode(WORD bus, DWORD idcode)
 {

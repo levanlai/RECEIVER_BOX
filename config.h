@@ -57,7 +57,13 @@ log⁡(a)=b có nghĩa là 10^b=a
 #define GAIN_MIN_START    -200 // dB
 #define GAIN_OUT_VOLUME_MIN_START    -400 // dB
 
-#define UI_MIC_OUT_VOLUME_MIN    GAIN_OUT_VOLUME_MIN_START //GAIN_MIN
+#define UI_MASTER_VOLUME_MIN_MIC    GAIN_OUT_VOLUME_MIN_START //GAIN_MIN
+#define UI_MASTER_VOLUME_MID_MIC      -120  
+#define UI_MASTER_VOLUME_MAX_MIC      0  
+
+#define UI_MASTER_VOLUME_MIN_LINE       -200
+#define UI_MASTER_VOLUME_MID_LINE      0 
+#define UI_MASTER_VOLUME_MAX_LINE      120
 
 #define UI_MIC_VOLUME_MIN     GAIN_MIN_START
 #define UI_MIC_VOLUME_MID      0  
@@ -163,6 +169,10 @@ enum {
     TURN_ON,
     TURN_NONE,   
 };
+enum {
+   OUTPUT_MIC,
+   OUTPUT_LINEIN, 
+};
 // enum {        
 //     EFFECT_OFF,
 //     EFFECT_MonoEcho_Reverb=12,  
@@ -235,7 +245,7 @@ enum {
     CMD_MIC_ECHO_LDAMP,
     CMD_MIC_ECHO_HDAMP,
 
-    CMD_VOL_OUT,  
+    CMD_MASTER_VOL,  
     CMD_MIC_MASTER,  
     CMD_MIC_EFFECT,
     CMD_MIC_FBC,
@@ -243,6 +253,7 @@ enum {
     CMD_MUSIC_ENHANCER,
     CMD_CONTROL_LINK,
     CMD_AUTO_POWEROFF,
+    CMD_OUTPUT,
 
     CMD_MIC_1_HPF,
     CMD_MIC_2_HPF, 
@@ -382,11 +393,12 @@ typedef struct MyData{
   WORD Mic_ECho_LDamping;
   WORD Mic_ECho_HDamping;
 
-  WORD Mic_Vol_Out;  
+  WORD Master_vol;  
   WORD Mic_Effect;
   WORD Mic_FBC; 
   WORD Mic_Control_link;
   WORD Auto_PowerOff;
+  //WORD Output;
 
   WORD Music_Vol; 
   WORD Music_Bass;  
