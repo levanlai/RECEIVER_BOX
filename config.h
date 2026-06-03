@@ -6,7 +6,7 @@
 #define FW_VERSION      11
 
 #define ENABLE_USB         1//1 //tắt để tránh lỗi plugin/plugout usb
-
+#define ENABLE_MUTE        0
 #define _USE_GLOBAL_PRESET 1
 
 #define UART_BAUDRATE                           115200//(57600) //supported are 31250, 38400 or 57600

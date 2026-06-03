@@ -176,7 +176,7 @@ void main_loop(void)
 						//TRACE("MIC_status ",iCheckSleepMic);
 					}
 				}
-
+				#if ENABLE_MUTE
 				if(!iFirstPowerOn)
 				{
 					cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
@@ -194,9 +194,9 @@ void main_loop(void)
 							set_Mute_value(FALSE);
 					}
 				}
-
+				#endif
 				timer_count++;						
-				if( timer_count>=120)//2s
+				if( timer_count>=150/*120*/)//2s
 				{					
 					timer_count=0;
 					if(iFirstPowerOn)//2s sau unmute
@@ -215,10 +215,13 @@ void main_loop(void)
 					
 					if(myData.Auto_PowerOff!=TURN_OFF)
 					{
-						//cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
-						//TRACE("Peak=%x",cnt);
-						//if(cnt==0)
+						#if ENABLE_MUTE
 						if(iMuteState)
+						#else
+						cnt=_LiveMic_PeakLevel_GetPeak(dsp[DSP4_LIVEMIC],dsp4pcs[9] );
+						//TRACE("Peak=%x",cnt);
+						if(cnt==0)
+						#endif
 						{
 							cnt_AutoPowerOff++;
 							//TRACE("cnt_AutoPowerOff=%d",cnt_AutoPowerOff);
