@@ -755,7 +755,7 @@ void TurnFBC(WORD value,WORD iInit)
 	//TRACE("TurnFBC %x",value);
 	uart_cmd_parse(CMD_MIC_FBC,value,iInit);	
 }
-WORD timeSendDelay=2;
+
 void syncDataToPanel(void)
 {	
 	int i;

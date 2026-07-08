@@ -77,7 +77,7 @@ typedef struct bk9532_rf_context
     WORD rf_freq_min;
     DWORD rf_idc;
     WORD is_connected;
-    //WORD isendPaired;
+    WORD isendPaired;
     WORD iModeSleep;
 } bk9532_rf_context_t;
 
